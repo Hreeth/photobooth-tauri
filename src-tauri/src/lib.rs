@@ -1,3 +1,59 @@
+use std::env;
+
+use dotenv::dotenv;
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize)]
+struct RazorpayOrder {
+  amount: u64,
+  currency: String,
+  receipt: String,
+  payment_capture: bool
+}
+
+#[derive(Deserialize)]
+struct RazorpayOrderResposne {
+  id: String,
+  status: String,
+  amount: u64,
+  currency: String
+}
+
+#[tauri::command]
+async fn create_order(amount: u64, receipt: String) -> Result<String, String> {
+  dotenv::dotenv().ok();
+
+  let key_id = env::var("RAZORPAY_KEY_ID").expect("Missing Razorpay Key ID");
+  let ket_secret = env::var("RAZORPAY_KEY_SECRET").expect("Missing Razorpay Key Secret");
+
+  let url = "https://api.razorpay.com/v1/orders";
+  let client = Client::new();
+
+  let order_payload = RazorpayOrder {
+    amount,
+    currency: "INR".to_string(),
+    receipt,
+    payment_capture: true
+  };
+
+  let res = client
+    .post(url)
+    .basic_auth(key_id, Some(ket_secret))
+    .json(&order_payload)
+    .send()
+    .await
+    .map_err(|e| format!("Request failed: {}", e))?;
+
+  if !res.status().is_success() {
+    return Err(format!("Failed to create order: HTTP {}", res.status()))
+  }
+
+  let order_res: RazorpayOrderResposne = res.json().await.map_err(|e| format!("Parse error: {}", e))?;
+
+  Ok(order_res.id)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()

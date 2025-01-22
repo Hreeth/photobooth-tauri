@@ -9,7 +9,8 @@ struct RazorpayOrder {
   amount: u64,
   currency: String,
   receipt: String,
-  payment_capture: bool
+  payment_capture: bool,
+  method: String
 }
 
 #[derive(Deserialize)]
@@ -17,7 +18,9 @@ struct RazorpayOrderResposne {
   id: String,
   status: String,
   amount: u64,
-  currency: String
+  currency: String,
+  receipt: String,
+  upi_qr_code: Option<String>
 }
 
 #[tauri::command]
@@ -34,7 +37,8 @@ async fn create_order(amount: u64, receipt: String) -> Result<String, String> {
     amount,
     currency: "INR".to_string(),
     receipt,
-    payment_capture: true
+    payment_capture: true,
+    method: "upi".to_string()
   };
 
   let res = client
@@ -51,7 +55,11 @@ async fn create_order(amount: u64, receipt: String) -> Result<String, String> {
 
   let order_res: RazorpayOrderResposne = res.json().await.map_err(|e| format!("Parse error: {}", e))?;
 
-  Ok(order_res.id)
+  if let Some(upi_qr_code) = order_res.upi_qr_code {
+    Ok(upi_qr_code)
+  } else {
+    Err("UPI QR Code not available".to_string())
+  }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

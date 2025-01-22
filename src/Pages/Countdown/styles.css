@@ -1,0 +1,13 @@
+#countdown {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#countdown .count {
+    font-size: 10vmin;
+    font-family: IntegralCF;
+    color: var(--txt-clr);
+}

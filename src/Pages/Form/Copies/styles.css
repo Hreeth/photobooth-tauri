@@ -1,0 +1,88 @@
+#copies {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.copies-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    gap: 3rem;
+    padding: 4rem;
+}
+
+.copies-container .heading {
+    color: var(--txt-clr);
+    font-size: 10vmin;
+}
+.copies-container .heading div {
+    display: inline;
+    font-family: Seriguela;
+    color: var(--accent-1);
+}
+
+.copies-container .plans-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+}
+
+
+.digital-container {
+    grid-column: span 3;
+    background: var(--bg-clr-2);
+    border: 2px solid var(--border-clr);
+    border-radius: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+.digital-container .digital-grp-1,
+.digital-container .digital-grp-2 {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.digital-container .digital-title {
+    font-weight: 700;
+    font-size: 2.5vmin;
+    color: var(--accent-1);
+    padding-left: 1rem;
+}
+.digital-container .digital-label {
+    padding: .3rem .8rem;
+    font-size: 1.5vmin;
+    background-color: #FFD5851A;
+    border-radius: 50px;
+    color: var(--accent-1);
+}
+.digital-container .digital-price {
+    font-weight: 900;
+    font-size: 5vmin;
+    line-height: 1;
+}
+.digital-container .add-btn {
+    padding: .5rem 2rem;
+    border-radius: 50px;
+    border: none;
+    font-size: 2.5vmin;
+    color: #000;
+    background-color: var(--txt-clr);
+    font-weight: 500;
+    transition: background-color 300ms ease;
+}
+.digital-container[data-selected="true"] .add-btn {
+    background-color: var(--accent-1);
+    transition: background-color 300ms ease;
+}

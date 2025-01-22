@@ -1,0 +1,20 @@
+#header {
+    display: flex;
+    width: 100%;
+    padding: 4vmax 0 0 8vmax;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 1rem;
+    top: 0;
+    position: fixed;
+}
+#header .back-btn {
+    border: 2px solid var(--txt-clr);
+    font-size: 2.5vmin;
+    padding: .5rem 1.5rem;
+    border-radius: 50px;
+    font-family: Satoshi;
+    background: none;
+    color: var(--txt-clr);
+    font-weight: 500;
+}

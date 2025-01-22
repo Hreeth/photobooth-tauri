@@ -1,0 +1,36 @@
+#greeting {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.greeting-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 50%;
+}
+
+.greeting-title {
+    font-size: 5vmin;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+    font-weight: 700;
+    color: var(--accent-1);
+}
+.greeting-subtitle {
+    font-size: 3vmin;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+}

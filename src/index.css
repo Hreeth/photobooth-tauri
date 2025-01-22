@@ -1,0 +1,63 @@
+@font-face {
+  font-family: IntegralCF;
+  src: url('./assets/Fonts/IntegralCF-Regular.otf');
+}
+@font-face {
+  font-family: Satoshi;
+  src: url('./assets/Fonts/Satoshi-Variable.ttf');
+}
+@font-face {
+  font-family: Seriguela;
+  src: url('./assets/Fonts/Seriguela-Bold.otf');
+}
+
+:root {
+  color-scheme: light dark;
+  color: var(--txt-clr);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --txt-clr: #FFFFFF;
+  --bg-clr-1: #131313;
+  --bg-clr-2: #222222;
+  --border-clr: #5B5B5B;
+  --accent-1: #FFD585;
+  --accent-2: #9BA1A6;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-clr-1);
+}
+
+*, *::before, *::after {
+  font-family: Satoshi;
+  user-select: none;
+  -moz-user-select: none;
+  -moz-user-select: none;
+}
+
+h1, h2 {
+  font-family: Seriguela;
+  margin: 0;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}

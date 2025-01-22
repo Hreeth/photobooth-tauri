@@ -1,0 +1,31 @@
+#footer {
+    display: flex;
+    width: 100%;
+    padding: 0 8vmax 4vmax 0;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 1rem;
+    position: fixed;
+    bottom: 0;
+}
+#footer button {
+    border: 2px solid var(--txt-clr);
+    font-size: 2.5vmin;
+    padding: .5rem 1.5rem;
+    border-radius: 50px;
+    font-family: Satoshi;
+    font-weight: 500;
+}
+#footer .back-btn {
+    background: none;
+    color: var(--txt-clr);
+}
+#footer .continue-btn {
+    background: var(--txt-clr);
+    color: #000;
+    transition: filter 200ms linear;
+}
+#footer .continue-btn:disabled {
+    filter: opacity(.6);
+    transition: filter 200ms linear;
+}

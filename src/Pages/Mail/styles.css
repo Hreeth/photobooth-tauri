@@ -1,0 +1,84 @@
+#mail {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+}
+
+.mail-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    gap: 3rem;
+    padding: 4rem;
+    margin-top: 20vmin;
+}
+
+.mail-container .heading {
+    color: var(--txt-clr);
+    font-size: 10vmin;
+}
+.mail-container .heading div {
+    display: inline;
+    font-family: Seriguela;
+    color: var(--accent-1);
+}
+
+.mail-container .input-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 40%;
+}
+
+.mail-container .input-container .input-box {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+.mail-container .input-container .input-box .input {
+    border: none;
+    font-size: 2.5vmin;
+    padding: .8rem 2rem;
+    border-radius: 50px;
+    font-weight: 500;
+    font-family: Satoshi;
+    background: var(--txt-clr);
+    color: #000;
+    width: 100%;
+}
+.mail-container .input-container .input-box .send-btn {
+    border: none;
+    font-size: 2.5vmin;
+    padding: .8rem 2rem;
+    border-radius: 50px;
+    font-family: Satoshi;
+    background: var(--accent-1);
+    color: #000;
+    font-weight: 500;
+}
+.mail-container .err-text {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 2.4vmin;
+    margin-left: 2.5rem;
+    color: #d9798c;
+}
+
+.disclaimer {
+    position: fixed;
+    bottom: 0;
+    padding-block: 4vmin;
+    font-size: 2.5vmin;
+    color: var(--accent-2);
+}

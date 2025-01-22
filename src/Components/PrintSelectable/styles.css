@@ -1,0 +1,18 @@
+.text-selectable {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--txt-clr);
+    padding: 2rem 3rem;
+    border-radius: 3vmax;
+    transition: background-color 300ms ease;
+}
+.text-selectable[data-selected="true"] {
+    background-color: var(--accent-1);
+    transition: background-color 300ms ease;
+}
+.text-selectable .selectable-value {
+    font-size: 10vmin;
+    color: #000;
+    font-family: Seriguela;
+}

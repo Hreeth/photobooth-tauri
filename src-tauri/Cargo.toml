@@ -25,3 +25,4 @@ tauri = { version = "2.2.3", features = [] }
 tauri-plugin-log = "2.0.0-rc"
 dotenv = "0.15.0"
 reqwest = "0.12.12"
+chrono = "0.4.39"

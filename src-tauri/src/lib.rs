@@ -1,72 +1,100 @@
 use std::env;
-
+use chrono::{Duration, Utc};
 use dotenv::dotenv;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize)]
-struct RazorpayOrder {
-  amount: u64,
-  currency: String,
-  receipt: String,
-  payment_capture: bool,
-  method: String
+#[derive(Serialize, Debug)]
+struct RazorpayQrRequest {
+  #[serde(rename = "type")]
+  qr_type: String,
+  usage: String,
+  fixed_amount: bool,
+  payment_amount: u64,
+  close_by: u64
+}
+
+#[derive(Serialize, Deserialize)]
+struct RazorpayQrResponse {
+  id: String,
+  image_url: String,
+  close_by: u64
 }
 
 #[derive(Deserialize)]
-struct RazorpayOrderResposne {
-  id: String,
-  status: String,
-  amount: u64,
-  currency: String,
-  receipt: String,
-  upi_qr_code: Option<String>
+struct RazorpayPollingResponse {
+  close_reason: Option<String>
 }
 
-#[tauri::command]
-async fn create_order(amount: u64, receipt: String) -> Result<String, String> {
-  dotenv::dotenv().ok();
+#[tauri::command(async)]
+async fn create_qr(amount: u64, close_by_secs: i64) -> Result<RazorpayQrResponse, String> {
+  dotenv().ok();
 
   let key_id = env::var("RAZORPAY_KEY_ID").expect("Missing Razorpay Key ID");
-  let ket_secret = env::var("RAZORPAY_KEY_SECRET").expect("Missing Razorpay Key Secret");
+  let key_secret = env::var("RAZORPAY_KEY_SECRET").expect("Missing Razorpay Key Secret");
 
-  let url = "https://api.razorpay.com/v1/orders";
+  let url = "https://api.razorpay.com/v1/payments/qr_codes";
   let client = Client::new();
 
-  let order_payload = RazorpayOrder {
-    amount,
-    currency: "INR".to_string(),
-    receipt,
-    payment_capture: true,
-    method: "upi".to_string()
+  let close_by = (Utc::now() + Duration::seconds(close_by_secs)).timestamp() as u64;
+
+  let qr_payload = RazorpayQrRequest {
+    qr_type: "upi_qr".to_string(),
+    usage: "single_use".to_string(),
+    fixed_amount: true,
+    payment_amount: amount,
+    close_by
   };
 
   let res = client
     .post(url)
-    .basic_auth(key_id, Some(ket_secret))
-    .json(&order_payload)
+    .basic_auth(key_id, Some(key_secret))
+    .json(&qr_payload)
     .send()
     .await
-    .map_err(|e| format!("Request failed: {}", e))?;
+    .map_err(|e| format!("Payment failed: {}", e))?;
 
   if !res.status().is_success() {
-    return Err(format!("Failed to create order: HTTP {}", res.status()))
+      return Err(format!("Failed to create QR code: {}", res.text().await.unwrap()));
   }
 
-  let order_res: RazorpayOrderResposne = res.json().await.map_err(|e| format!("Parse error: {}", e))?;
-
-  if let Some(upi_qr_code) = order_res.upi_qr_code {
-    Ok(upi_qr_code)
-  } else {
-    Err("UPI QR Code not available".to_string())
-  }
+  let qr_res: RazorpayQrResponse = res.json().await.map_err(|e| format!("Parse error: {}", e))?;
+  Ok(qr_res)
 }
 
+#[tauri::command(async)]
+async fn check_payment_status(qr_code_id: String) -> Result<bool, String> {
+  dotenv().ok();
 
+  let key_id = env::var("RAZORPAY_KEY_ID").expect("Missing Razorpay Key ID");
+  let key_secret = env::var("RAZORPAY_KEY_SECRET").expect("Missing Razorpay Key Secret");
+
+  let url = format!("https://api.razorpay.com/v1/payments/qr_codes/{}", qr_code_id);
+  let client = Client::new();
+
+  let res = client
+    .get(url)
+    .basic_auth(key_id, Some(key_secret))
+    .send()
+    .await
+    .map_err(|e| format!("Failed to fetch payment details: {}", e))?;
+
+  if !res.status().is_success() {
+    return Err(format!("Failed to create QR code: {}", res.text().await.unwrap()));
+  }
+
+  let res_data: RazorpayPollingResponse = res.json().await.map_err(|e| format!("Parse error: {}", e))?;
+
+  match res_data.close_reason.as_deref() {
+    Some("paid") => Ok(true),
+    _ => Ok(false)
+  }
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
+    .invoke_handler(tauri::generate_handler![create_qr, check_payment_status])
     .setup(|app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(

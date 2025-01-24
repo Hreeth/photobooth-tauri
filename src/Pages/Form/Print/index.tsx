@@ -16,8 +16,6 @@ export default function Print() {
 
   const navigate = useNavigate()
 
-  console.log(options.print == arr[0])
-
   return (
     <motion.div
       id='print'

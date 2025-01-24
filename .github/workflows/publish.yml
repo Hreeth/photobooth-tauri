@@ -44,7 +44,10 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ contains(matrix.platform, 'arm') && 'aarch64-unknown-linux-gnu' || '' }}
+          targets: |
+            aarch64-unknown-linux-gnu
+            x86_64-apple-darwin
+            aarch64-apple-darwin
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2

@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invoke } from "@tauri-apps/api";
 import { useCallback, useRef, useState } from "react";
 
 interface QrResponse {

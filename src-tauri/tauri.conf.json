@@ -1,40 +1,48 @@
 {
-  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Photobooth",
-  "version": "0.1.0",
-  "identifier": "com.tauri.photobooth",
+  "package": {
+    "productName": "Photobooth",
+    "version": "0.1.0"
+  },
   "build": {
-    "frontendDist": "../dist",
-    "devUrl": "http://localhost:5173",
+    "distDir": "../dist",
+    "devPath": "http://localhost:5173",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "tsc -b && vite build"
   },
-  "app": {
+  "tauri": {
     "windows": [
       {
         "title": "Photobooth",
         "width": 1280,
         "height": 800,
         "resizable": true,
-        "fullscreen": true
+        "fullscreen": true,
+        "center": true,
+        "minimizable": false,
+        "closable": false,
+        "contentProtected": true
       }
     ],
     "security": {
       "csp": null
+    },
+    "bundle": {
+      "active": true,
+      "targets": [
+        "deb",
+        "nsis"
+      ],
+      "identifier": "com.tauri.photobooth",
+      "deb": {
+        "depends": ["libwebkit2gtk-4.0-dev", "librsvg2-dev"]
+      },
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ]
     }
-  },
-  "bundle": {
-    "active": true,
-    "targets": [
-      "deb",
-      "nsis"
-    ],
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ]
   }
 }

@@ -14,6 +14,8 @@ export default function Payment() {
   const [time, setTime] = useState<number>(0)
   const { qrCode, loading, fetchQrCode, paid, pollingIntervalRef } = usePayment()
 
+  const dev = true;
+
   const { setOptions, options, plans } = useData()
   
   useEffect(() => {
@@ -21,6 +23,8 @@ export default function Payment() {
   }, [fetchQrCode])
   
   useEffect(() => {
+    if (dev) navigate('/countdown')
+
     switch (paid) {
       case false: {
         reset(setOptions, navigate)
@@ -34,8 +38,6 @@ export default function Payment() {
         break
       }
     }
-
-    console.log(paid)
   }, [paid])
 
   useEffect(() => {

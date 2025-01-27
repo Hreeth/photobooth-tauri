@@ -1,4 +1,4 @@
-import { Mode, useData } from '../../../Contexts/DataContext'
+import { useData } from '../../../Contexts/DataContext'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Footer from '../../../Components/Footer'
@@ -12,7 +12,7 @@ export default function Print() {
     PrintOptions['B&W'],
     PrintOptions.COLOR
   ]
-  const { options, mode } = useData()
+  const { options } = useData()
 
   const navigate = useNavigate()
 

@@ -8,7 +8,11 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
     let result = Command::new("libcamera-still")
         .arg("-o")
         .arg(output_path)
-        .arg("--nopreview")
+        .arg("-n")
+        .arg("-t")
+        .arg("3000")
+        .arg("--quality")
+        .arg("100")
         .output();
 
     if let Err(e) = result {

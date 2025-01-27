@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { invoke } from '@tauri-apps/api/core'
 
 export default function Greeting() {
-  const { setOptions, options } = useData()
+  const { setOptions, options, images } = useData()
   const navigate = useNavigate()
 
   const greetings = [
@@ -24,12 +24,7 @@ export default function Greeting() {
     const printPhotos = async () => {
       try {
         await invoke("print", {
-          images: [
-            "photo_1.jpg",
-            "photo_2.jpg",
-            "photo_3.jpg",
-            "photo_4.jpg"
-          ],
+          images,
           outputPath: "print.jpg",
           colorMode: options.print == Print.COLOR ? "COLOR" : "B&W",
           copies: options.copies

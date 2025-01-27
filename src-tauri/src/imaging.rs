@@ -1,18 +1,35 @@
-use std::{fs, process::Command};
+use std::process::Command;
 
-use image::{imageops::FilterType::Lanczos3, GenericImage, GenericImageView, Rgba, RgbaImage};
+use image::{imageops::FilterType::Lanczos3, GenericImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use palette::{FromColor, Hsl, IntoColor, Srgb};
 
 #[tauri::command(async)]
-pub async fn capture(output_path: &str, index: u8) -> Result<String, String> {
-    if let Err(e) = fs::copy("sample.jpg", output_path) {
-        return Err(format!("Failed to take photo: {}", e));
+pub async fn capture(output_path: &str) -> Result<String, String> {
+    let result = Command::new("libcamera-still")
+        .arg("-o")
+        .arg(output_path)
+        .output();
+
+    if let Err(e) = result {
+        return Err(format!("Failed to execute libcamera command: {}", e));
+    }
+
+    let mut image = match image::open(output_path) {
+        Ok(img) => img.to_rgba8(),
+        Err(e) => return Err(format!("Failed to open captured image: {}", e)),
+    };
+
+    saturate(&mut image);
+
+    if let Err(e) = image.save(output_path) {
+        return Err(format!("Failed to save saturated image: {}", e));
     }
 
     Ok(output_path.to_string())
 }
 
 #[tauri::command(async)]
-pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, copies: usize) -> Result<(), String> {
+pub async fn print(images: Vec<String>, color_mode: &str, copies: usize) -> Result<(), String> {
     let strip_width = 600;
     let strip_height = 1800;
 
@@ -57,10 +74,8 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
     }
 
     let print_res = Command::new("lp")
-        .arg("-d")
-        .arg("DNP-RX1HS")
         .arg("-n")
-        .arg(copies.to_string())
+        .arg((copies / 2).to_string())
         .arg("print_strip.png")
         .output();
 
@@ -77,4 +92,23 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
     }
 
     Ok(())
+}
+
+fn saturate(image: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
+    for pixel in image.pixels_mut() {
+        let rgb = Srgb::new(
+            pixel[0] as f32 / 255.0,
+            pixel[1] as f32 / 255.0,
+            pixel[2] as f32 / 255.0
+        );
+
+        let mut hsl: Hsl = rgb.into_color();
+
+        hsl.saturation = (hsl.saturation * 1.2).min(1.0);
+
+        let adjusted_rgb = Srgb::from_color(hsl);
+        pixel[0] = (adjusted_rgb.red * 255.0).round() as u8;
+        pixel[1] = (adjusted_rgb.green * 255.0).round() as u8;
+        pixel[2] = (adjusted_rgb.blue * 255.0).round() as u8;
+    }
 }

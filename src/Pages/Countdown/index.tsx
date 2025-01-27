@@ -5,23 +5,40 @@ import { motion } from "framer-motion";
 import { useData } from "../../Contexts/DataContext";
 
 import './styles.css'
+import { invoke } from "@tauri-apps/api/core";
 
 function Countdown() {
   const navigate = useNavigate();
   const [count, setCount] = useState(5);
+  const [photoIndex, setPhotoIndex] = useState(1)
   const { options } = useData();
 
   useEffect(() => {
-    if (count > 0) {
-      const timer = setTimeout(() => {
-        setCount((prev) => prev - 1);
-      }, 1000);
+    if (photoIndex <= 4) {
+      if (count > 0) {
+        const timer = setTimeout(() => {
+          setCount(prev => prev - 1)
+        }, 1000);
 
-      return () => clearTimeout(timer);
-    } else {
-      navigate(options.digital ? "/mail" : "/greeting");
+        return () => clearTimeout(timer)
+      } else {
+        invoke("capture", { outputPath: `photo_${photoIndex}.jpg`, index: photoIndex })
+          .then(() => {
+            console.log(`Photo ${photoIndex} taken successfully`);
+          })
+          .catch((err) => {
+            console.error(`Error taking photo ${photoIndex}:`, err);
+          });
+
+        if (photoIndex < 4) {
+          setCount(5);
+          setPhotoIndex((prev) => prev + 1);
+        } else {
+          navigate(options.digital ? "/mail" : "/greeting");
+        }
+      }
     }
-  }, [count, navigate, options.digital]);
+  }, [count, navigate, options.digital, photoIndex]);
 
   return (
     <div id="countdown">

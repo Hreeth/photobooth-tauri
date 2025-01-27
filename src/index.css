@@ -13,7 +13,6 @@
 
 :root {
   color-scheme: light dark;
-  color: var(--txt-clr);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -38,7 +37,9 @@ body {
 }
 
 *, *::before, *::after {
+  color: var(--txt-clr);
   font-family: Satoshi;
+  cursor: default;
   user-select: none;
   -moz-user-select: none;
   -moz-user-select: none;

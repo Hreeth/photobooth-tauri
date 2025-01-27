@@ -3,11 +3,12 @@ import { useEffect } from 'react'
 
 import './styles.css'
 import reset from '../../Utils/reset'
-import { useData } from '../../Contexts/DataContext'
+import { Print, useData } from '../../Contexts/DataContext'
 import { useNavigate } from 'react-router-dom'
+import { invoke } from '@tauri-apps/api/core'
 
 export default function Greeting() {
-  const { setOptions } = useData()
+  const { setOptions, options } = useData()
   const navigate = useNavigate()
 
   const greetings = [
@@ -20,10 +21,30 @@ export default function Greeting() {
   ]
 
   useEffect(() => {
-    const resetTimeout = setTimeout(() => reset(setOptions, navigate), 5000)
+    const printPhotos = async () => {
+      try {
+        await invoke("print", {
+          images: [
+            "photo_1.jpg",
+            "photo_2.jpg",
+            "photo_3.jpg",
+            "photo_4.jpg"
+          ],
+          outputPath: "print.jpg",
+          colorMode: options.print == Print.COLOR ? "COLOR" : "B&W",
+          copies: options.copies
+        })
 
-    return () => clearTimeout(resetTimeout)
-  }, [])
+        console.log("Print successful")
+      } catch (err) {
+        console.error("Error during the printing:", err)
+      } finally {
+        reset(setOptions, navigate)
+      }
+    }
+    
+    printPhotos()
+  }, [setOptions, navigate, options])
 
   return (
     <motion.div

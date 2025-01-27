@@ -14,22 +14,22 @@ function Countdown() {
   const { options, setImages } = useData();
 
   useEffect(() => {
-    const click = async (idx: number) => {
+    async function print() {
       try {
-        const img = await invoke<string>( "capture", { outputPath: `picture-${idx}.jpg` })
-        if (img) {
-          setImages(prev => ([
-            ...prev,
-            img
-          ]))
-
-          console.log("Captured image successfully")
-        }
+        let img = await invoke<string>("capture", { outputPath: `photo-${photoIndex}.jpg` })
+        setImages(prev => ([
+          ...prev,
+          img
+        ]))
       } catch (err) {
-        console.error("Error capturing image:", err)
+        console.error("Failed to capture image:", err)
       }
     }
 
+    print()
+  }, [photoIndex])
+
+  useEffect(() => {
     if (photoIndex <= 4) {
       if (count > 0) {
         const timer = setTimeout(() => {
@@ -38,8 +38,6 @@ function Countdown() {
 
         return () => clearTimeout(timer)
       } else {
-        click(photoIndex)
-
         if (photoIndex < 4) {
           setCount(5);
           setPhotoIndex((prev) => prev + 1);
@@ -49,7 +47,7 @@ function Countdown() {
       }
     }
   }, [count, navigate, options.digital, photoIndex]);
-
+ 
   return (
     <div id="countdown">
         {count > 0 && (

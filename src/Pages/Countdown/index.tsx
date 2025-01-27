@@ -11,9 +11,25 @@ function Countdown() {
   const navigate = useNavigate();
   const [count, setCount] = useState(5);
   const [photoIndex, setPhotoIndex] = useState(1)
-  const { options } = useData();
+  const { options, setImages } = useData();
 
   useEffect(() => {
+    const click = async (idx: number) => {
+      try {
+        const img = await invoke<string>( "capture", { outputPath: `picture-${idx}.jpg` })
+        if (img) {
+          setImages(prev => ([
+            ...prev,
+            img
+          ]))
+
+          console.log("Captured image successfully")
+        }
+      } catch (err) {
+        console.error("Error capturing image:", err)
+      }
+    }
+
     if (photoIndex <= 4) {
       if (count > 0) {
         const timer = setTimeout(() => {
@@ -22,13 +38,7 @@ function Countdown() {
 
         return () => clearTimeout(timer)
       } else {
-        invoke("capture", { outputPath: `photo_${photoIndex}.jpg`, index: photoIndex })
-          .then(() => {
-            console.log(`Photo ${photoIndex} taken successfully`);
-          })
-          .catch((err) => {
-            console.error(`Error taking photo ${photoIndex}:`, err);
-          });
+        click(photoIndex)
 
         if (photoIndex < 4) {
           setCount(5);

@@ -25,7 +25,9 @@ interface DataContextProps {
         popular: boolean
     }>,
     mode: Mode,
-    setMode: React.Dispatch<React.SetStateAction<Mode>>
+    setMode: React.Dispatch<React.SetStateAction<Mode>>,
+    images: Array<String>
+    setImages: React.Dispatch<React.SetStateAction<Array<String>>>,
 }
 
 const DataContext = createContext<DataContextProps | undefined>(undefined)
@@ -40,6 +42,7 @@ export const useData = () => {
 export default function DataProvider({ children }: { children: React.ReactNode }) {
     const [options, setOptions] = useState<Options>({ copies: null, digital: false, print: null })
     const [mode, setMode] = useState<Mode>(Mode.AUTOMATIC)
+    const [images, setImages] = useState<Array<String>>([]);
 
     const plans = useMemo(() => [
         {
@@ -63,7 +66,7 @@ export default function DataProvider({ children }: { children: React.ReactNode }
       ], [])
   
       return (
-          <DataContext.Provider value={{ options, setOptions, plans, mode, setMode }}>
+          <DataContext.Provider value={{ options, setOptions, plans, mode, setMode, images, setImages }}>
               {children}
           </DataContext.Provider>
       )

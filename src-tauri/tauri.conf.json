@@ -19,7 +19,8 @@
         "center": true,
         "minimizable": true,
         "closable": true,
-        "contentProtected": true
+        "contentProtected": true,
+        "devtools": true
       }
     ],
     "security": {

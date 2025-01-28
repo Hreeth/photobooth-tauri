@@ -1,34 +1,42 @@
-use std::process::Command;
+use std::{fs, process::Command};
 
 use image::{imageops::FilterType::Lanczos3, GenericImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use palette::{FromColor, Hsl, IntoColor, Srgb};
 
 #[tauri::command(async)]
 pub async fn capture(output_path: &str) -> Result<String, String> {
-    let result = Command::new("libcamera-still")
-        .arg("-o")
-        .arg(output_path)
-        .arg("--immediate")
-        .arg("--saturation")
-        .arg("1.2")
-        .arg("--quality")
-        .arg("100")
-        .output();
-
-    match result {
-        Ok(output) => {
-            let stdout_str = String::from_utf8_lossy(&output.stdout);
-            let stderr_str = String::from_utf8_lossy(&output.stderr);
+    // Use the Tauri application's resource directory or a default placeholder image
+    let sample_photo_path = "sample.jpg"; // Ensure this file exists in your app directory
     
-            if !output.status.success() {
-                println!("stderr: {}", stderr_str);
-            }
-            
-            println!("stdout: {}", stdout_str);
-            Ok(output_path.to_string())
-        }
-        Err(e) => return Err(format!("Failed to execute print command: {}", e)),
+    if let Err(e) = fs::copy(sample_photo_path, output_path) {
+        return Err(format!("Failed to take photo: {}", e));
     }
+
+    Ok(output_path.to_string())
+    // let result = Command::new("libcamera-still")
+    //     .arg("-o")
+    //     .arg(output_path)
+    //     .arg("--immediate")
+    //     .arg("--saturation")
+    //     .arg("1.2")
+    //     .arg("--quality")
+    //     .arg("100")
+    //     .output();
+
+    // match result {
+    //     Ok(output) => {
+    //         let stdout_str = String::from_utf8_lossy(&output.stdout);
+    //         let stderr_str = String::from_utf8_lossy(&output.stderr);
+    
+    //         if !output.status.success() {
+    //             println!("stderr: {}", stderr_str);
+    //         }
+            
+    //         println!("stdout: {}", stdout_str);
+    //         Ok(output_path.to_string())
+    //     }
+    //     Err(e) => return Err(format!("Failed to execute print command: {}", e)),
+    // }
 }
 
 #[tauri::command(async)]

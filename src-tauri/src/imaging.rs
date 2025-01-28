@@ -8,29 +8,27 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
     let result = Command::new("libcamera-still")
         .arg("-o")
         .arg(output_path)
-        .arg("-n")
-        .arg("-t")
-        .arg("3000")
+        .arg("--immediate")
+        .arg("--saturation")
+        .arg("1.2")
         .arg("--quality")
         .arg("100")
         .output();
 
-    if let Err(e) = result {
-        return Err(format!("Failed to execute libcamera command: {}", e));
+    match result {
+        Ok(output) => {
+            let stdout_str = String::from_utf8_lossy(&output.stdout);
+            let stderr_str = String::from_utf8_lossy(&output.stderr);
+    
+            if !output.status.success() {
+                println!("stderr: {}", stderr_str);
+            }
+            
+            println!("stdout: {}", stdout_str);
+            Ok(output_path.to_string())
+        }
+        Err(e) => return Err(format!("Failed to execute print command: {}", e)),
     }
-
-    let mut image = match image::open(output_path) {
-        Ok(img) => img.to_rgba8(),
-        Err(e) => return Err(format!("Failed to open captured image: {}", e)),
-    };
-
-    saturate(&mut image);
-
-    if let Err(e) = image.save(output_path) {
-        return Err(format!("Failed to save saturated image: {}", e));
-    }
-
-    Ok(output_path.to_string())
 }
 
 #[tauri::command(async)]

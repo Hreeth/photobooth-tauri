@@ -7,13 +7,15 @@ use tauri::path;
 #[tauri::command(async)]
 pub async fn capture(output_path: &str) -> Result<String, String> {
     let result = Command::new("libcamera-still")
-        .arg("-o")
-        .arg(output_path)
-        .arg("--immediate")
+        .arg("-t")
+        .arg("0")
         .arg("--saturation")
         .arg("1.2")
         .arg("--quality")
         .arg("100")
+        .arg("--nopreview")
+        .arg("-o")
+        .arg(output_path)
         .output();
 
     match result {
@@ -44,6 +46,7 @@ pub async fn print(images: Vec<String>, color_mode: &str, copies: usize) -> Resu
     for (i, img_path) in images.iter().enumerate() {
         let photo = match image::open(img_path) {
             Ok(img) => {
+                println!("{:?}", img_path);
                 let (width, height) = img.dimensions();
                 let aspect_ratio = width as f32 / height as f32;
 

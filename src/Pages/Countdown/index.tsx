@@ -6,6 +6,7 @@ import { useData } from "../../Contexts/DataContext";
 
 import './styles.css'
 import { invoke } from "@tauri-apps/api/core";
+import { pictureDir } from "@tauri-apps/api/path";
 
 function Countdown() {
   const navigate = useNavigate();
@@ -15,8 +16,9 @@ function Countdown() {
 
   useEffect(() => {
     async function print() {
+      const pictures = await pictureDir();
       try {
-        let img = await invoke<string>("capture", { outputPath: `photo-${photoIndex}.jpg` })
+        let img = await invoke<string>("capture", { outputPath: `${pictures}/photo-${photoIndex}.jpg` })
         setImages(prev => ([
           ...prev,
           img

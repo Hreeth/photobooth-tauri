@@ -2,6 +2,7 @@ use std::process::Command;
 
 use image::{imageops::FilterType::Lanczos3, GenericImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use palette::{FromColor, Hsl, IntoColor, Srgb};
+use tauri::path;
 
 #[tauri::command(async)]
 pub async fn capture(output_path: &str) -> Result<String, String> {
@@ -10,7 +11,7 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
         .arg(output_path)
         .arg("--immediate")
         .arg("--saturation")
-        .arg("arg")
+        .arg("1.2")
         .arg("--quality")
         .arg("100")
         .output();
@@ -27,7 +28,7 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
             println!("stdout: {}", stdout_str);
             Ok(output_path.to_string())
         }
-        Err(e) => return Err(format!("Failed to execute print command: {}", e)),
+        Err(e) => return Err(format!("Failed to execute capture command: {}", e)),
     }
 }
 
@@ -97,21 +98,21 @@ pub async fn print(images: Vec<String>, color_mode: &str, copies: usize) -> Resu
     Ok(())
 }
 
-fn saturate(image: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
-    for pixel in image.pixels_mut() {
-        let rgb = Srgb::new(
-            pixel[0] as f32 / 255.0,
-            pixel[1] as f32 / 255.0,
-            pixel[2] as f32 / 255.0
-        );
+// fn saturate(image: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
+//     for pixel in image.pixels_mut() {
+//         let rgb = Srgb::new(
+//             pixel[0] as f32 / 255.0,
+//             pixel[1] as f32 / 255.0,
+//             pixel[2] as f32 / 255.0
+//         );
 
-        let mut hsl: Hsl = rgb.into_color();
+//         let mut hsl: Hsl = rgb.into_color();
 
-        hsl.saturation = (hsl.saturation * 1.2).min(1.0);
+//         hsl.saturation = (hsl.saturation * 1.2).min(1.0);
 
-        let adjusted_rgb = Srgb::from_color(hsl);
-        pixel[0] = (adjusted_rgb.red * 255.0).round() as u8;
-        pixel[1] = (adjusted_rgb.green * 255.0).round() as u8;
-        pixel[2] = (adjusted_rgb.blue * 255.0).round() as u8;
-    }
-}
+//         let adjusted_rgb = Srgb::from_color(hsl);
+//         pixel[0] = (adjusted_rgb.red * 255.0).round() as u8;
+//         pixel[1] = (adjusted_rgb.green * 255.0).round() as u8;
+//         pixel[2] = (adjusted_rgb.blue * 255.0).round() as u8;
+//     }
+// }

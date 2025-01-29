@@ -34,7 +34,10 @@ export default function Greeting() {
       } catch (err) {
         console.error("Error during the printing:", err)
       } finally {
-        reset(setOptions, navigate)
+        let resetInterval = setTimeout(() => {
+          reset(setOptions, navigate)
+          clearTimeout(resetInterval)
+        }, 4000);
       }
     }
     

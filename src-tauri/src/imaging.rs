@@ -34,7 +34,7 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
 }
 
 #[tauri::command(async)]
-pub async fn print(images: Vec<String>, color_mode: &str, copies: usize) -> Result<(), String> {
+pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, copies: usize) -> Result<(), String> {
     let strip_width = 600;
     let strip_height = 1800;
 
@@ -75,14 +75,14 @@ pub async fn print(images: Vec<String>, color_mode: &str, copies: usize) -> Resu
         }
     }
 
-    if let Err(e) = canvas.save("print_strip.png") {
+    if let Err(e) = canvas.save(output_path) {
         return Err(format!("Failed to save print copy: {}", e));
     }
 
     let print_res = Command::new("lp")
         .arg("-n")
         .arg((copies / 2).to_string())
-        .arg("print_strip.png")
+        .arg(output_path)
         .output();
 
     match print_res {

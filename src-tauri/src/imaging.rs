@@ -12,7 +12,11 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
         .arg("--quality")
         .arg("100")
         .arg("--immediate")
-        .arg("--nopreview")
+        .arg("--autofocus-mode")
+        .arg("mode")
+        .arg("--sharpness")
+        .arg("1.2")
+        .arg("-n")
         .arg("-o")
         .arg(output_path)
         .output();

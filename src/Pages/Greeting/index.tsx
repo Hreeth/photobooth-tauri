@@ -55,7 +55,7 @@ export default function Greeting() {
     >
         <div className='greeting-container'>
           <div className="greeting-title">{greetings[Math.floor(Math.random() * greetings.length)]}</div>
-          <div className="greeting-subtitle">Your Prints are ready to be collected outside</div>
+          <div className="greeting-subtitle">Your Prints are ready to be collected</div>
         </div>
     </motion.div>
   )

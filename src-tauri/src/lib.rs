@@ -1,7 +1,5 @@
 use std::{thread, time::Duration};
-
-use tauri::{LogicalPosition, Manager};
-
+use tauri::Manager;
 
 mod razorpay;
 mod imaging;
@@ -17,12 +15,9 @@ pub fn run() {
     ])
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();
-            
-      window.hide().unwrap();
 
       thread::spawn(move || {
-          thread::sleep(Duration::from_millis(1500));
-          let _ = window.show();
+          thread::sleep(Duration::from_millis(20000));
           let _ = window.set_fullscreen(true);
       });
 

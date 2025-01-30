@@ -13,7 +13,7 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
         .arg("1.2")
         .arg("--quality")
         .arg("100")
-        .arg("--nopreview")
+        .arg("--fullscreen")
         .arg("-o")
         .arg(output_path)
         .output();

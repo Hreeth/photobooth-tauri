@@ -20,7 +20,7 @@ pub fn run() {
         thread::sleep(Duration::from_millis(500));
         let _ = window.set_size(tauri::Size::Logical(LogicalSize { width: 800.0, height: 600.0 }));
         thread::sleep(Duration::from_millis(200));
-        let _ = window.set_size(tauri::Size::Logical(LogicalSize { width: 1024.0, height: 700.0 }));
+        window.set_fullscreen(true).unwrap();
       });
 
       if cfg!(debug_assertions) {

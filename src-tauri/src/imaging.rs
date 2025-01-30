@@ -54,12 +54,12 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
                 let (width, height) = img.dimensions();
                 let aspect_ratio = width as f32 / height as f32;
 
-                let resized_width = (strip_width / 2) - 2 * border_width; 
+                let resized_width = (strip_width / 2) - 2 * border_width;
+                let resized_height = (resized_width as f32 / aspect_ratio) as u32;
 
-                let resized = img.resize(resized_width, (resized_width as f32 / aspect_ratio) as u32, Lanczos3)
-                                 .crop(0, 0, resized_width, strip_height / 4 - 2 * border_width);
+                let resized = img.resize(resized_width, resized_height, Lanczos3);
 
-                let mut bordered_image = RgbaImage::from_pixel(resized_width, strip_height / 2, Rgba([255, 255, 255, 255]));
+                let mut bordered_image = RgbaImage::from_pixel(resized_width, resized_height, Rgba([255, 255, 255, 255]));
                 bordered_image.copy_from(&resized, border_width as u32, border_width as u32).unwrap();
 
                 bordered_image
@@ -109,22 +109,3 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
 
     Ok(())
 }
-
-// fn saturate(image: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
-//     for pixel in image.pixels_mut() {
-//         let rgb = Srgb::new(
-//             pixel[0] as f32 / 255.0,
-//             pixel[1] as f32 / 255.0,
-//             pixel[2] as f32 / 255.0
-//         );
-
-//         let mut hsl: Hsl = rgb.into_color();
-
-//         hsl.saturation = (hsl.saturation * 1.2).min(1.0);
-
-//         let adjusted_rgb = Srgb::from_color(hsl);
-//         pixel[0] = (adjusted_rgb.red * 255.0).round() as u8;
-//         pixel[1] = (adjusted_rgb.green * 255.0).round() as u8;
-//         pixel[2] = (adjusted_rgb.blue * 255.0).round() as u8;
-//     }
-// }

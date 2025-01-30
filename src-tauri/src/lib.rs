@@ -17,7 +17,7 @@ pub fn run() {
       let window = app.get_webview_window("main").unwrap();
 
       thread::spawn(move || {
-          thread::sleep(Duration::from_millis(20000));
+          thread::sleep(Duration::from_millis(8000));
           let _ = window.set_fullscreen(true);
       });
 

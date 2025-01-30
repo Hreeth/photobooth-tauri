@@ -17,13 +17,13 @@ pub fn run() {
     ])
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();
-
-      window.set_position(LogicalPosition { x: 0.0, y: 0.0 }).unwrap();
+            
+      window.hide().unwrap();
 
       thread::spawn(move || {
-        let _ = window.set_fullscreen(false);
-        thread::sleep(Duration::from_millis(2000));
-        let _ = window.set_fullscreen(true);
+          thread::sleep(Duration::from_millis(1500));
+          let _ = window.show();
+          let _ = window.set_fullscreen(true);
       });
 
       if cfg!(debug_assertions) {

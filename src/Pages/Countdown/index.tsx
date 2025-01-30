@@ -15,41 +15,42 @@ function Countdown() {
   const { options, setImages } = useData();
 
   useEffect(() => {
-  }, [photoIndex])
-
-  useEffect(() => {
-    async function print() {
-      const pictures = await pictureDir();
-      try {
-        let img = await invoke<string>("capture", { outputPath: `${pictures}/photo-${photoIndex}.jpg` })
-        setImages(prev => ([
-          ...prev,
-          img
-        ]))
-      } catch (err) {
-        console.error("Failed to capture image:", err)
-      }
-    }
-
-    if (photoIndex <= 4) {
-      if (count > 0) {
-        const timer = setTimeout(() => {
-          setCount(prev => prev - 1)
-        }, 1000);
-
-        print()
-        
-        return () => clearTimeout(timer)
-      } else {
-        if (photoIndex < 4) {
-          setCount(5);
-          setPhotoIndex((prev) => prev + 1);
-        } else {
-          navigate(options.digital ? "/mail" : "/greeting");
+    if (count === 0 && photoIndex <= 4) {
+      async function capturePhoto() {
+        const pictures = await pictureDir();
+        try {
+          let img = await invoke<string>("capture", { outputPath: `${pictures}/photo-${photoIndex}.jpg` });
+          setImages(prev => [...prev, img]);
+        } catch (err) {
+          console.error("Failed to capture image:", err);
         }
       }
+
+      capturePhoto();
+
+      if (photoIndex < 4) {
+        setTimeout(() => {
+          setCount(5); // Restart countdown for the next photo
+          setPhotoIndex(prev => prev + 1);
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          navigate(options.digital ? "/mail" : "/greeting");
+        }, 1000);
+      }
     }
-  }, [count, navigate, options.digital, photoIndex]);
+  }, [count, photoIndex, navigate, options.digital, setImages]);
+
+  useEffect(() => {
+    if (count > 0) {
+      const timer = setTimeout(() => {
+        setCount(prev => prev - 1);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [count]);
+
  
   return (
     <div id="countdown">

@@ -22,11 +22,12 @@ export default function Greeting() {
   ]
 
   useEffect(() => {
+    console.log(images)
     const printPhotos = async () => {
       try {
         let pictures = await pictureDir();
         await invoke("print", {
-          images,
+          images: images,
           outputPath: `${pictures}/print-strip.png`,
           colorMode: options.print == Print.COLOR ? "COLOR" : "B&W",
           copies: options.copies

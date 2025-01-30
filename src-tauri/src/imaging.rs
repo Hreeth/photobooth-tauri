@@ -9,6 +9,8 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
     let result = Command::new("libcamera-still")
         .arg("--saturation")
         .arg("1.2")
+        .arg("-t")
+        .arg("0")
         .arg("--quality")
         .arg("100")
         .arg("--immediate")

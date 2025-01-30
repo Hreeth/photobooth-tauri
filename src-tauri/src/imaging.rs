@@ -7,13 +7,12 @@ use tauri::path;
 #[tauri::command(async)]
 pub async fn capture(output_path: &str) -> Result<String, String> {
     let result = Command::new("libcamera-still")
-        .arg("-t")
-        .arg("0")
         .arg("--saturation")
         .arg("1.2")
         .arg("--quality")
         .arg("100")
-        .arg("--fullscreen")
+        .arg("--immediate")
+        .arg("--nopreview")
         .arg("-o")
         .arg(output_path)
         .output();

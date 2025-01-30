@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import reset from '../../../Utils/reset'
 
 export default function Copies() {
-  const { plans, options, setOptions } = useData()
+  const { plans, options, setOptions, setImages } = useData()
 
   const navigate = useNavigate()
 
@@ -36,7 +36,7 @@ export default function Copies() {
           </div>
         </div>
         <Footer
-          backCallback={() => reset(setOptions, navigate)}
+          backCallback={() => reset(setOptions, setImages, navigate)}
           continueCallback={() => navigate('/print')}
           disabled={!options.copies}
         />

@@ -4,6 +4,7 @@ import { NavigateFunction } from "react-router-dom";
 
 export default function reset(
     setOptions: React.Dispatch<React.SetStateAction<Options>>,
+    setImages: React.Dispatch<React.SetStateAction<Array<string>>>,
     navigate: NavigateFunction
 
 ): void {
@@ -12,6 +13,8 @@ export default function reset(
         digital: false,
         print: null
     })
+
+    setImages([])
 
     navigate('/', { replace: true })    
 }

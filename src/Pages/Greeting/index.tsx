@@ -9,7 +9,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { pictureDir } from '@tauri-apps/api/path'
 
 export default function Greeting() {
-  const { setOptions, options, images } = useData()
+  const { setOptions, options, images, setImages } = useData()
   const navigate = useNavigate()
 
   const greetings = [
@@ -22,7 +22,6 @@ export default function Greeting() {
   ]
 
   useEffect(() => {
-    console.log(images)
     const printPhotos = async () => {
       try {
         let pictures = await pictureDir();
@@ -38,7 +37,7 @@ export default function Greeting() {
         console.error("Error during the printing:", err)
       } finally {
         let resetInterval = setTimeout(() => {
-          reset(setOptions, navigate)
+          reset(setOptions, setImages, navigate)
           clearTimeout(resetInterval)
         }, 4000);
       }

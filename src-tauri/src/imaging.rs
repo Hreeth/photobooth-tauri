@@ -37,7 +37,7 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
 
 #[tauri::command(async)]
 pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, copies: usize) -> Result<(), String> {
-    let strip_width = 600;
+    let strip_width = 1200;
     let strip_height = 1800;
 
     let border_width = 10;
@@ -45,27 +45,30 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
     let mut canvas = RgbaImage::from_pixel(strip_width, strip_height, image::Rgba([255, 255, 255, 255]));
 
     for (i, img_path) in images.iter().enumerate() {
-        let photo = match image::open(img_path) {
-            Ok(img) => {
-                println!("{:?}", img_path);
-                let (width, height) = img.dimensions();
-                let aspect_ratio = width as f32 / height as f32;
-
-                let resized_width = strip_width - 2 * border_width;
-
-                let resized = img.resize(resized_width, (resized_width as f32 / aspect_ratio) as u32, Lanczos3).crop(0, 0, strip_width, strip_height / 4 - 2 * border_width);
-
-                let mut bordered_image = RgbaImage::from_pixel(strip_width, strip_height / 4, Rgba([255, 255, 255, 255]));
-                bordered_image.copy_from(&resized, border_width  as u32, border_width as u32).unwrap();
-
-                bordered_image
+        for j in 0..1 {
+            let photo = match image::open(img_path) {
+                Ok(img) => {
+                    println!("{:?}", img_path);
+                    let (width, height) = img.dimensions();
+                    let aspect_ratio = width as f32 / height as f32;
+    
+                    let resized_width = (strip_width / 2) - 2 * border_width; 
+    
+                    let resized = img.resize(resized_width, (resized_width as f32 / aspect_ratio) as u32, Lanczos3).crop(0, 0, strip_width, strip_height / 4 - 2 * border_width);
+    
+                    let mut bordered_image = RgbaImage::from_pixel(strip_width, strip_height / 4, Rgba([255, 255, 255, 255]));
+                    bordered_image.copy_from(&resized, border_width  as u32, border_width as u32).unwrap();
+    
+                    bordered_image
+                }
+                Err(e) => return Err(format!("Failed to load photo {}: {}", img_path, e))
+            };
+    
+            let x_offset = j as u32 * (strip_width / 2);
+            let y_offset = i as u32 * (strip_height / 4);
+            if let Err(e) = canvas.copy_from(&photo, x_offset, y_offset) {
+                return Err(format!("Failed to place photo {}: {}", i + 1, e));
             }
-            Err(e) => return Err(format!("Failed to load photo {}: {}", img_path, e))
-        };
-
-        let y_offset = i as u32 * (strip_height / 4);
-        if let Err(e) = canvas.copy_from(&photo, 0, y_offset) {
-            return Err(format!("Failed to place photo {}: {}", i + 1, e));
         }
     }
 

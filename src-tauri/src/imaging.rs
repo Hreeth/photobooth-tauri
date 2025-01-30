@@ -121,7 +121,7 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
     // Print the image
     let print_res = Command::new("lp")
         .arg("-n")
-        .arg(copies.to_string()) // Full copies since it's a single page
+        .arg((copies / 2).to_string()) // Full copies since it's a single page
         .arg(output_path)
         .output();
 

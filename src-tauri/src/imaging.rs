@@ -45,30 +45,33 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
     let mut canvas = RgbaImage::from_pixel(strip_width, strip_height, image::Rgba([255, 255, 255, 255]));
 
     for (i, img_path) in images.iter().enumerate() {
-        for j in 0..1 {
-            let photo = match image::open(img_path) {
-                Ok(img) => {
-                    println!("{:?}", img_path);
-                    let (width, height) = img.dimensions();
-                    let aspect_ratio = width as f32 / height as f32;
-    
-                    let resized_width = (strip_width / 2) - 2 * border_width; 
-    
-                    let resized = img.resize(resized_width, (resized_width as f32 / aspect_ratio) as u32, Lanczos3).crop(0, 0, strip_width, strip_height / 4 - 2 * border_width);
-    
-                    let mut bordered_image = RgbaImage::from_pixel(strip_width, strip_height / 4, Rgba([255, 255, 255, 255]));
-                    bordered_image.copy_from(&resized, border_width  as u32, border_width as u32).unwrap();
-    
-                    bordered_image
-                }
-                Err(e) => return Err(format!("Failed to load photo {}: {}", img_path, e))
-            };
-    
-            let x_offset = j as u32 * (strip_width / 2);
-            let y_offset = i as u32 * (strip_height / 4);
-            if let Err(e) = canvas.copy_from(&photo, x_offset, y_offset) {
-                return Err(format!("Failed to place photo {}: {}", i + 1, e));
+        let row = i / 2;
+        let col = i % 2;
+
+        let photo = match image::open(img_path) {
+            Ok(img) => {
+                println!("{:?}", img_path);
+                let (width, height) = img.dimensions();
+                let aspect_ratio = width as f32 / height as f32;
+
+                let resized_width = (strip_width / 2) - 2 * border_width; 
+
+                let resized = img.resize(resized_width, (resized_width as f32 / aspect_ratio) as u32, Lanczos3)
+                                 .crop(0, 0, resized_width, strip_height / 2 - 2 * border_width);
+
+                let mut bordered_image = RgbaImage::from_pixel(resized_width, strip_height / 2, Rgba([255, 255, 255, 255]));
+                bordered_image.copy_from(&resized, border_width as u32, border_width as u32).unwrap();
+
+                bordered_image
             }
+            Err(e) => return Err(format!("Failed to load photo {}: {}", img_path, e))
+        };
+
+        let x_offset = col as u32 * (strip_width / 2);
+        let y_offset = row as u32 * (strip_height / 2);
+
+        if let Err(e) = canvas.copy_from(&photo, x_offset, y_offset) {
+            return Err(format!("Failed to place photo {}: {}", i + 1, e));
         }
     }
 
@@ -80,10 +83,12 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
         }
     }
 
+    // Save the final image to the output path
     if let Err(e) = canvas.save(output_path) {
         return Err(format!("Failed to save print copy: {}", e));
     }
 
+    // Print the image (half the number of copies for two-sided printing)
     let print_res = Command::new("lp")
         .arg("-n")
         .arg((copies / 2).to_string())

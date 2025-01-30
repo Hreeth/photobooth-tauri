@@ -12,7 +12,7 @@ function Countdown() {
   const navigate = useNavigate();
   const [count, setCount] = useState(5);
   const [photoIndex, setPhotoIndex] = useState(1)
-  const { options, setImages } = useData();
+  const { options, setImages, images } = useData();
 
   useEffect(() => {
     async function print() {
@@ -29,6 +29,8 @@ function Countdown() {
     }
 
     print()
+
+    console.log(images)
   }, [photoIndex])
 
   useEffect(() => {

@@ -26,18 +26,18 @@ function Countdown() {
         }
       }
 
-      capturePhoto();
-
-      if (photoIndex < 4) {
-        setTimeout(() => {
-          setCount(5); // Restart countdown for the next photo
-          setPhotoIndex(prev => prev + 1);
-        }, 1000);
-      } else {
-        setTimeout(() => {
-          navigate(options.digital ? "/mail" : "/greeting");
-        }, 1000);
-      }
+      capturePhoto().then(() => {
+        if (photoIndex < 4) {
+          setTimeout(() => {
+            setPhotoIndex(prev => prev + 1);
+            setCount(5);
+          }, 1000);
+        } else {
+          setTimeout(() => {
+            navigate(options.digital ? "/mail" : "/greeting");
+          }, 1000);
+        }
+      });
     }
   }, [count, photoIndex, navigate, options.digital, setImages]);
 
@@ -50,7 +50,6 @@ function Countdown() {
       return () => clearTimeout(timer);
     }
   }, [count]);
-
  
   return (
     <div id="countdown">

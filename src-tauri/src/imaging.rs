@@ -1,8 +1,6 @@
 use std::process::Command;
 
-use image::{imageops::FilterType::Lanczos3, GenericImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
-use palette::{FromColor, Hsl, IntoColor, Srgb};
-use tauri::path;
+use image::{imageops::FilterType::Lanczos3, GenericImage, GenericImageView, Rgba, RgbaImage};
 
 #[tauri::command(async)]
 pub async fn capture(output_path: &str) -> Result<String, String> {

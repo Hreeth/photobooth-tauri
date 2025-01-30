@@ -15,31 +15,25 @@ function Countdown() {
   const { options, setImages } = useData();
 
   useEffect(() => {
-    if (count === 0 && photoIndex <= 4) {
-      async function capturePhoto() {
-        const pictures = await pictureDir();
-        try {
-          let img = await invoke<string>("capture", { outputPath: `${pictures}/photo-${photoIndex}.jpg` });
-          setImages(prev => [...prev, img]);
-        } catch (err) {
-          console.error("Failed to capture image:", err);
-        }
+    async function capturePhoto() {
+      const pictures = await pictureDir();
+      try {
+        let img = await invoke<string>("capture", { outputPath: `${pictures}/photo-${photoIndex}.jpg` });
+        setImages(prev => [...prev, img]);
+      } catch (err) {
+        console.error("Failed to capture image:", err);
       }
-
-      capturePhoto().then(() => {
-        if (photoIndex < 4) {
-          setTimeout(() => {
-            setPhotoIndex(prev => prev + 1);
-            setCount(5);
-          }, 1000);
-        } else {
-          setTimeout(() => {
-            navigate(options.digital ? "/mail" : "/greeting");
-          }, 1000);
-        }
-      });
     }
-  }, [count, photoIndex, navigate, options.digital, setImages]);
+
+    if (photoIndex <= 4) {
+      capturePhoto();
+      setCount(5);
+    } else {
+      setTimeout(() => {
+        navigate(options.digital ? "/mail" : "/greeting");
+      }, 1000);
+    }
+  }, [photoIndex, navigate, options.digital, setImages]);
 
   useEffect(() => {
     if (count > 0) {
@@ -48,10 +42,13 @@ function Countdown() {
       }, 1000);
 
       return () => clearTimeout(timer);
+    } else if (photoIndex < 4) {
+      setTimeout(() => {
+        setPhotoIndex(prev => prev + 1);
+      }, 1000);
     }
-  }, [count]);
+  }, [count, photoIndex]);
 
- 
   return (
     <div id="countdown">
         {count > 0 && (

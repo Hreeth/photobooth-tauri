@@ -12,15 +12,12 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "Photobooth",
-        "resizable": true,
-        "center": true,
-        "maximized": true,
         "focus": true,
-        "alwaysOnTop": true,
-        "minimizable": true,
-        "closable": true,
-        "devtools": true
+        "resizable": false,
+        "fullscreen": true,
+        "decorations": false
       }
     ],
     "security": {

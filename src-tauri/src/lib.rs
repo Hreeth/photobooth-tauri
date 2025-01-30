@@ -1,4 +1,6 @@
-use std::env;
+use std::{env, thread, time::Duration};
+
+use tauri::{LogicalSize, Manager};
 
 mod razorpay;
 mod imaging;
@@ -13,6 +15,14 @@ pub fn run() {
       imaging::print
     ])
     .setup(|app| {
+      let window = app.get_webview_window("main").unwrap();
+      thread::spawn(move || {
+        thread::sleep(Duration::from_millis(500));
+        let _ = window.set_size(tauri::Size::Logical(LogicalSize { width: 800.0, height: 600.0 }));
+        thread::sleep(Duration::from_millis(200));
+        let _ = window.set_size(tauri::Size::Logical(LogicalSize { width: 1024.0, height: 700.0 }));
+      });
+
       if cfg!(debug_assertions) {
         app.handle().plugin(
           tauri_plugin_log::Builder::default()

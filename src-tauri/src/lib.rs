@@ -1,5 +1,7 @@
+use std::{thread, time::Duration};
 
-use tauri::Manager;
+use tauri::{LogicalPosition, Manager};
+
 
 mod razorpay;
 mod imaging;
@@ -14,6 +16,16 @@ pub fn run() {
       imaging::print
     ])
     .setup(|app| {
+      let window = app.get_webview_window("main").unwrap();
+
+      window.set_position(LogicalPosition { x: 0.0, y: 0.0 }).unwrap();
+
+      thread::spawn(move || {
+        let _ = window.set_fullscreen(false);
+        thread::sleep(Duration::from_millis(2000));
+        let _ = window.set_fullscreen(true);
+      });
+
       if cfg!(debug_assertions) {
         app.handle().plugin(
           tauri_plugin_log::Builder::default()

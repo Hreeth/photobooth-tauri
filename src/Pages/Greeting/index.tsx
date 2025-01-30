@@ -6,6 +6,7 @@ import reset from '../../Utils/reset'
 import { Print, useData } from '../../Contexts/DataContext'
 import { useNavigate } from 'react-router-dom'
 import { invoke } from '@tauri-apps/api/core'
+import { pictureDir } from '@tauri-apps/api/path'
 
 export default function Greeting() {
   const { setOptions, options, images } = useData()
@@ -23,9 +24,10 @@ export default function Greeting() {
   useEffect(() => {
     const printPhotos = async () => {
       try {
+        let pictures = await pictureDir();
         await invoke("print", {
           images,
-          outputPath: "print.jpg",
+          outputPath: `${pictures}/print-strip.png`,
           colorMode: options.print == Print.COLOR ? "COLOR" : "B&W",
           copies: options.copies
         })

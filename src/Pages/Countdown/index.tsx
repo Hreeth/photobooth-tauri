@@ -15,6 +15,9 @@ function Countdown() {
   const { options, setImages, images } = useData();
 
   useEffect(() => {
+  }, [photoIndex])
+
+  useEffect(() => {
     async function print() {
       const pictures = await pictureDir();
       try {
@@ -28,18 +31,14 @@ function Countdown() {
       }
     }
 
-    print()
-
-    console.log(images)
-  }, [photoIndex])
-
-  useEffect(() => {
     if (photoIndex <= 4) {
       if (count > 0) {
         const timer = setTimeout(() => {
           setCount(prev => prev - 1)
         }, 1000);
 
+        print()
+        
         return () => clearTimeout(timer)
       } else {
         if (photoIndex < 4) {

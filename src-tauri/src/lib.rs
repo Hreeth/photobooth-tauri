@@ -16,12 +16,8 @@ pub fn run() {
     ])
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();
-      thread::spawn(move || {
-        thread::sleep(Duration::from_millis(500));
-        let _ = window.set_size(tauri::Size::Logical(LogicalSize { width: 800.0, height: 600.0 }));
-        thread::sleep(Duration::from_millis(200));
-        window.set_fullscreen(true).unwrap();
-      });
+      let _ = window.hide();
+      let _ = window.show();
 
       if cfg!(debug_assertions) {
         app.handle().plugin(

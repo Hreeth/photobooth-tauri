@@ -12,10 +12,10 @@
   "app": {
     "windows": [
       {
-        "label": "main",
         "title": "Photobooth",
         "focus": true,
-        "resizable": false,
+        "width": 800,
+        "height": 600,
         "fullscreen": true,
         "decorations": false
       }

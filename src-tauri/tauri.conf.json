@@ -17,9 +17,9 @@
         "height": 800,
         "resizable": true,
         "center": true,
+        "fullscreen": true,
         "minimizable": true,
         "closable": true,
-        "contentProtected": true,
         "devtools": true
       }
     ],

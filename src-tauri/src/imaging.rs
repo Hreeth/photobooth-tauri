@@ -37,42 +37,69 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
 pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, copies: usize) -> Result<(), String> {
     let strip_width = 1200;
     let strip_height = 1800;
-
-    let border_width = 10;
+    
+    let border_width = 20; // Increased border to ensure symmetry
+    let cell_width = (strip_width / 2) - (2 * border_width); // 600px minus borders
+    let cell_height = (strip_height / 4) - (2 * border_width); // 450px minus borders
 
     let mut canvas = RgbaImage::from_pixel(strip_width, strip_height, image::Rgba([255, 255, 255, 255]));
 
     for (i, img_path) in images.iter().enumerate() {
-        let row = i / 2;
-        let col = i % 2;
+        let y_offset = i as u32 * (strip_height / 4); // Row position
 
         let photo = match image::open(img_path) {
             Ok(img) => {
-                println!("{:?}", img_path);
+                println!("Loading image: {:?}", img_path);
                 let (width, height) = img.dimensions();
                 let aspect_ratio = width as f32 / height as f32;
 
-                let resized_width = (strip_width / 2) - 2 * border_width;
-                let resized_height = (resized_width as f32 / aspect_ratio) as u32;
+                // Resize while keeping the image within bounds
+                let mut resized_width = cell_width;
+                let mut resized_height = (resized_width as f32 / aspect_ratio) as u32;
 
+                if resized_height > cell_height {
+                    resized_height = cell_height;
+                    resized_width = (resized_height as f32 * aspect_ratio) as u32;
+                }
+
+                // Resize the image to fit exactly within its space
                 let resized = img.resize(resized_width, resized_height, Lanczos3);
 
-                let mut bordered_image = RgbaImage::from_pixel(resized_width, resized_height, Rgba([255, 255, 255, 255]));
-                bordered_image.copy_from(&resized, border_width as u32, border_width as u32).unwrap();
+                // Create a blank bordered image with correct dimensions
+                let mut bordered_image = RgbaImage::from_pixel(cell_width, cell_height, Rgba([255, 255, 255, 255]));
+
+                // Ensure the image is centered in its slot
+                let x_offset_center = (cell_width - resized_width) / 2;
+                let y_offset_center = (cell_height - resized_height) / 2;
+
+                if let Err(e) = bordered_image.copy_from(&resized, x_offset_center, y_offset_center) {
+                    return Err(format!("Failed to place photo {} in bordered image: {}", i + 1, e));
+                }
 
                 bordered_image
             }
-            Err(e) => return Err(format!("Failed to load photo {}: {}", img_path, e))
+            Err(e) => return Err(format!("Failed to load photo {}: {}", img_path, e)),
         };
 
-        let x_offset = col as u32 * (strip_width / 2);
-        let y_offset = row as u32 * (strip_height / 2);
+        // Ensure equal left and right placement without exceeding dimensions
+        let left_x_offset = border_width;
+        let right_x_offset = strip_width / 2 + border_width;
 
-        if let Err(e) = canvas.copy_from(&photo, x_offset, y_offset) {
-            return Err(format!("Failed to place photo {}: {}", i + 1, e));
+        // Check that right_x_offset does not exceed bounds
+        if right_x_offset + cell_width > strip_width {
+            return Err(format!("Error: Right column image exceeds strip width."));
+        }
+
+        // Place images in both left and right columns
+        if let Err(e) = canvas.copy_from(&photo, left_x_offset, y_offset) {
+            return Err(format!("Failed to place photo {} in left column: {}", i + 1, e));
+        }
+        if let Err(e) = canvas.copy_from(&photo, right_x_offset, y_offset) {
+            return Err(format!("Failed to duplicate photo {} in right column: {}", i + 1, e));
         }
     }
 
+    // Convert to B&W if needed
     if color_mode == "B&W" {
         for pixel in canvas.pixels_mut() {
             let [r, g, b, a] = pixel.0;
@@ -81,15 +108,16 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
         }
     }
 
+
     // Save the final image to the output path
     if let Err(e) = canvas.save(output_path) {
         return Err(format!("Failed to save print copy: {}", e));
     }
 
-    // Print the image (half the number of copies for two-sided printing)
+    // Print the image
     let print_res = Command::new("lp")
         .arg("-n")
-        .arg((copies / 2).to_string())
+        .arg(copies.to_string()) // Full copies since it's a single page
         .arg(output_path)
         .output();
 

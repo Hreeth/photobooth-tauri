@@ -16,7 +16,7 @@ export default function Payment() {
 
   const dev = true;
 
-  const { setOptions, options, plans } = useData()
+  const { setOptions, options, plans, setImages } = useData()
   
   useEffect(() => {
     fetchQrCode(calculate(options, plans))
@@ -27,7 +27,7 @@ export default function Payment() {
 
     switch (paid) {
       case false: {
-        reset(setOptions, navigate)
+        reset(setOptions, setImages, navigate)
         break
       }
       case true: {

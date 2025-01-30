@@ -1,6 +1,5 @@
-use std::{env, thread, time::Duration};
 
-use tauri::{LogicalSize, Manager};
+use tauri::Manager;
 
 mod razorpay;
 mod imaging;
@@ -15,10 +14,6 @@ pub fn run() {
       imaging::print
     ])
     .setup(|app| {
-      let window = app.get_webview_window("main").unwrap();
-      let _ = window.hide();
-      let _ = window.show();
-
       if cfg!(debug_assertions) {
         app.handle().plugin(
           tauri_plugin_log::Builder::default()

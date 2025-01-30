@@ -57,7 +57,7 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
                 let resized_width = (strip_width / 2) - 2 * border_width; 
 
                 let resized = img.resize(resized_width, (resized_width as f32 / aspect_ratio) as u32, Lanczos3)
-                                 .crop(0, 0, resized_width, strip_height / 2 - 2 * border_width);
+                                 .crop(0, 0, resized_width, strip_height / 4 - 2 * border_width);
 
                 let mut bordered_image = RgbaImage::from_pixel(resized_width, strip_height / 2, Rgba([255, 255, 255, 255]));
                 bordered_image.copy_from(&resized, border_width as u32, border_width as u32).unwrap();

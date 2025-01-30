@@ -17,7 +17,9 @@
         "height": 800,
         "resizable": true,
         "center": true,
-        "fullscreen": true,
+        "maximized": true,
+        "focus": true,
+        "alwaysOnTop": true,
         "minimizable": true,
         "closable": true,
         "devtools": true

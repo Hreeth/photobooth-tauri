@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+
 import Numpad from '../../Components/Numpad'
+import Header from '../../Components/Header';
+
+import { useNavigate } from 'react-router-dom';
 
 import './styles.css';
-import Header from '../../Components/Header';
-import { useNavigate } from 'react-router-dom';
 
 export default function Passcode() {
   const navigate = useNavigate()

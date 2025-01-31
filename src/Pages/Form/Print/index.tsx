@@ -1,9 +1,11 @@
-import { useData } from '../../../Contexts/DataContext'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+
+import PrintSelectable from '../../../Components/PrintSelectable'
+
 import Footer from '../../../Components/Footer'
 import { Print as PrintOptions } from '../../../Contexts/DataContext'
-import PrintSelectable from '../../../Components/PrintSelectable'
+import { useData } from '../../../Contexts/DataContext'
 
 import './styles.css'
 

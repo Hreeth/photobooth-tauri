@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
+
+import CopiesSelectable from '../../../Components/CopiesSelectable'
 import Footer from '../../../Components/Footer'
 
-import './styles.css'
 import { useData } from '../../../Contexts/DataContext'
-import CopiesSelectable from '../../../Components/CopiesSelectable'
-import { useNavigate } from 'react-router-dom'
 import reset from '../../../Utils/reset'
+
+import './styles.css'
 
 export default function Copies() {
   const { plans, options, setOptions, setImages } = useData()

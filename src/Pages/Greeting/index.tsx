@@ -1,17 +1,18 @@
 import { motion } from 'framer-motion'
 import { useEffect } from 'react'
-
-import './styles.css'
-import reset from '../../Utils/reset'
-import { Print, useData } from '../../Contexts/DataContext'
 import { useNavigate } from 'react-router-dom'
 import { invoke } from '@tauri-apps/api/core'
 import { pictureDir } from '@tauri-apps/api/path'
 
+import { Print, useData } from '../../Contexts/DataContext'
+import reset from '../../Utils/reset'
+
+import './styles.css'
+
 export default function Greeting() {
   const { setOptions, options, images, setImages } = useData()
   const navigate = useNavigate()
-
+  
   const greetings = [
     "Photos so good, they might break the internet!",
     "Your photos are hotter than the flash we just used!",

@@ -1,5 +1,6 @@
-import './styles.css'
 import { useData } from '../../Contexts/DataContext'
+
+import './styles.css'
 
 interface CopiesData {
   title: string,

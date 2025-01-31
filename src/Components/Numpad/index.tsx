@@ -1,10 +1,10 @@
 import React from 'react'
-
-import './styles.css'
 import { useNavigate } from 'react-router-dom'
 
 import clear from '../../assets/Images/clear.svg'
 import backspace from '../../assets/Images/backspace.svg'
+
+import './styles.css'
 
 export default function Numpad({
     correct,

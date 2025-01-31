@@ -1,11 +1,13 @@
-import { useData } from '../../Contexts/DataContext'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+
+import Header from '../../Components/Header'
+import ModeSelectable from '../../Components/ModeSelectable'
+
 import { Mode as ModeOptions } from '../../Contexts/DataContext'
+import { useData } from '../../Contexts/DataContext'
 
 import './styles.css'
-import ModeSelectable from '../../Components/ModeSelectable'
-import Header from '../../Components/Header'
 
 export default function Mode() {
   const arr = [
@@ -13,7 +15,7 @@ export default function Mode() {
     ModeOptions.AUTOMATIC,
   ]
   const { mode } = useData()
-
+  
   const navigate = useNavigate()
 
   return (

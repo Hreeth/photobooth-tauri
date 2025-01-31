@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Route, Routes, useLocation } from 'react-router-dom'
+
 import DataProvider from './Contexts/DataContext'
 
 const Home = React.lazy(() => import('./Pages/Home'))

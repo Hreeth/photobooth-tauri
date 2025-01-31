@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { invoke } from "@tauri-apps/api/core";
+import { pictureDir } from "@tauri-apps/api/path";
 
 import { useData } from "../../Contexts/DataContext";
 
 import './styles.css'
-import { invoke } from "@tauri-apps/api/core";
-import { pictureDir } from "@tauri-apps/api/path";
 
 function Countdown() {
   const navigate = useNavigate();
@@ -15,25 +15,31 @@ function Countdown() {
   const { options, setImages } = useData();
 
   useEffect(() => {
-    async function capturePhoto() {
-      const pictures = await pictureDir();
-      try {
-        let img = await invoke<string>("capture", { outputPath: `${pictures}/photo-${photoIndex}.jpg` });
-        setImages(prev => [...prev, img]);
-      } catch (err) {
-        console.error("Failed to capture image:", err);
+    if (count === 0 && photoIndex <= 4) {
+      async function capturePhoto() {
+        const pictures = await pictureDir();
+        try {
+          let img = await invoke<string>("capture", { outputPath: `${pictures}/photo-${photoIndex}.jpg` });
+          setImages(prev => [...prev, img]);
+        } catch (err) {
+          console.error("Failed to capture image:", err);
+        }
       }
-    }
 
-    if (photoIndex <= 4) {
-      capturePhoto();
-      setCount(5);
-    } else {
-      setTimeout(() => {
-        navigate(options.digital ? "/mail" : "/greeting");
-      }, 1000);
+      capturePhoto().then(() => {
+        if (photoIndex < 4) {
+          setTimeout(() => {
+            setPhotoIndex(prev => prev + 1);
+            setCount(5);
+          }, 1000);
+        } else {
+          setTimeout(() => {
+            navigate(options.digital ? "/mail" : "/greeting");
+          }, 1000);
+        }
+      });
     }
-  }, [photoIndex, navigate, options.digital, setImages]);
+  }, [count, photoIndex, navigate, options.digital, setImages]);
 
   useEffect(() => {
     if (count > 0) {
@@ -42,12 +48,8 @@ function Countdown() {
       }, 1000);
 
       return () => clearTimeout(timer);
-    } else if (photoIndex < 4) {
-      setTimeout(() => {
-        setPhotoIndex(prev => prev + 1);
-      }, 1000);
     }
-  }, [count, photoIndex]);
+  }, [count]);
 
   return (
     <div id="countdown">

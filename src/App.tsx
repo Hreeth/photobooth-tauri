@@ -1,5 +1,6 @@
-import './App.css'
 import AnimatedRoutes from './AnimatedRoutes'
+
+import './App.css'
 
 function App() {
   return (

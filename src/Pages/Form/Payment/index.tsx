@@ -1,13 +1,16 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import Header from '../../../Components/Header'
 import { useNavigate } from 'react-router-dom'
 
-import './styles.css'
+import Header from '../../../Components/Header'
+
 import usePayment from '../../../Hooks/usePayment'
-import reset from '../../../Utils/reset'
+
 import { useData } from '../../../Contexts/DataContext'
 import calculate from '../../../Utils/calculate'
+import reset from '../../../Utils/reset'
+
+import './styles.css'
 
 export default function Payment() {
   const navigate = useNavigate()

@@ -1,5 +1,6 @@
-import './styles.css'
 import { Mode, useData } from '../../Contexts/DataContext'
+
+import './styles.css'
 
 export default function ModeSelectable({ data, selected = false }: { data: Mode, selected?: boolean }) {
   const { setMode } = useData()

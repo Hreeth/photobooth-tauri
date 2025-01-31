@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Photobooth",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "identifier": "com.tauri.photobooth",
   "build": {
     "frontendDist": "../dist",
@@ -16,7 +16,7 @@
         "title": "Photobooth",
         "focus": true,
         "width": 1000,
-        "height": 800,
+        "height": 600,
         "decorations": false
       }
     ],

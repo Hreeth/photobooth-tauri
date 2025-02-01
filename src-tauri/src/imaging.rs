@@ -8,7 +8,7 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
         .arg("--saturation")
         .arg("1.5")
         .arg("-t")
-        .arg("2000")
+        .arg("5000")
         .arg("--autofocus-mode")
         .arg("continuous")
         .arg("--autofocus-range")

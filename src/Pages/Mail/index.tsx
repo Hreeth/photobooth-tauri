@@ -1,12 +1,39 @@
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import './styles.css'
+import { documentDir } from '@tauri-apps/api/path'
+import { invoke } from '@tauri-apps/api/core'
+import { useData } from '../../Contexts/DataContext'
 
 export default function Mail() {
   const navigate = useNavigate()
   const [email, onSetEmail] = useState("")
+  const [documentPath, setDocumentPath] = useState("")
+
+  const { images } = useData()
+
+  useEffect(() => {
+    async function fetchPath() {
+      const path = await documentDir()
+      setDocumentPath(path)
+    }
+
+    fetchPath()
+  }, [])
+
+  async function handleEmail() {
+    navigate("/greeting")
+
+    invoke<string>("store_email", {
+      documentPath: documentPath,
+      userEmail: email,
+      photoPaths: images
+    })
+    .then(() => invoke("send_email", { documentPath: documentPath }))
+    .catch((err) => console.error("Error storing / sending email:", err))
+  }
 
   const validate = (): boolean => {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
@@ -31,7 +58,7 @@ export default function Mail() {
               />
               <button
                 className="send-btn"
-                onClick={() => navigate('/greeting')}
+                onClick={() => handleEmail()}
                 disabled={email == "" || !validate()}
               >
                 Submit

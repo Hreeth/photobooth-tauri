@@ -1,4 +1,4 @@
-use std::process::Command;
+use std::{fs, process::Command};
 
 use image::{imageops::FilterType::Lanczos3, GenericImage, GenericImageView, Rgba, RgbaImage};
 
@@ -38,12 +38,25 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
     }
 }
 
+// #[tauri::command]
+// pub fn capture(output_path: &str) -> Result<String, String> {
+//     let sample_path = "sample.jpg"; // Replace with the actual path of your sample image
+
+//     match fs::copy(sample_path, output_path) {
+//         Ok(_) => {
+//             println!("Sample image copied to: {}", output_path);
+//             Ok(output_path.to_string())
+//         }
+//         Err(e) => Err(format!("Failed to copy sample image: {}", e)),
+//     }
+// }
+
 #[tauri::command(async)]
 pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, copies: usize) -> Result<(), String> {
     let strip_width = 1200;
     let strip_height = 1800;
     
-    let border_width = 20; // Increased border to ensure symmetry
+    let border_width = ((0.15 / 2.54) * 300.0) as u32;// Increased border to ensure symmetry
     let cell_width = (strip_width / 2) - (2 * border_width); // 600px minus borders
     let cell_height = (strip_height / 4) - (2 * border_width); // 450px minus borders
 

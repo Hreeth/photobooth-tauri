@@ -2,6 +2,7 @@ use std::{thread, time::Duration};
 use tauri::Manager;
 
 mod razorpay;
+mod mail;
 mod imaging;
  
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -11,7 +12,9 @@ pub fn run() {
       razorpay::create_qr,
       razorpay::check_payment_status,
       imaging::capture,
-      imaging::print
+      imaging::print,
+      mail::store_email,
+      mail::send_email
     ])
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();

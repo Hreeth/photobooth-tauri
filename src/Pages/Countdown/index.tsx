@@ -7,6 +7,7 @@ import { pictureDir } from "@tauri-apps/api/path";
 import { useData } from "../../Contexts/DataContext";
 
 import './styles.css'
+import { path } from "@tauri-apps/api";
 
 function Countdown() {
   const navigate = useNavigate();
@@ -19,7 +20,8 @@ function Countdown() {
       async function capturePhoto() {
         const pictures = await pictureDir();
         try {
-          let img = await invoke<string>("capture", { outputPath: `${pictures}/photo-${photoIndex}.jpg` });
+          let img_path = await path.join(pictures, `photo-${photoIndex}.jpg`)
+          let img = await invoke<string>("capture", { outputPath: img_path });
           setImages(prev => [...prev, img]);
         } catch (err) {
           console.error("Failed to capture image:", err);

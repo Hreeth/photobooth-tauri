@@ -10,7 +10,7 @@ export default function calculate(
     }>
 ): number {
     let price = plans.find(_ => _.strips == options.copies)?.price
-    if (options.digital && price) price += 39
+    if (options.digital && price) price += 99
 
     return price ? price * 100 : 0
 }

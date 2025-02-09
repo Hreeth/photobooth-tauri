@@ -1,7 +1,7 @@
 use dotenv::dotenv;
 use reqwest::Client;
 use serde_json::{json, to_string_pretty, Value};
-use std::{env, error::Error, fs::{self, read, remove_file, rename, File, OpenOptions}, io::{Read, Write}, path::PathBuf};
+use std::{env, error::Error, f32::consts::E, fs::{self, copy, read, remove_file, File, OpenOptions}, io::{Read, Write}, path::PathBuf};
 use reqwest::multipart::{Form, Part};
 
 #[tauri::command]
@@ -151,8 +151,10 @@ fn format_files(document_path: String, user_email: String, photo_paths: Vec<Stri
         let new_filename = format!("{}_photo_{}.png", email_prefix, index + 1);
         let new_path = storage_dir.join(&new_filename);
 
-        rename(photo_path, &new_path).map_err(|e| format!("Failed to rename file: {}", e))?;
-
+        if let Err(e) = copy(photo_path, new_path.clone()) {
+            return Err(format!("Failed to copy sample image: {}", e).into())
+        }
+        
         renamed_paths.push(new_path.to_string_lossy().to_string());
     }
 

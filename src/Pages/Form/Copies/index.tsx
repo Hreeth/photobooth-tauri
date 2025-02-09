@@ -31,7 +31,7 @@ export default function Copies() {
                 <div className="digital-label">Add-On</div>
               </div>
               <div className="digital-grp-1">
-                <div className="digital-price">₹39</div>
+                <div className="digital-price">₹99</div>
                 <div className="add-btn">{options.digital ? "Added" : "Add"}</div>
               </div>
             </div>

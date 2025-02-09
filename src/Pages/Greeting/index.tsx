@@ -8,6 +8,7 @@ import { Print, useData } from '../../Contexts/DataContext'
 import reset from '../../Utils/reset'
 
 import './styles.css'
+import { path } from '@tauri-apps/api'
 
 export default function Greeting() {
   const { setOptions, options, images, setImages } = useData()
@@ -26,9 +27,10 @@ export default function Greeting() {
     const printPhotos = async () => {
       try {
         let pictures = await pictureDir();
+        let img_path = await path.join(pictures, "print-strip.png");
         await invoke("print", {
           images: images,
-          outputPath: `${pictures}/print-strip.png`,
+          outputPath: img_path,
           colorMode: options.print == Print.COLOR ? "COLOR" : "B&W",
           copies: options.copies
         })

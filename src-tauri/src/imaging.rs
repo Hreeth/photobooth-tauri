@@ -1,4 +1,4 @@
-use std::{fs, process::Command};
+use std::{fs, path::{Path, PathBuf}, process::Command};
 
 use image::{imageops::FilterType::Lanczos3, GenericImage, GenericImageView, Rgba, RgbaImage};
 
@@ -53,17 +53,29 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
 
 #[tauri::command(async)]
 pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, copies: usize) -> Result<(), String> {
-    let strip_width = 1200;
-    let strip_height = 1800;
-    
-    let border_width = ((0.15 / 2.54) * 300.0) as u32;// Increased border to ensure symmetry
-    let cell_width = (strip_width / 2) - (2 * border_width); // 600px minus borders
-    let cell_height = (strip_height / 4) - (2 * border_width); // 450px minus borders
+    let strip_width = 1200;  // Total width of the photostrip
+    let strip_height = 1800; // Total height of the photostrip
 
-    let mut canvas = RgbaImage::from_pixel(strip_width, strip_height, image::Rgba([255, 255, 255, 255]));
+    let gap_cm = 0.15; // 0.15 cm gap
+    let dpi = 300; // Standard printing DPI
+    let gap_px = ((gap_cm / 2.54) * dpi as f32).round() as u32; // Convert cm to pixels
 
-    for (i, img_path) in images.iter().enumerate() {
-        let y_offset = i as u32 * (strip_height / 4); // Row position
+    let column_gap = gap_px; // 0.15 cm gap between columns
+    let row_gap = gap_px; // 0.15 cm gap between rows
+
+    let cell_width = (strip_width - column_gap) / 2; // Each photo takes half of the width minus column gap
+    let cell_height = (strip_height - (row_gap * 3)) / 4; // Adjust height to fit 4 images + gaps
+
+    let bg_color = if color_mode == "B&W" {
+        Rgba([0, 0, 0, 255]) // Black background
+    } else {
+        Rgba([255, 255, 255, 255]) // White background
+    };
+
+    let mut canvas = RgbaImage::from_pixel(strip_width, strip_height, bg_color);
+
+    for (i, img_path) in images.iter().enumerate().take(4) { // Only process the first 4 images
+        let y_offset = i as u32 * (cell_height + row_gap); // Offset including row gap
 
         let photo = match image::open(img_path) {
             Ok(img) => {
@@ -71,22 +83,22 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
                 let (width, height) = img.dimensions();
                 let aspect_ratio = width as f32 / height as f32;
 
-                // Resize while keeping the image within bounds
+                // Resize while keeping aspect ratio
                 let mut resized_width = cell_width;
-                let mut resized_height = (resized_width as f32 / aspect_ratio) as u32;
+                let mut resized_height = (resized_width as f32 / aspect_ratio).round() as u32;
 
                 if resized_height > cell_height {
                     resized_height = cell_height;
-                    resized_width = (resized_height as f32 * aspect_ratio) as u32;
+                    resized_width = (resized_height as f32 * aspect_ratio).round() as u32;
                 }
 
-                // Resize the image to fit exactly within its space
+                // Resize image
                 let resized = img.resize(resized_width, resized_height, Lanczos3);
 
-                // Create a blank bordered image with correct dimensions
-                let mut bordered_image = RgbaImage::from_pixel(cell_width, cell_height, Rgba([255, 255, 255, 255]));
+                // Create a blank image with correct size
+                let mut bordered_image = RgbaImage::from_pixel(cell_width, cell_height, bg_color);
 
-                // Ensure the image is centered in its slot
+                // Center the image
                 let x_offset_center = (cell_width - resized_width) / 2;
                 let y_offset_center = (cell_height - resized_height) / 2;
 
@@ -99,16 +111,10 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
             Err(e) => return Err(format!("Failed to load photo {}: {}", img_path, e)),
         };
 
-        // Ensure equal left and right placement without exceeding dimensions
-        let left_x_offset = border_width;
-        let right_x_offset = strip_width / 2 + border_width;
+        // Place images in both left and right columns with column gap
+        let left_x_offset = 0;
+        let right_x_offset = cell_width + column_gap;
 
-        // Check that right_x_offset does not exceed bounds
-        if right_x_offset + cell_width > strip_width {
-            return Err(format!("Error: Right column image exceeds strip width."));
-        }
-
-        // Place images in both left and right columns
         if let Err(e) = canvas.copy_from(&photo, left_x_offset, y_offset) {
             return Err(format!("Failed to place photo {} in left column: {}", i + 1, e));
         }
@@ -126,8 +132,7 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
         }
     }
 
-
-    // Save the final image to the output path
+    // Save the final image
     if let Err(e) = canvas.save(output_path) {
         return Err(format!("Failed to save print copy: {}", e));
     }
@@ -135,7 +140,7 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
     // Print the image
     let print_res = Command::new("lp")
         .arg("-n")
-        .arg((copies / 2).to_string()) // Full copies since it's a single page
+        .arg((copies / 2).to_string()) // Print full copies
         .arg(output_path)
         .output();
 

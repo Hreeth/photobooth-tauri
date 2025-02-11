@@ -54,7 +54,7 @@ export default function DataProvider({ children }: { children: React.ReactNode }
         {
           strips: 4,
           title: 'Fantastic Four',
-          price: 299,
+          price: 349,
           popular: true
         },
         {

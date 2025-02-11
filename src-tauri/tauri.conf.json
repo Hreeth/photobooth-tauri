@@ -41,8 +41,8 @@
       "icons/icon.ico"
     ],
     "resources": [
-      "fonts",
-      ".env"
+      "src-tauri/fonts/",
+      "src-tauri/.env"
     ]
   }
 }

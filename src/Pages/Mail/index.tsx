@@ -31,7 +31,7 @@ export default function Mail() {
       userEmail: email,
       photoPaths: images
     })
-    .then(() => invoke("send_email", { documentPath: documentPath }))
+    .then(async () => await invoke("send_email", { documentPath: documentPath }))
     .catch((err) => console.error("Error storing / sending email:", err))
   }
 

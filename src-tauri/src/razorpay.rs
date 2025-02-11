@@ -1,7 +1,5 @@
-use std::env;
-
 use chrono::{Duration, Utc};
-use dotenv::dotenv;
+
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -29,10 +27,8 @@ pub struct RazorpayPollingResponse {
 
 #[tauri::command(async)]
 pub async fn create_qr(amount: u64, close_by_secs: i64) -> Result<RazorpayQrResponse, String> {
-  dotenv().ok();
-
-  let key_id = env::var("RAZORPAY_KEY_ID").expect("Missing Razorpay Key ID");
-  let key_secret = env::var("RAZORPAY_KEY_SECRET").expect("Missing Razorpay Key Secret");
+  let key_id = dotenv_codegen::dotenv!("RAZORPAY_KEY_ID");
+  let key_secret = dotenv_codegen::dotenv!("RAZORPAY_KEY_SECRET");
 
   let url = "https://api.razorpay.com/v1/payments/qr_codes";
   let client = Client::new();
@@ -65,10 +61,9 @@ pub async fn create_qr(amount: u64, close_by_secs: i64) -> Result<RazorpayQrResp
 
 #[tauri::command(async)]
 pub async fn check_payment_status(qr_code_id: String) -> Result<bool, String> {
-  dotenv().ok();
 
-  let key_id = env::var("RAZORPAY_KEY_ID").expect("Missing Razorpay Key ID");
-  let key_secret = env::var("RAZORPAY_KEY_SECRET").expect("Missing Razorpay Key Secret");
+  let key_id = dotenv_codegen::dotenv!("RAZORPAY_KEY_ID");
+  let key_secret = dotenv_codegen::dotenv!("RAZORPAY_KEY_SECRET");
 
   let url = format!("https://api.razorpay.com/v1/payments/qr_codes/{}", qr_code_id);
   let client = Client::new();

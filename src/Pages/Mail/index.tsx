@@ -39,6 +39,14 @@ export default function Mail() {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
   }
 
+  function openKeyboard() {
+    invoke("open_keyboard")
+  }
+
+  function closeKeyboard() {
+    invoke("close_keyboard")
+  }
+
   return (
     <motion.div
       id='mail'
@@ -55,6 +63,8 @@ export default function Mail() {
                 className="input"
                 onChange={(_) => onSetEmail(_.target.value.trim())}
                 placeholder='enteryouremail@gmail.com'
+                onFocus={openKeyboard}
+                onBlur={closeKeyboard}
               />
               <button
                 className="send-btn"

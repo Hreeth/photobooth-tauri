@@ -42,7 +42,8 @@
     ],
     "resources": [
       "fonts",
-      ".env"
+      ".env",
+      "sample.jpg"
     ]
   }
 }

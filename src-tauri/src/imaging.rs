@@ -2,54 +2,54 @@ use std::{fs, path::{Path, PathBuf}, process::Command};
 
 use image::{imageops::FilterType::Lanczos3, GenericImage, GenericImageView, Rgba, RgbaImage};
 
-// #[tauri::command(async)]
-// pub async fn capture(output_path: &str) -> Result<String, String> {
-//     let result = Command::new("libcamera-still")
-//         .arg("--saturation")
-//         .arg("1.5")
-//         .arg("-t")
-//         .arg("5000")
-//         .arg("--autofocus-mode")
-//         .arg("continuous")
-//         .arg("--autofocus-range")
-//         .arg("normal")
-//         .arg("--denoise")
-//         .arg("cdn_off")
-//         .arg("--ev")
-//         .arg("0")
-//         .arg("-f")
-//         .arg("-o")
-//         .arg(output_path)
-//         .output();
+#[tauri::command(async)]
+pub async fn capture(output_path: &str) -> Result<String, String> {
+    let result = Command::new("libcamera-still")
+        .arg("--saturation")
+        .arg("1.5")
+        .arg("-t")
+        .arg("5000")
+        .arg("--autofocus-mode")
+        .arg("continuous")
+        .arg("--autofocus-range")
+        .arg("normal")
+        .arg("--denoise")
+        .arg("cdn_off")
+        .arg("--ev")
+        .arg("0")
+        .arg("-f")
+        .arg("-o")
+        .arg(output_path)
+        .output();
 
-//     match result {
-//         Ok(output) => {
-//             let stdout_str = String::from_utf8_lossy(&output.stdout);
-//             let stderr_str = String::from_utf8_lossy(&output.stderr);
+    match result {
+        Ok(output) => {
+            let stdout_str = String::from_utf8_lossy(&output.stdout);
+            let stderr_str = String::from_utf8_lossy(&output.stderr);
     
-//             if !output.status.success() {
-//                 println!("stderr: {}", stderr_str);
-//             }
+            if !output.status.success() {
+                println!("stderr: {}", stderr_str);
+            }
             
-//             println!("stdout: {}", stdout_str);
-//             Ok(output_path.to_string())
-//         }
-//         Err(e) => return Err(format!("Failed to execute capture command: {}", e)),
-//     }
-// }
-
-#[tauri::command]
-pub fn capture(output_path: &str) -> Result<String, String> {
-    let sample_path = "sample.jpg"; // Replace with the actual path of your sample image
-
-    match fs::copy(sample_path, output_path) {
-        Ok(_) => {
-            println!("Sample image copied to: {}", output_path);
+            println!("stdout: {}", stdout_str);
             Ok(output_path.to_string())
         }
-        Err(e) => Err(format!("Failed to copy sample image: {}", e)),
+        Err(e) => return Err(format!("Failed to execute capture command: {}", e)),
     }
 }
+
+// #[tauri::command]
+// pub fn capture(output_path: &str) -> Result<String, String> {
+//     let sample_path = "sample.jpg"; // Replace with the actual path of your sample image
+
+//     match fs::copy(sample_path, output_path) {
+//         Ok(_) => {
+//             println!("Sample image copied to: {}", output_path);
+//             Ok(output_path.to_string())
+//         }
+//         Err(e) => Err(format!("Failed to copy sample image: {}", e)),
+//     }
+// }
 
 #[tauri::command(async)]
 pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, copies: usize) -> Result<(), String> {

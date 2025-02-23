@@ -17,6 +17,8 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
         .arg("cdn_off")
         .arg("--ev")
         .arg("0")
+        .arg("--rotation")
+        .arg("180")
         .arg("-f")
         .arg("-o")
         .arg(output_path)

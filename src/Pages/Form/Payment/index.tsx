@@ -17,12 +17,13 @@ export default function Payment() {
   const [time, setTime] = useState<number>(0)
   const { qrCode, loading, fetchQrCode, paid, pollingIntervalRef } = usePayment()
 
-  const dev = true;
+  const dev = false;
 
   const { setOptions, options, plans, setImages } = useData()
   
   useEffect(() => {
-    fetchQrCode(calculate(options, plans))
+    // fetchQrCode(calculate(options, plans))
+    fetchQrCode(100)
   }, [fetchQrCode])
   
   useEffect(() => {

@@ -3,6 +3,27 @@
 version = 3
 
 [[package]]
+name = "Photobooth"
+version = "1.0.3"
+dependencies = [
+ "ab_glyph",
+ "base64 0.22.1",
+ "chrono",
+ "dotenv",
+ "dotenv_codegen",
+ "image",
+ "imageproc",
+ "log",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-log",
+ "tokio",
+]
+
+[[package]]
 name = "ab_glyph"
 version = "0.2.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -111,27 +132,6 @@ name = "anyhow"
 version = "1.0.95"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "34ac096ce696dc2fcabef30516bb13c0a68a11d30131d3df6f04711467681b04"
-
-[[package]]
-name = "app"
-version = "1.0.0"
-dependencies = [
- "ab_glyph",
- "base64 0.22.1",
- "chrono",
- "dotenv",
- "dotenv_codegen",
- "image",
- "imageproc",
- "log",
- "reqwest",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-log",
- "tokio",
-]
 
 [[package]]
 name = "approx"

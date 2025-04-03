@@ -1,18 +1,20 @@
 import './styles.css'
 
 export default function Footer({
-  backCallback = () => { return },
-  continueCallback = () => { return },
+  backCallback = () => {},
+  continueCallback = () => {},
+  continueText = "Continue",
   disabled = false
 }: {
-  backCallback?: Function,
-  continueCallback?: Function,
+  backCallback?: () => void,
+  continueCallback?: () => void,
+  continueText?: String
   disabled?: boolean
 }) {
   return (
     <div id="footer">
       <button className="back-btn" onClick={() => backCallback()}>Back</button>
-      <button className="continue-btn" onClick={() => continueCallback()} disabled={disabled}>Continue</button>
+      <button className="continue-btn" onClick={() => continueCallback()} disabled={disabled}>{continueText}</button>
     </div>
   )
 }

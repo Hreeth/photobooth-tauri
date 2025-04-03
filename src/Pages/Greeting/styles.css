@@ -34,3 +34,25 @@
     width: 100%;
     text-align: center;
 }
+.greeting-arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40%;
+    aspect-ratio: 1;
+    filter: invert(.2) brightness(1.8) hue-rotate(167deg) sepia(.6);
+}
+
+.greeting-progress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--accent-2);
+    gap: 1rem;
+    line-height: 1;
+}
+.greeting-progress .greeting-progress-loader {
+    margin: -30%;
+    filter: brightness(2);
+    height: 4rem;
+}

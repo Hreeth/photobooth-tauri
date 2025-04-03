@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Photobooth",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "identifier": "com.tauri.photobooth",
   "build": {
     "frontendDist": "../dist",
@@ -21,7 +21,8 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "capabilities": []
     }
   },
   "bundle": {

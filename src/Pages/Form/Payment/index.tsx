@@ -19,7 +19,7 @@ export default function Payment() {
 
   const dev = false;
 
-  const { setOptions, options, plans, setImages } = useData()
+  const { setOptions, setImages } = useData()
   
   useEffect(() => {
     // fetchQrCode(calculate(options, plans))

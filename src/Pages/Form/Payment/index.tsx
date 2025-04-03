@@ -7,7 +7,7 @@ import Header from '../../../Components/Header'
 import usePayment from '../../../Hooks/usePayment'
 
 import { useData } from '../../../Contexts/DataContext'
-// import calculate from '../../../Utils/calculate'
+import calculate from '../../../Utils/calculate'
 import reset from '../../../Utils/reset'
 
 import './styles.css'
@@ -19,11 +19,10 @@ export default function Payment() {
 
   const dev = false;
 
-  const { setOptions, setImages } = useData()
+  const { setOptions, setImages, options, plans } = useData()
   
   useEffect(() => {
-    // fetchQrCode(calculate(options, plans))
-    fetchQrCode(100)
+    fetchQrCode(calculate(options, plans))
   }, [fetchQrCode])
   
   useEffect(() => {

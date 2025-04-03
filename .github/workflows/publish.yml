@@ -14,60 +14,52 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: 'macos-latest'
+          - platform: 'macos-latest' # for Arm-based macs (M1 and above).
             args: '--target aarch64-apple-darwin'
-            target: 'aarch64-apple-darwin'
-          - platform: 'macos-latest'
+          - platform: 'macos-latest' # for Intel-based macs.
             args: '--target x86_64-apple-darwin'
-            target: 'x86_64-apple-darwin'
           - platform: 'ubuntu-22.04'
             args: ''
-            target: 'x86_64-unknown-linux-gnu'
           - platform: 'windows-latest'
             args: ''
-            target: 'x86_64-pc-windows-msvc'
           - platform: 'ubuntu-22.04-arm'
             args: '--target aarch64-unknown-linux-gnu'
-            target: 'aarch64-unknown-linux-gnu'
 
     runs-on: ${{ matrix.platform }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install dependencies (Linux)
-        if: contains(matrix.platform, 'ubuntu')
+      - name: install dependencies (ubuntu and arm)
+        if: contains(matrix.platform, 'ubuntu') # This must match the platform value defined above.
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Setup Node.js
+      - name: setup node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
           cache: 'npm'
 
-      - name: Install Rust stable
+      - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: |
             aarch64-unknown-linux-gnu
             x86_64-apple-darwin
             aarch64-apple-darwin
-            x86_64-pc-windows-msvc
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
 
-      - name: Install frontend dependencies
-        run: npm install
+      - name: install frontend dependencies
+        run: npm install # change this to npm or pnpm depending on which one you use.
 
-      - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@v0
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: app-v__VERSION__
           releaseName: 'App v__VERSION__'
@@ -75,44 +67,4 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
-          includeUpdaterJson: false
-
-      - name: Generate update signatures
-        run: |
-          tauri signer sign --private-key private.key "src-tauri/target/release/bundle/${{ matrix.target }}/your_app_installer"
-        shell: bash
-
-      - name: Create latest.json
-        run: |
-          VERSION=$(jq -r '.package.version' src-tauri/tauri.conf.json)
-          DATE=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
-          echo '{
-            "version": "'$VERSION'",
-            "date": "'$DATE'",
-            "body": "Bug fixes and improvements.",
-            "binaries": {
-              "windows-x86_64": {
-                "url": "https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO/releases/download/v'$VERSION'/your_windows_installer.exe",
-                "signature": "'$(cat signature-windows-x86_64.txt)'"
-              },
-              "linux-x86_64": {
-                "url": "https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO/releases/download/v'$VERSION'/your_linux_installer.AppImage",
-                "signature": "'$(cat signature-linux-x86_64.txt)'"
-              },
-              "macos-aarch64": {
-                "url": "https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO/releases/download/v'$VERSION'/your_macos_arm.dmg",
-                "signature": "'$(cat signature-macos-aarch64.txt)'"
-              },
-              "macos-x86_64": {
-                "url": "https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO/releases/download/v'$VERSION'/your_macos_intel.dmg",
-                "signature": "'$(cat signature-macos-x86_64.txt)'"
-              }
-            }
-          }' > latest.json
-
-      - name: Upload latest.json to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: latest.json
-          tag_name: app-v__VERSION__
-          token: ${{ secrets.GH_TOKEN }}
+          includeUpdaterJson: true

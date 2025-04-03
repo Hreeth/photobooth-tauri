@@ -3,7 +3,7 @@ import './styles.css'
 export default function Header({
   backCallback = () => { return },
 }: {
-  backCallback?: Function,
+  backCallback?: () => void,
 }) {
   return (
     <div id="header">

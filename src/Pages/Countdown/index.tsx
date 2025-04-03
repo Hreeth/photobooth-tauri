@@ -11,7 +11,7 @@ import { path } from "@tauri-apps/api";
 
 function Countdown() {
   const navigate = useNavigate();
-  const [count, setCount] = useState(5);
+  const [count, setCount] = useState(3);
   const [photoIndex, setPhotoIndex] = useState(1)
   const { options, setImages } = useData();
 
@@ -32,7 +32,7 @@ function Countdown() {
         if (photoIndex < 4) {
           setTimeout(() => {
             setPhotoIndex(prev => prev + 1);
-            setCount(5);
+            setCount(3);
           }, 1000);
         } else {
           setTimeout(() => {

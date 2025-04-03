@@ -1,6 +1,6 @@
 [package]
-name = "app"
-version = "1.0.2"
+name = "Photobooth"
+version = "1.0.3"
 description = "A Photobooth kiosk app made with Tauri + ReactTS"
 authors = ["Risuleia"]
 license = ""

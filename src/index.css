@@ -34,12 +34,13 @@ body {
   width: 100%;
   min-height: 100vh;
   background-color: var(--bg-clr-1);
+  cursor: default !important;
 }
 
 *, *::before, *::after {
   color: var(--txt-clr);
   font-family: Satoshi;
-  cursor: default;
+  cursor: inherit !important;
   user-select: none;
   -moz-user-select: none;
   -moz-user-select: none;

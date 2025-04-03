@@ -121,7 +121,7 @@ async fn send_email_req(document_path: String) -> Result<String, String> {
 
         let res = client
             .post(zepto_url)
-            .header("Authorization", format!("Zoho-enczapikey {}", api_key.clone()))
+            .header("Authorization", format!("Zoho-enczapikey {}", api_key))
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
             .json(&email_data)

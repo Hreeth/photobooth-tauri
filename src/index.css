@@ -12,8 +12,6 @@
 }
 
 :root {
-  color-scheme: light dark;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -34,7 +32,7 @@ body {
   width: 100%;
   min-height: 100vh;
   background-color: var(--bg-clr-1);
-  cursor: default !important;
+  cursor: none !important;
 }
 
 *, *::before, *::after {
@@ -49,17 +47,4 @@ body {
 h1, h2 {
   font-family: Seriguela;
   margin: 0;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
 }

@@ -4,7 +4,6 @@ use tauri::Manager;
 mod razorpay;
 mod mail;
 mod imaging;
-mod keyboard;
  
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -15,9 +14,7 @@ pub fn run() {
       imaging::capture,
       imaging::print,
       mail::store_email,
-      mail::send_email,
-      keyboard::open_keyboard,
-      keyboard::close_keyboard
+      mail::send_email
     ])
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();

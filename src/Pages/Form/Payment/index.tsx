@@ -7,7 +7,7 @@ import Header from '../../../Components/Header'
 import usePayment from '../../../Hooks/usePayment'
 
 import { useData } from '../../../Contexts/DataContext'
-import calculate from '../../../Utils/calculate'
+// import calculate from '../../../Utils/calculate'
 import reset from '../../../Utils/reset'
 
 import './styles.css'

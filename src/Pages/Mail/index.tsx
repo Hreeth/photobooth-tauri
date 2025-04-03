@@ -1,16 +1,22 @@
 import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import './styles.css'
 import { documentDir } from '@tauri-apps/api/path'
 import { invoke } from '@tauri-apps/api/core'
 import { useData } from '../../Contexts/DataContext'
+import KeyboardReact from 'react-simple-keyboard'
+import 'react-simple-keyboard/build/css/index.css';
 
 export default function Mail() {
   const navigate = useNavigate()
   const [email, onSetEmail] = useState("")
   const [documentPath, setDocumentPath] = useState("")
+  const [keyboardVisible, setKeyboardVisible] = useState(false)
+  const [layoutName, setLayoutName] = useState("default")
+
+  const keyboardRef = useRef(null)
 
   const { images } = useData()
 
@@ -39,13 +45,43 @@ export default function Mail() {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
   }
 
-  function openKeyboard() {
-    invoke("open_keyboard")
+  function handleKeyPress(btn: string) {
+    switch (btn) {
+      case "{lock}": {
+        setLayoutName(prev => prev == "lock" ? "default" : "lock")
+        break
+      }
+      case "{shift}": {
+        setLayoutName(prev => prev == "shift" ? "default" : "shift")
+        break
+      }
+      case "{bksp}": {
+        onSetEmail(prev => prev.slice(0, -1))
+        break
+      }
+      default: break
+    }
   }
 
-  function closeKeyboard() {
-    invoke("close_keyboard")
-  }
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        keyboardRef.current &&
+        !(keyboardRef.current as HTMLElement).contains(event.target as Node) &&
+        !(document.getElementById("email-input") as HTMLElement)?.contains(event.target as Node)
+      ) {
+        setKeyboardVisible(false)
+      }
+    }
+
+    if (keyboardVisible) {
+      document.addEventListener("mousedown", handleClickOutside)
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [keyboardVisible])
 
   return (
     <motion.div
@@ -63,8 +99,8 @@ export default function Mail() {
                 className="input"
                 onChange={(_) => onSetEmail(_.target.value.trim())}
                 placeholder='enteryouremail@gmail.com'
-                onFocus={openKeyboard}
-                onBlur={closeKeyboard}
+                onFocus={() => setKeyboardVisible(true)}
+                value={email}
               />
               <button
                 className="send-btn"
@@ -82,6 +118,42 @@ export default function Mail() {
           <br />
           This email may also be used for marketing purposes, with an option to unsubscribe anytime.
         </div>
+        {keyboardVisible && (
+          <div id='keyboard' ref={keyboardRef}>
+            <KeyboardReact
+              onChange={(input) => onSetEmail(input)}
+              inputName='email'
+              layoutName={layoutName}
+              onKeyPress={(btn) => handleKeyPress(btn)}
+              layout={{
+                default: [
+                  "q w e r t y u i o p",
+                  "a s d f g h j k l",
+                  "{lock} z x c v b n m {bksp}",
+                  "{shift} .com .in .net . {space} @ ,",
+                ],
+                lock: [
+                  "Q W E R T Y U I O P",
+                  "A S D F G H J K L",
+                  "{lock} Z X C V B N M {bksp}",
+                  "{shift} .com .in .net . {space} @ ,"
+                ],
+                shift: [
+                  "1 2 3 4 5 6 7 8 9 0",
+                  "! @ # $ % ^ & * ( )",
+                  "` \" \' : ; ! ? {bksp}",
+                  "{shift} .com .in .net . {space} ,",
+                ],
+              }}
+              display={{
+                "{bksp}": "⌫",
+                "{lock}": "⇧",
+                "{shift}": layoutName == "shift" ? "ABC" : "?123",
+                "{space}": " "
+              }}
+            />
+          </div>
+        )}
     </motion.div>
   )
 }

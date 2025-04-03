@@ -67,6 +67,9 @@ function Countdown() {
             {count}
           </motion.span>
         )}
+        <span className="count-text">
+          Choose a pose now, stay still after 1...
+        </span>
     </div>
   );
 }

@@ -46,28 +46,28 @@ export default function DataProvider({ children }: { children: React.ReactNode }
 
     const plans = useMemo(() => [
         {
-          strips: 2,
-          title: 'Duo Delight',
-          price: 500,
-          popular: false
+            strips: 2,
+            title: 'Duo Delight',
+            price: 500,
+            popular: false
         },
         {
-          strips: 4,
-          title: 'Fantastic Four',
-          price: 900,
-          popular: true
+            strips: 4,
+            title: 'Fantastic Four',
+            price: 900,
+            popular: true
         },
         {
-          strips: 6,
-          title: 'Super Six',
-          price: 1200,
-          popular: false
+            strips: 6,
+            title: 'Super Six',
+            price: 1300,
+            popular: false
         },
-      ], [])
-  
-      return (
-          <DataContext.Provider value={{ options, setOptions, plans, mode, setMode, images, setImages }}>
-              {children}
-          </DataContext.Provider>
-      )
+    ], [])
+
+    return (
+        <DataContext.Provider value={{ options, setOptions, plans, mode, setMode, images, setImages }}>
+            {children}
+        </DataContext.Provider>
+    )
 }

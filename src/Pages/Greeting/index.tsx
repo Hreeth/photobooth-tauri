@@ -45,10 +45,9 @@ export default function Greeting() {
       } catch (err) {
         console.error("Error during the printing:", err)
       } finally {
-        let resetInterval = setTimeout(() => {
+        timers.push(setTimeout(() => {
           reset(setOptions, setImages, navigate)
-          clearTimeout(resetInterval)
-        }, 40000)
+        }, 2000))
       }
     }
 
@@ -84,7 +83,7 @@ export default function Greeting() {
       timers.forEach(clearTimeout)
     }
 
-  }, [setOptions, navigate, options])
+  }, [])
 
   return (
     <motion.div

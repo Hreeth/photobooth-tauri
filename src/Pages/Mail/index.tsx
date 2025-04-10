@@ -31,14 +31,16 @@ export default function Mail() {
 
   async function handleEmail() {
     navigate("/greeting")
-
-    invoke<string>("store_email", {
-      documentPath: documentPath,
-      userEmail: email,
-      photoPaths: images
-    })
-    .then(async () => await invoke("send_email", { documentPath: documentPath }))
-    .catch((err) => console.error("Error storing / sending email:", err))
+    
+    try {
+      await invoke<string>("store_email", {
+        documentPath: documentPath,
+        userEmail: email,
+        photoPaths: images
+      })
+    } catch (err) {
+      console.error("Error storing email:", err)
+    }
   }
 
   const validate = (): boolean => {

@@ -5,16 +5,29 @@ use image::{imageops::FilterType::Lanczos3, GenericImage, GenericImageView, Rgba
 use imageproc::drawing::draw_text_mut;
 use reqwest::Client;
 use serde_json::{json, to_string_pretty, Value};
-use std::{error::Error, fs::{self, read, remove_file, File, OpenOptions}, io::{Read, Write}, path::PathBuf};
+use std::{error::Error, fs::{self, read, remove_file, File, OpenOptions}, io::{Read, Write}, path::PathBuf, sync::atomic::{AtomicBool, Ordering}};
+use once_cell::sync::Lazy;
+
+static IS_SENDING: Lazy<AtomicBool> = Lazy::new(|| AtomicBool::new(false));
 
 #[tauri::command]
-pub fn store_email(document_path: &str, user_email: String, photo_paths: Vec<String>) -> Result<String, String> {
-    let json_path: PathBuf = PathBuf::from(document_path).join("emails.json");
+pub fn store_email(document_path: String, user_email: String, photo_paths: Vec<String>) -> Result<String, String> {
+    tauri::async_runtime::spawn(async move {
+        if let Err(e) = store_email_req(document_path, user_email, photo_paths) {
+            eprintln!("Failed to store emails: {}", e);
+        }
+    });
+
+    Ok("Email stores successfully".to_string())
+}
+
+fn store_email_req(document_path: String, user_email: String, photo_paths: Vec<String>) -> Result<(), String> {
+    let json_path: PathBuf = PathBuf::from(document_path.clone()).join("emails.json");
 
     let new_photo_paths = format_files((document_path).to_string(), user_email.clone(), photo_paths);
     if let Err(e) = new_photo_paths {
         return Err(format!("Failed to process new paths: {}", e))
-    }
+    } 
 
     let mut emails: Vec<Value> = if json_path.exists() {
         let mut file = File::open(&json_path).map_err(|e| format!("Failed to open file: {}", e))?;
@@ -45,21 +58,26 @@ pub fn store_email(document_path: &str, user_email: String, photo_paths: Vec<Str
 
     file.write_all(to_string_pretty(&emails).unwrap().as_bytes()).map_err(|e| format!("Failed to write to file: {}", e))?;
 
-    Ok("Email stores successfully".to_string())
+    Ok(())
 }
 
-#[tauri::command(async)]
-pub async fn send_email(document_path: String) ->  Result<String, String> {
-    let document_path_clone = document_path.clone();
-    
-    let res = tokio::task::spawn_blocking(move || {
-        let rt = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
-        rt.block_on(send_email_req(document_path_clone))
-    })
-    .await
-    .unwrap_or_else(|e| Err(format!("Task execution failed: {}", e)))?;
+#[tauri::command]
+pub fn send_email(document_path: String) ->  Result<String, String> {
+    if IS_SENDING.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst).is_err() {
+        return Err("Email sending already in progress.".to_string());
+    }
 
-    Ok(res)
+    tauri::async_runtime::spawn(async move {
+        let res = send_email_req(document_path).await;
+
+        IS_SENDING.store(false, Ordering::SeqCst);
+
+        if let Err(e) = res {
+            eprintln!("Failed to send emails: {}", e);
+        }
+    });
+
+    Ok("Started sending emails".into())
 }
 
 async fn send_email_req(document_path: String) -> Result<String, String> {

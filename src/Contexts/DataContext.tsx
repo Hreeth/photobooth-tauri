@@ -48,19 +48,19 @@ export default function DataProvider({ children }: { children: React.ReactNode }
         {
             strips: 2,
             title: 'Duo Delight',
-            price: 500,
+            price: 399,
             popular: false
         },
         {
             strips: 4,
             title: 'Fantastic Four',
-            price: 900,
+            price: 799,
             popular: true
         },
         {
             strips: 6,
             title: 'Super Six',
-            price: 1300,
+            price: 1199,
             popular: false
         },
     ], [])

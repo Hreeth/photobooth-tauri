@@ -25,6 +25,12 @@
   --accent-2: #9BA1A6;
 }
 
+html, body {
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
   display: flex;

@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Photobooth",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "identifier": "com.tauri.photobooth",
   "build": {
     "frontendDist": "../dist",
@@ -46,7 +46,8 @@
     ],
     "resources": [
       "fonts",
-      ".env"
+      ".env",
+      "assets"
     ]
   }
 }

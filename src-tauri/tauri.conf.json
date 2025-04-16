@@ -5,7 +5,7 @@
   "identifier": "com.tauri.photobooth",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:5174",
+    "devUrl": "http://localhost:5173",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "tsc -b && vite build"
   },
@@ -19,7 +19,8 @@
         "width": 1000,
         "height": 600,
         "decorations": false,
-        "zoomHotkeysEnabled": false
+        "zoomHotkeysEnabled": false,
+        "devtools": true
       }
     ],
     

@@ -1,6 +1,7 @@
-use std::{fs, process::Command};
+use std::{fs, path::PathBuf, process::Command};
 
 use image::{GenericImage, GenericImageView, Rgba, RgbaImage};
+use tauri::{AppHandle, Manager};
 
 #[tauri::command(async)]
 pub async fn capture(output_path: &str) -> Result<String, String> {
@@ -198,7 +199,13 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
 // }
 
 #[tauri::command(async)]
-pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, copies: usize) -> Result<(), String> {
+pub async fn print(
+    app: AppHandle,
+    images: Vec<String>,
+    output_path: &str,
+    color_mode: &str,
+    copies: usize
+) -> Result<(), String> {
     let dpi = 300.0f32;
 
     let strip_width = (4f32 * dpi).round() as u32;
@@ -277,11 +284,13 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
         }
     }
 
-    let br_img = match image::open(if color_mode == "B&W" {
-        "../assets/br_bw.png"
+    let br_img_path = if color_mode == "B&W" {
+        get_asset_path(&app, "br_bw.png")?
     } else {
-        "../assets/br_color.png"
-    }) {
+        get_asset_path(&app, "br_color.png")?
+    };
+
+    let br_img = match image::open(&br_img_path) {
         Ok(img) => img,
         Err(e) => {
             eprintln!("Failed to open branding logo: {}", e);
@@ -359,4 +368,13 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
     }
 
     Ok(())
+}
+
+fn get_asset_path(app_handle: &AppHandle, filename: &str) -> Result<PathBuf, String> {
+    let resource_path = app_handle.path().resolve(format!("assets/{}", filename), tauri::path::BaseDirectory::Resource);
+    if let Err(e) = resource_path {
+        return Err("Failed to find resource".to_string())
+    }
+
+    Ok(resource_path.unwrap())
 }

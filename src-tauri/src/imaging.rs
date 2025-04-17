@@ -278,14 +278,14 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
     }
 
     let br_img = match image::open(if color_mode == "B&W" {
-        "assets/br_bw.png"
+        "../assets/br_bw.png"
     } else {
-        "assets/br_color.png"
+        "../assets/br_color.png"
     }) {
         Ok(img) => img,
         Err(e) => {
-            eprintln!("Failed to open bottom-right logo: {}", e);
-            return Err(format!("Failed to open bottom-right logo: {}", e));
+            eprintln!("Failed to open branding logo: {}", e);
+            return Err(format!("Failed to open branding logo: {}", e));
         }
     };
 
@@ -300,12 +300,12 @@ pub async fn print(images: Vec<String>, output_path: &str, color_mode: &str, cop
     let second_x = border_px + cell_width + center_gap;
 
     if let Err(e) = canvas.copy_from(&resized_br, first_x, first_y) {
-        eprintln!("Failed to copy bottom-right logo (left): {}", e);
+        eprintln!("Failed to copy branding logo (left): {}", e);
         return Err(e.to_string());
     }
 
     if let Err(e) = canvas.copy_from(&resized_br, second_x, first_y) {
-        eprintln!("Failed to copy bottom-right logo (right): {}", e);
+        eprintln!("Failed to copy branding logo (right): {}", e);
         return Err(e.to_string());
     }
 

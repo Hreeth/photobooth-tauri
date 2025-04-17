@@ -19,8 +19,6 @@ pub fn run() {
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();
 
-      window.open_devtools();
-
       thread::spawn(move || {
           thread::sleep(Duration::from_millis(8000));
           let _ = window.set_fullscreen(true);

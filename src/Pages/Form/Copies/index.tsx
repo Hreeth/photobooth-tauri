@@ -26,7 +26,7 @@ export default function Copies() {
           <div className="plans-container">
             {plans.map(plan => <CopiesSelectable data={plan} selected={options.copies == plan.strips} />)}
             {/* <div className="digital-container" data-selected={options.digital}> */}
-            {/* <div className="digital-container" data-selected={options.digital} onClick={() => setOptions(prev => ({ ...prev, digital: !prev.digital }))}>
+            <div className="digital-container" data-selected={options.digital} onClick={() => setOptions(prev => ({ ...prev, digital: !prev.digital }))}>
               <div className="digital-grp-2">
                 <div className="digital-title">Digital Copy</div>
                 <div className="digital-label">Add-On</div>
@@ -35,7 +35,7 @@ export default function Copies() {
                 <div className="digital-price">₹99</div>
                 <div className="add-btn">{options.digital ? "Added" : "Add"}</div>
               </div>
-            </div> */}
+            </div>
           </div>
         </div>
         <Footer

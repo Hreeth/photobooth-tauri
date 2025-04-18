@@ -108,14 +108,6 @@ export default function Greeting() {
             autoplay
           />}
         </div>
-        <DotLottieReact
-          className='greeting-arrow'
-          src='/downArrow.lottie'
-          loop
-          autoplay
-          width={1000}
-          height={1000}
-        />
       </div>
     </motion.div>
   )

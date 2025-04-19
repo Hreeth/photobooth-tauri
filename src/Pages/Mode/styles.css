@@ -34,3 +34,54 @@
     align-items: center;
     gap: 2rem;
 }
+
+#mode .digital-container {
+    width: 30%;
+    background: var(--bg-clr-2);
+    border: 2px solid var(--border-clr);
+    border-radius: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+#mode .digital-container .digital-grp-1,
+#mode .digital-container .digital-grp-2 {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+}
+
+#mode .digital-container .digital-title {
+    font-weight: 700;
+    font-size: 2.5vmin;
+    color: var(--accent-1);
+    padding-left: 1rem;
+}
+#mode .digital-container .digital-label {
+    padding: .3rem .8rem;
+    font-size: 1.5vmin;
+    background-color: #FFD5851A;
+    border-radius: 50px;
+    color: var(--accent-1);
+}
+#mode .digital-container .digital-price {
+    font-weight: 900;
+    font-size: 5vmin;
+    line-height: 1;
+}
+#mode .digital-container .add-btn {
+    padding: .5rem 2rem;
+    border-radius: 50px;
+    border: none;
+    font-size: 2.5vmin;
+    color: #000;
+    background-color: var(--txt-clr);
+    font-weight: 500;
+    transition: background-color 300ms ease;
+}
+#mode .digital-container[data-selected="true"] .add-btn {
+    background-color: var(--accent-1);
+    transition: background-color 300ms ease;
+}

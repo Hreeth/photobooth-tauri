@@ -14,7 +14,7 @@ export default function Mode() {
     ModeOptions.MANUAL,
     ModeOptions.AUTOMATIC,
   ]
-  const { mode } = useData()
+  const { mode, setDigitalEnabled, digitalEnabled } = useData()
   
   const navigate = useNavigate()
 
@@ -30,6 +30,14 @@ export default function Mode() {
           <h1 className="heading">Choose what you <div>like?</div></h1>
           <div className="selectables-container">
             {arr.map(item => <ModeSelectable data={item} selected={mode == item} />)}
+          </div>
+          <div className="digital-container" data-selected={digitalEnabled} onClick={() => setDigitalEnabled(prev => !prev)}>
+            <div className="digital-grp-2">
+              <div className="digital-title">Digital Downloads</div>
+            </div>
+            <div className="digital-grp-1">
+              <div className="add-btn">{digitalEnabled ? "Enabled" : "Disabled"}</div>
+            </div>
           </div>
         </div> 
     </motion.div>

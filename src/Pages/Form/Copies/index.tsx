@@ -10,7 +10,7 @@ import reset from '../../../Utils/reset'
 import './styles.css'
 
 export default function Copies() {
-  const { plans, options, setOptions, setImages } = useData()
+  const { plans, options, setOptions, setImages, digitalEnabled } = useData()
 
   const navigate = useNavigate()
 
@@ -25,8 +25,7 @@ export default function Copies() {
           <h1 className="heading">Pick your <div>Perfect</div> Strip Package!</h1>
           <div className="plans-container">
             {plans.map(plan => <CopiesSelectable data={plan} selected={options.copies == plan.strips} />)}
-            {/* <div className="digital-container" data-selected={options.digital}> */}
-            <div className="digital-container" data-selected={options.digital} onClick={() => setOptions(prev => ({ ...prev, digital: !prev.digital }))}>
+            {digitalEnabled && <div className="digital-container" data-selected={options.digital} onClick={() => setOptions(prev => ({ ...prev, digital: !prev.digital }))}>
               <div className="digital-grp-2">
                 <div className="digital-title">Digital Copy</div>
                 <div className="digital-label">Add-On</div>
@@ -35,7 +34,7 @@ export default function Copies() {
                 <div className="digital-price">₹99</div>
                 <div className="add-btn">{options.digital ? "Added" : "Add"}</div>
               </div>
-            </div>
+            </div>}
           </div>
         </div>
         <Footer

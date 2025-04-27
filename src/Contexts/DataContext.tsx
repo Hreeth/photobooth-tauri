@@ -45,7 +45,7 @@ export default function DataProvider({ children }: { children: React.ReactNode }
     const [options, setOptions] = useState<Options>({ copies: null, digital: false, print: null })
     const [mode, setMode] = useState<Mode>(Mode.AUTOMATIC)
     const [images, setImages] = useState<Array<string>>([]);
-    const [digitalEnabled, setDigitalEnabled] = useState<boolean>(true)
+    const [digitalEnabled, setDigitalEnabled] = useState<boolean>(false)
 
     const plans = useMemo(() => [
         {

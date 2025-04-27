@@ -97,7 +97,7 @@ export default function Greeting() {
           {greetings[Math.floor(Math.random() * greetings.length)]}
         </div>
         <div className="greeting-subtitle">
-          Collect your prints here
+          Collect your prints outside
         </div>
         <div className="greeting-progress">
           {progressText}

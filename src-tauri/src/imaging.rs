@@ -1,6 +1,9 @@
 use std::{fs, path::PathBuf, process::Command};
 
+use ab_glyph::{FontArc, PxScale};
+use chrono::Local;
 use image::{GenericImage, GenericImageView, Rgba, RgbaImage};
+use imageproc::drawing::draw_text_mut;
 use tauri::{AppHandle, Manager};
 
 #[tauri::command(async)]
@@ -14,6 +17,10 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
         .arg("continuous")
         .arg("--autofocus-range")
         .arg("normal")
+        .arg("--brightness")
+        .arg("0.3")
+        .arg("--contrast")
+        .arg("1.5")
         .arg("--denoise")
         .arg("cdn_off")
         .arg("--ev")
@@ -57,7 +64,7 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
 
 #[tauri::command(async)]
 pub async fn print(
-    app: AppHandle,
+    _app: AppHandle,
     images: Vec<String>,
     output_path: &str,
     color_mode: &str,
@@ -141,39 +148,53 @@ pub async fn print(
         }
     }
 
-    let br_img_path = if color_mode == "B&W" {
-        get_asset_path(&app, "br_bw.png")?
+    let date_text = Local::now().format("%d.%m.%Y").to_string();
+    let font_data = include_bytes!("../fonts/Spacetype - Garet Book.otf");
+    let font = FontArc::try_from_slice(font_data as &[u8])
+        .expect("Failed to load font");
+
+    let scale = PxScale {
+        x: 70.0,
+        y: 70.0
+    };
+
+    let text_color = if color_mode == "B&W" {
+        Rgba([255, 255, 255, 255])
     } else {
-        get_asset_path(&app, "br_color.png")?
+        Rgba([0, 0, 0, 255])
     };
 
-    let br_img = match image::open(&br_img_path) {
-        Ok(img) => img,
-        Err(e) => {
-            eprintln!("Failed to open branding logo: {}", e);
-            return Err(format!("Failed to open branding logo: {}", e));
-        }
-    };
+    let padding_x = border_px + 280;
+    let padding_y = border_px + 80;
 
-    let resized_br = br_img.resize(
-        (br_img.dimensions().0 / br_img.dimensions().1) * (branding_height / 2) as u32,
-        branding_height / 2 as u32,
-        image::imageops::FilterType::Lanczos3,
+    draw_text_mut(
+        &mut canvas,
+        text_color,
+        padding_x.try_into().unwrap(),
+        ((strip_height - padding_y)).try_into().unwrap(),
+        scale,
+        &font,
+        &date_text
+    );
+    draw_text_mut(
+        &mut canvas,
+        text_color,
+        padding_x.try_into().unwrap(),
+        ((strip_height - padding_y)).try_into().unwrap(),
+        scale,
+        &font,
+        &date_text
     );
 
-    let first_y = 10 + strip_height - branding_height;
-    let first_x = border_px;
-    let second_x = border_px + cell_width + center_gap;
-
-    if let Err(e) = canvas.copy_from(&resized_br, first_x, first_y) {
-        eprintln!("Failed to copy branding logo (left): {}", e);
-        return Err(e.to_string());
-    }
-
-    if let Err(e) = canvas.copy_from(&resized_br, second_x, first_y) {
-        eprintln!("Failed to copy branding logo (right): {}", e);
-        return Err(e.to_string());
-    }
+    draw_text_mut(
+        &mut canvas,
+        text_color,
+        (padding_x + cell_width + center_gap).try_into().unwrap(),
+        ((strip_height - padding_y)).try_into().unwrap(),
+        scale,
+        &font,
+        &date_text
+    );
 
     if let Err(e) = canvas.save(output_path) {
         eprintln!("Failed to save image: {}", e);
@@ -227,10 +248,10 @@ pub async fn print(
     Ok(())
 }
 
-fn get_asset_path(app_handle: &AppHandle, filename: &str) -> Result<PathBuf, String> {
+fn _get_asset_path(app_handle: &AppHandle, filename: &str) -> Result<PathBuf, String> {
     let resource_path = app_handle.path().resolve(format!("assets/{}", filename), tauri::path::BaseDirectory::Resource);
     if let Err(e) = resource_path {
-        return Err("Failed to find resource".to_string())
+        return Err(format!("Failed to find resource: {}", e))
     }
 
     Ok(resource_path.unwrap())

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
 import { pictureDir } from "@tauri-apps/api/path";
 
-import { useData } from "../../Contexts/DataContext";
+import { Print, useData } from "../../Contexts/DataContext";
 
 import './styles.css'
 import { path } from "@tauri-apps/api";
@@ -21,7 +21,10 @@ function Countdown() {
         const pictures = await pictureDir();
         try {
           let img_path = await path.join(pictures, `photo-${photoIndex}.jpg`)
-          let img = await invoke<string>("capture", { outputPath: img_path });
+          let img = await invoke<string>("capture", {
+            outputPath: img_path,
+            colorMode: options.print == Print.COLOR ? "COLOR" : "B&W"
+          });
           setImages(prev => [...prev, img]);
         } catch (err) {
           console.error("Failed to capture image:", err);

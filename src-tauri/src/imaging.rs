@@ -7,20 +7,22 @@ use imageproc::drawing::draw_text_mut;
 use tauri::{AppHandle, Manager};
 
 #[tauri::command(async)]
-pub async fn capture(output_path: &str) -> Result<String, String> {
-    let result = Command::new("libcamera-still")
-        .arg("--saturation")
-        .arg("1.5")
+pub async fn capture(
+    output_path: &str,
+    color_mode: &str
+) -> Result<String, String> {
+    let mut cmd_base = Command::new("libcamera-still");
+    let cmd = cmd_base
         .arg("-t")
         .arg("3000")
+        .arg("--brightness")
+        .arg("0.2")
+        .arg("--contrast")
+        .arg("1.25")
         .arg("--autofocus-mode")
         .arg("continuous")
         .arg("--autofocus-range")
         .arg("normal")
-        .arg("--brightness")
-        .arg("0.3")
-        .arg("--contrast")
-        .arg("1.5")
         .arg("--denoise")
         .arg("cdn_off")
         .arg("--ev")
@@ -30,8 +32,15 @@ pub async fn capture(output_path: &str) -> Result<String, String> {
         .arg("-p")
         .arg("-10,-10,1920,1080")
         .arg("-o")
-        .arg(output_path)
-        .output();
+        .arg(output_path);
+
+    if color_mode != "B&W" {
+        cmd
+            .arg("--awbgains")
+            .arg("1.8,3.2");
+    }
+        
+    let result = cmd.output();
 
     match result {
         Ok(output) => {
@@ -149,7 +158,7 @@ pub async fn print(
     }
 
     let date_text = Local::now().format("%d.%m.%Y").to_string();
-    let font_data = include_bytes!("../fonts/Spacetype - Garet Book.otf");
+    let font_data = include_bytes!("../fonts/JMH Typewriter.ttf");
     let font = FontArc::try_from_slice(font_data as &[u8])
         .expect("Failed to load font");
 
@@ -164,7 +173,7 @@ pub async fn print(
         Rgba([0, 0, 0, 255])
     };
 
-    let padding_x = border_px + 280;
+    let padding_x = border_px + 155;
     let padding_y = border_px + 80;
 
     draw_text_mut(

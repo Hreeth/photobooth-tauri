@@ -33,17 +33,17 @@ pub async fn capture(
     if color_mode != "B&W" {
         cmd
             .arg("--brightness")
-            .arg("0.2")
+            .arg("0.4")
             .arg("--contrast")
-            .arg("1.25")
+            .arg("1.75")
             .arg("--awbgains")
             .arg("1.8,3.2");
     } else {
         cmd
             .arg("--brightness")
-            .arg("0.4")
+            .arg("0.2")
             .arg("--contrast")
-            .arg("1.75");
+            .arg("1.25");
     }
         
     let result = cmd.output();

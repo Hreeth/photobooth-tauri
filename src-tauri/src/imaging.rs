@@ -15,10 +15,6 @@ pub async fn capture(
     let cmd = cmd_base
         .arg("-t")
         .arg("3000")
-        .arg("--brightness")
-        .arg("0.2")
-        .arg("--contrast")
-        .arg("1.25")
         .arg("--autofocus-mode")
         .arg("continuous")
         .arg("--autofocus-range")
@@ -33,11 +29,21 @@ pub async fn capture(
         .arg("-10,-10,1920,1080")
         .arg("-o")
         .arg(output_path);
-
+    
     if color_mode != "B&W" {
         cmd
+            .arg("--brightness")
+            .arg("0.2")
+            .arg("--contrast")
+            .arg("1.25")
             .arg("--awbgains")
             .arg("1.8,3.2");
+    } else {
+        cmd
+            .arg("--brightness")
+            .arg("0.4")
+            .arg("--contrast")
+            .arg("1.75");
     }
         
     let result = cmd.output();

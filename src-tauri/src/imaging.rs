@@ -34,12 +34,6 @@ pub async fn capture(
         cmd
             .arg("--awbgains")
             .arg("1.8,3.2");
-    } else {
-        cmd
-            .arg("--brightness")
-            .arg("0.2")
-            .arg("--contrast")
-            .arg("1.25");
     }
         
     let result = cmd.output();

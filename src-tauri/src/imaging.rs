@@ -32,10 +32,6 @@ pub async fn capture(
     
     if color_mode != "B&W" {
         cmd
-            .arg("--brightness")
-            .arg("0.24")
-            .arg("--contrast")
-            .arg("1.35")
             .arg("--awbgains")
             .arg("1.8,3.2");
     } else {

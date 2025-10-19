@@ -1,8 +1,9 @@
-import React, { Suspense } from 'react'
+import React, { Suspense, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
-import DataProvider from './Contexts/DataContext'
+import DataProvider, { useData } from './Contexts/DataContext'
+import reset from './Utils/reset'
 
 const Home = React.lazy(() => import('./Pages/Home'))
 const Mail = React.lazy(() => import('./Pages/Mail'))
@@ -21,6 +22,8 @@ export default function AnimatedRoutes() {
         <Suspense fallback={<div>Loading...</div>}>
             <AnimatePresence>
                 <DataProvider>
+                    <RedirectAfterTimeout />
+                    
                     <Routes location={location} key={location.pathname}>
                         <Route path='/' element={<Home />} />
                         <Route path='/mail' element={<Mail />} />
@@ -36,4 +39,24 @@ export default function AnimatedRoutes() {
             </AnimatePresence>
         </Suspense>
     )
+}
+
+function RedirectAfterTimeout() {
+    const navigate = useNavigate()
+    const location = useLocation()
+
+    const { setOptions, setImages } = useData()
+
+    useEffect(() => {
+        if (location.pathname == "/") return;
+
+        const timeout = setTimeout(() => {
+            navigate("/", { replace: true })
+            reset(setOptions, setImages, navigate)
+        }, 4 * 60 * 1000);
+
+        return () => clearTimeout(timeout)
+    }, [navigate])
+    
+    return null;
 }

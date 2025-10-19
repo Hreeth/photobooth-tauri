@@ -34,7 +34,7 @@ export default function Print() {
         <Footer
           backCallback={() => navigate(-1)}
           continueCallback={() => mode == Mode.AUTOMATIC ? navigate('/payment') : navigate('/countdown')}
-          continueText="Start Countdown"
+          continueText={mode == Mode.AUTOMATIC ? "Continue to Payment" : "Start Countdown"}
           disabled={options.print == null}
         />
     </motion.div>

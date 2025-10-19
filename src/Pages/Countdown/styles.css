@@ -14,6 +14,10 @@
     font-family: IntegralCF;
     color: var(--txt-clr);
 }
+#countdown .count-starting {
+    font-size: 6vmin;
+    color: var(--txt-clr);
+}
 
 #countdown .count-text {
     position: absolute;

@@ -51,7 +51,6 @@ function RedirectAfterTimeout() {
         if (location.pathname == "/") return;
 
         const timeout = setTimeout(() => {
-            navigate("/", { replace: true })
             reset(setOptions, setImages, navigate)
         }, 4 * 60 * 1000);
 

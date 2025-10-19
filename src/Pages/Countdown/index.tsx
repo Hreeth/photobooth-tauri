@@ -13,9 +13,20 @@ function Countdown() {
   const navigate = useNavigate();
   const [count, setCount] = useState(3);
   const [photoIndex, setPhotoIndex] = useState(1)
+  const [isStarting, setIsStarting] = useState(true)
   const { options, setImages } = useData();
 
+  // useEffect(() => {
+  //   const startDelay = setTimeout(() => {
+  //     setIsStarting(false)
+  //   }, 3000);
+
+  //   return () => clearTimeout(startDelay)
+  // }, [])
+
   useEffect(() => {
+    if (isStarting) return
+
     if (count === 0 && photoIndex <= 4) {
       async function capturePhoto() {
         const pictures = await pictureDir();
@@ -44,9 +55,11 @@ function Countdown() {
         }
       });
     }
-  }, [count, photoIndex, navigate, options.digital, setImages]);
+  }, [count, photoIndex, navigate, options.digital, setImages, isStarting]);
 
   useEffect(() => {
+    if (isStarting || count <= 0) return
+
     if (count > 0) {
       const timer = setTimeout(() => {
         setCount(prev => prev - 1);
@@ -54,11 +67,23 @@ function Countdown() {
 
       return () => clearTimeout(timer);
     }
-  }, [count]);
+  }, [count, isStarting]);
 
   return (
     <div id="countdown">
-        {count > 0 && (
+      {isStarting ? (
+        <motion.span
+          key="starting"
+          className="count-starting"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          Starting countdown...
+        </motion.span>
+      ) : (
+        count > 0 && (
           <motion.span
             key={count}
             className="count"
@@ -69,10 +94,11 @@ function Countdown() {
           >
             {count}
           </motion.span>
-        )}
-        <span className="count-text">
-          Choose a pose now, stay still after 1...
-        </span>
+        )
+      )}
+      {!isStarting && <span className="count-text">
+        Choose a pose now, stay still after 1...
+      </span>}
     </div>
   );
 }

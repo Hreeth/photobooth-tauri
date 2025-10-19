@@ -16,13 +16,13 @@ function Countdown() {
   const [isStarting, setIsStarting] = useState(true)
   const { options, setImages } = useData();
 
-  // useEffect(() => {
-  //   const startDelay = setTimeout(() => {
-  //     setIsStarting(false)
-  //   }, 3000);
+  useEffect(() => {
+    const startDelay = setTimeout(() => {
+      setIsStarting(false)
+    }, 3000);
 
-  //   return () => clearTimeout(startDelay)
-  // }, [])
+    return () => clearTimeout(startDelay)
+  }, [])
 
   useEffect(() => {
     if (isStarting) return

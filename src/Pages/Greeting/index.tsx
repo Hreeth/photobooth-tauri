@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { invoke } from '@tauri-apps/api/core'
 import { pictureDir } from '@tauri-apps/api/path'
@@ -15,21 +15,26 @@ export default function Greeting() {
   const { setOptions, options, images, setImages } = useData()
   const navigate = useNavigate()
 
-  const greetings = [
+  const greetings = useMemo(() => [
     "Photos so good, they might break the internet!",
     "Your photos are hotter than the flash we just used!",
     "Warning: These pictures may cause excessive smiling!",
     "We hope you love these pics as much as the camera loved you!",
     "Caution: These photos may cause extreme nostalgia in the future.",
     "Looking this good should be illegal!"
-  ]
+  ], [])
 
+  const [greetingText, _] = useState(
+    greetings[Math.floor(Math.random() * greetings.length)]
+  )
   const [progressText, setProgressText] = useState("0 of 0")
   const [showLoader, setShowLoader] = useState(true)
 
   const stripCount = options.copies || 2
 
   useEffect(() => {
+    const timers: NodeJS.Timeout[] = []
+
     const printPhotos = async () => {
       try {
         let pictures = await pictureDir()
@@ -44,10 +49,6 @@ export default function Greeting() {
         console.log("Print successful")
       } catch (err) {
         console.error("Error during the printing:", err)
-      } finally {
-        timers.push(setTimeout(() => {
-          reset(setOptions, setImages, navigate)
-        }, 2000))
       }
     }
 
@@ -56,33 +57,36 @@ export default function Greeting() {
     setProgressText(`0 of ${stripCount}`)
     setShowLoader(true)
 
-    const timers: NodeJS.Timeout[] = []
+    const progressSteps: Record<number, { time: number, text: string }[]> = {
+      2: [{ time: 16000, text: "2 of 2" }],
+      4: [
+        { time: 16000, text: "2 of 4" },
+        { time: 30000, text: "4 of 4" },
+      ],
+      6: [
+        { time: 16000, text: "2 of 6" },
+        { time: 30000, text: "4 of 6" },
+        { time: 40000, text: "6 of 6" },
+      ],
+    }
 
-    if (stripCount >= 2) {
+    const steps = progressSteps[stripCount] || []
+
+    steps.forEach((step, idx) => {
+      const last = idx == steps.length - 1;
       timers.push(setTimeout(() => {
-        setProgressText(`2 of ${stripCount}`)
-        setShowLoader(stripCount > 2)
-      }, 16000))
-    }
+        setProgressText(step.text)
+        setShowLoader(!last)
 
-    if (stripCount >= 4) {
-      timers.push(setTimeout(() => {
-        setProgressText(`4 of ${stripCount}`)
-        setShowLoader(stripCount > 4)
-      }, 30000))
-    }
+        if (last) {
+          setTimeout(() => {
+            reset(setOptions, setImages, navigate)
+          }, 2000);
+        }
+      }, step.time))
+    })
 
-    if (stripCount === 6) {
-      timers.push(setTimeout(() => {
-        setProgressText(`6 of 6`)
-        setShowLoader(false)
-      }, 40000))
-    }
-
-    return () => {
-      timers.forEach(clearTimeout)
-    }
-
+    return () => timers.forEach(clearTimeout)
   }, [])
 
   return (
@@ -94,7 +98,7 @@ export default function Greeting() {
     >
       <div className='greeting-container'>
         <div className="greeting-title">
-          {greetings[Math.floor(Math.random() * greetings.length)]}
+          {greetingText}
         </div>
         <div className="greeting-subtitle">
           Collect your prints outside

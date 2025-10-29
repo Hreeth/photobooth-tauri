@@ -28,7 +28,7 @@ export default function Print() {
         <div className='print-container'>
           <h1 className="heading">Choose what you <div>like?</div></h1>
           <div className="selectables-container">
-            {arr.map(item => <PrintSelectable data={item} selected={options.print == item} />)}
+            {arr.map((item, idx) => <PrintSelectable key={idx} data={item} selected={options.print == item} />)}
           </div>
         </div>
         <Footer

@@ -24,7 +24,7 @@ export default function Copies() {
         <div className='copies-container'>
           <h1 className="heading">Pick your <div>Perfect</div> Strip Package!</h1>
           <div className="plans-container">
-            {plans.map(plan => <CopiesSelectable data={plan} selected={options.copies == plan.strips} />)}
+            {plans.map((plan, idx) => <CopiesSelectable key={idx} data={plan} selected={options.copies == plan.strips} />)}
             {digitalEnabled && <div className="digital-container" data-selected={options.digital} onClick={() => setOptions(prev => ({ ...prev, digital: !prev.digital }))}>
               <div className="digital-grp-2">
                 <div className="digital-title">Digital Copy</div>

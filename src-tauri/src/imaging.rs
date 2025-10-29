@@ -30,11 +30,11 @@ pub async fn capture(
         .arg("-o")
         .arg(output_path);
     
-    if color_mode != "B&W" {
-        cmd
-            .arg("--awbgains")
-            .arg("1.8,3.2");
-    }
+    // if color_mode != "B&W" {
+    //     cmd
+    //         .arg("--awbgains")
+    //         .arg("1.8,3.2");
+    // }
         
     let result = cmd.output();
 

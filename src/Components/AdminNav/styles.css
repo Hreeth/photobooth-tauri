@@ -1,0 +1,31 @@
+#admin-nav {
+    display: flex;
+    padding: 4vmax 8vmax 0 8vmax;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 2rem;
+    top: 0;
+    position: fixed;
+}
+
+#admin-nav .admin-nav-link {
+    font-size: 2.5vmin;
+    padding: .5rem 1.5rem;
+    border-radius: 50px;
+    font-family: Satoshi;
+    background: #fff;
+    color: #000;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer !important;
+}
+#admin-nav .admin-nav-link.active {
+    font-size: 2.5vmin;
+    padding: .5rem 1.5rem;
+    border-radius: 50px;
+    font-family: Satoshi;
+    background: var(--accent-1);
+    color: #000;
+    font-weight: 500;
+    text-decoration: none;
+}

@@ -38,7 +38,7 @@ body {
   width: 100%;
   min-height: 100vh;
   background-color: var(--bg-clr-1);
-  cursor: none !important;
+  /* cursor: none !important; */
 }
 
 *, *::before, *::after {

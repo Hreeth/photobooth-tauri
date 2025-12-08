@@ -30,7 +30,7 @@ export default function Numpad({
         if (nextIndex === 3 && updatedCode.join("") === correct) {
             setStatus(1)
 			setTimeout(() => {
-				navigate("/mode")
+				navigate("/admin/mode")
 			}, 1000);
         }
 

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useMemo, useState } from "react"
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react"
+import { getOrInitPricing } from "../Services/pricing"
 
 export interface Options {
     copies: number | null,
@@ -15,15 +16,18 @@ export enum Print {
     COLOR
 }
 
+export interface Plan {
+  title: string
+  price: number
+  strips: 2 | 4 | 6
+  popular: boolean
+}
+
 interface DataContextProps {
     options: Options,
     setOptions: React.Dispatch<React.SetStateAction<Options>>,
-    plans: Array<{
-        strips: number,
-        title: string,
-        price: number,
-        popular: boolean
-    }>,
+    setPlans: React.Dispatch<React.SetStateAction<Plan[]>>
+    plans: Array<Plan>,
     digitalEnabled: boolean,
     setDigitalEnabled: React.Dispatch<React.SetStateAction<boolean>>,
     mode: Mode,
@@ -46,18 +50,19 @@ export default function DataProvider({ children }: { children: React.ReactNode }
     const [mode, setMode] = useState<Mode>(Mode.AUTOMATIC)
     const [images, setImages] = useState<Array<string>>([]);
     const [digitalEnabled, setDigitalEnabled] = useState<boolean>(false)
+    const [plans, setPlans] = useState<Plan[]>([]);
 
-    const plans = useMemo(() => [
+    const defaults = useMemo<Plan[]>(() => [
         {
             strips: 2,
             title: 'Duo Delight',
-            price: 249,
+            price: 199,
             popular: false
         },
         {
             strips: 4,
             title: 'Fantastic Four',
-            price: 449,
+            price: 399,
             popular: true
         },
         {
@@ -68,8 +73,22 @@ export default function DataProvider({ children }: { children: React.ReactNode }
         },
     ], [])
 
+    useEffect(() => {
+        const fetch = async () => {
+            try {
+                let data = await getOrInitPricing(defaults)
+                setPlans(data)
+            } catch (e) {
+                console.error(e)
+                if (plans.length < 1) setPlans(defaults)
+            }
+        }
+
+        fetch()
+    }, [])
+
     return (
-        <DataContext.Provider value={{ options, setOptions, plans, mode, setMode, images, setImages, digitalEnabled, setDigitalEnabled }}>
+        <DataContext.Provider value={{ options, setOptions, plans, setPlans, mode, setMode, images, setImages, digitalEnabled, setDigitalEnabled }}>
             {children}
         </DataContext.Provider>
     )

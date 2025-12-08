@@ -1,7 +1,7 @@
 use std::{fs, path::PathBuf, process::Command};
 
 use ab_glyph::{FontArc, PxScale};
-use chrono::Local;
+// use chrono::Local;
 use image::{GenericImage, GenericImageView, Rgba, RgbaImage};
 use imageproc::drawing::draw_text_mut;
 use tauri::{AppHandle, Manager};
@@ -21,6 +21,10 @@ pub async fn capture(
         .arg("normal")
         .arg("--denoise")
         .arg("cdn_off")
+        .arg("--shutter")
+        .arg("18000")
+        .arg("--gain")
+        .arg("10")
         .arg("--ev")
         .arg("0")
         .arg("--roi")
@@ -153,14 +157,15 @@ pub async fn print(
         }
     }
 
-    let date_text = Local::now().format("%d.%m.%Y").to_string();
-    let font_data = include_bytes!("../fonts/JMH Typewriter.ttf");
+    // let date_text = Local::now().format("%d.%m.%Y").to_string();
+    let label = "MEMORABOOTH".to_string();
+    let font_data = include_bytes!("../fonts/Futura.ttf");
     let font = FontArc::try_from_slice(font_data as &[u8])
         .expect("Failed to load font");
 
     let scale = PxScale {
-        x: 70.0,
-        y: 70.0
+        x: 60.0,
+        y: 60.0
     };
 
     let text_color = if color_mode == "B&W" {
@@ -169,7 +174,7 @@ pub async fn print(
         Rgba([0, 0, 0, 255])
     };
 
-    let padding_x = border_px + 155;
+    let padding_x = border_px + 115;
     let padding_y = border_px + 80;
 
     draw_text_mut(
@@ -179,7 +184,7 @@ pub async fn print(
         ((strip_height - padding_y)).try_into().unwrap(),
         scale,
         &font,
-        &date_text
+        &label
     );
     draw_text_mut(
         &mut canvas,
@@ -188,7 +193,7 @@ pub async fn print(
         ((strip_height - padding_y)).try_into().unwrap(),
         scale,
         &font,
-        &date_text
+        &label
     );
 
     draw_text_mut(
@@ -198,7 +203,7 @@ pub async fn print(
         ((strip_height - padding_y)).try_into().unwrap(),
         scale,
         &font,
-        &date_text
+        &label
     );
 
     if let Err(e) = canvas.save(output_path) {

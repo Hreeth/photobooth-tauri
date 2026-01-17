@@ -11,7 +11,8 @@ export default function reset(
     setOptions({
         copies: null,
         digital: false,
-        print: null
+        print: null,
+        layout: null
     })
 
     setImages([])

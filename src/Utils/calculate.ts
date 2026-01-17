@@ -1,15 +1,10 @@
-import { Options } from "../Contexts/DataContext";
+import { Options, Plan } from "../Contexts/DataContext";
 
 export default function calculate(
     options: Options,
-    plans: Array<{
-        strips: number,
-        title: string,
-        price: number,
-        popular: boolean
-    }>
+    plans: Array<Plan>
 ): number {
-    let price = plans.find(_ => _.strips == options.copies)?.price
+    let price = plans.find(_ => _.copies == options.copies)?.price
     if (options.digital && price) price += 99
 
     return price ? price * 100 : 0

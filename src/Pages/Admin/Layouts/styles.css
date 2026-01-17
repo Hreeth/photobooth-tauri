@@ -1,0 +1,86 @@
+#admin-layouts {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    gap: 3rem;
+    padding: 4rem;
+}
+
+#admin-layouts .heading {
+    color: var(--txt-clr);
+    font-size: 10vmin;
+}
+
+#admin-layouts .heading div {
+    display: inline;
+    font-family: Seriguela;
+    color: var(--accent-1);
+}
+
+#admin-layouts .layouts-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+}
+
+.layout-option {
+    background: var(--bg-clr-2);
+    padding: 1rem;
+    border-radius: 4vmin;
+    border: 2px solid var(--border-clr);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 260px;
+    transition: all 300ms ease;
+}
+.layout-option .layout-details {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--accent-1);
+    font-weight: 700;
+    font-size: 2.5vmin;
+}
+.layout-option .layout-content {
+    aspect-ratio: 1;
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.8;
+    transition: all 300ms ease;
+}
+.layout-option .layout-content img {
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+.layout-option .layout-btn {
+    width: 100%;
+    border-radius: 3ex;
+    padding: .6rem;
+    color: #000;
+    font-size: 1.2rem;
+    font-weight: 600;
+    background: var(--accent-1);
+}
+
+.layout-option[data-disabled="true"] {
+    opacity: 0.8;
+    transition: all 300ms ease;
+}
+.layout-option[data-disabled="true"] .layout-btn {
+    background: #fff;
+    opacity: .6;
+    transition: all 300ms ease;
+}

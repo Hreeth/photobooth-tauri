@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
 import { pictureDir } from "@tauri-apps/api/path";
 
-import { Print, useData } from "../../Contexts/DataContext";
+import { Layout, Print, useData } from "../../Contexts/DataContext";
 
 import './styles.css'
 import { path } from "@tauri-apps/api";
@@ -27,7 +27,9 @@ function Countdown() {
   useEffect(() => {
     if (isStarting) return
 
-    if (count === 0 && photoIndex <= 4) {
+    let photo_num = options.layout == Layout.A ? 1 : 4;
+
+    if (count === 0 && photoIndex <= photo_num) {
       async function capturePhoto() {
         const pictures = await pictureDir();
         try {
@@ -43,7 +45,7 @@ function Countdown() {
       }
 
       capturePhoto().then(() => {
-        if (photoIndex < 4) {
+        if (photoIndex < photo_num) {
           setTimeout(() => {
             setPhotoIndex(prev => prev + 1);
             setCount(3);

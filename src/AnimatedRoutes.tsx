@@ -11,8 +11,10 @@ const Greeting = React.lazy(() => import('./Pages/Greeting'))
 const Admin = React.lazy(() => import('./Pages/Admin'))
 const AdminMode = React.lazy(() => import('./Pages/Admin/Mode'))
 const AdminPricing = React.lazy(() => import('./Pages/Admin/Pricing'))
+const AdminLayouts = React.lazy(() => import('./Pages/Admin/Layouts'))
 const Countdown = React.lazy(() => import('./Pages/Countdown'))
 const Passcode = React.lazy(() => import('./Pages/Passcode'))
+const Layout = React.lazy(() => import('./Pages/Form/Layout'))
 const Copies = React.lazy(() => import('./Pages/Form/Copies'))
 const Print = React.lazy(() => import('./Pages/Form/Print'))
 const Payment = React.lazy(() => import('./Pages/Form/Payment'))
@@ -34,8 +36,10 @@ export default function AnimatedRoutes() {
                         <Route path='/admin' element={<Admin />}>
                             <Route path='mode' element={<AdminMode />} />
                             <Route path='pricing' element={<AdminPricing />} />
+                            <Route path='layouts' element={<AdminLayouts />} />
                         </Route>
                         <Route path='/countdown' element={<Countdown />} />
+                        <Route path='/layout' element={<Layout />} />
                         <Route path='/copies' element={<Copies />} />
                         <Route path='/print' element={<Print />} />
                         <Route path='/payment' element={<Payment />} />

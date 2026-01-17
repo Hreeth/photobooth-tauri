@@ -5,12 +5,11 @@ import CopiesSelectable from '../../../Components/CopiesSelectable'
 import Footer from '../../../Components/Footer'
 
 import { useData } from '../../../Contexts/DataContext'
-import reset from '../../../Utils/reset'
 
 import './styles.css'
 
 export default function Copies() {
-  const { plans, options, setOptions, setImages, digitalEnabled } = useData()
+  const { plans, options, setOptions, digitalEnabled } = useData()
 
   const navigate = useNavigate()
 
@@ -24,7 +23,7 @@ export default function Copies() {
         <div className='copies-container'>
           <h1 className="heading">Pick your <div>Perfect</div> Strip Package!</h1>
           <div className="plans-container">
-            {plans.map((plan, idx) => <CopiesSelectable key={idx} data={plan} selected={options.copies == plan.strips} />)}
+            {plans.map((plan, idx) => <CopiesSelectable key={idx} data={plan} selected={options.copies == plan.copies} />)}
             {digitalEnabled && <div className="digital-container" data-selected={options.digital} onClick={() => setOptions(prev => ({ ...prev, digital: !prev.digital }))}>
               <div className="digital-grp-2">
                 <div className="digital-title">Digital Copy</div>
@@ -38,10 +37,20 @@ export default function Copies() {
           </div>
         </div>
         <Footer
-          backCallback={() => reset(setOptions, setImages, navigate)}
+          backCallback={() => navigate(-1)}
           continueCallback={() => navigate('/print')}
           disabled={!options.copies}
         />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '4.5rem',
+            opacity: 0.8,
+            fontSize: '1.2rem'
+          }}
+        >
+          NOTE: For Layout C, each copy includes 2 strips.
+        </div>
     </motion.div>
   )
 }

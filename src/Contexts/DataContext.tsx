@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react"
-import { getOrInitPricing } from "../Services/pricing"
+import { getOrInitLayouts, getOrInitPricing } from "../Services/commands"
 
 export interface Options {
+    layout: Layout | null,
     copies: number | null,
     digital: boolean,
     print: Print | null
@@ -15,12 +16,18 @@ export enum Print {
     "B&W",
     COLOR
 }
+export enum Layout { A = "A", B = "B", C = "C" }
 
 export interface Plan {
   title: string
   price: number
-  strips: 2 | 4 | 6
+  copies: 1 | 2 | 3
   popular: boolean
+}
+
+export interface LayoutData {
+  kind: Layout,
+  disabled: boolean
 }
 
 interface DataContextProps {
@@ -28,6 +35,8 @@ interface DataContextProps {
     setOptions: React.Dispatch<React.SetStateAction<Options>>,
     setPlans: React.Dispatch<React.SetStateAction<Plan[]>>
     plans: Array<Plan>,
+    setLayouts: React.Dispatch<React.SetStateAction<LayoutData[]>>
+    layouts: Array<LayoutData>,
     digitalEnabled: boolean,
     setDigitalEnabled: React.Dispatch<React.SetStateAction<boolean>>,
     mode: Mode,
@@ -46,49 +55,91 @@ export const useData = () => {
 }
 
 export default function DataProvider({ children }: { children: React.ReactNode }) {
-    const [options, setOptions] = useState<Options>({ copies: null, digital: false, print: null })
+    const [options, setOptions] = useState<Options>({
+        layout: null,
+        copies: null,
+        digital: false,
+        print: null
+    })
     const [mode, setMode] = useState<Mode>(Mode.AUTOMATIC)
     const [images, setImages] = useState<Array<string>>([]);
     const [digitalEnabled, setDigitalEnabled] = useState<boolean>(false)
     const [plans, setPlans] = useState<Plan[]>([]);
+    const [layouts, setLayouts] = useState<LayoutData[]>([]);
 
-    const defaults = useMemo<Plan[]>(() => [
+    const defaultPlans = useMemo<Plan[]>(() => [
         {
-            strips: 2,
-            title: 'Duo Delight',
+            copies: 1,
+            title: 'Solo Special',
             price: 199,
             popular: false
         },
         {
-            strips: 4,
-            title: 'Fantastic Four',
+            copies: 2,
+            title: 'Duo Delight',
             price: 399,
             popular: true
         },
         {
-            strips: 6,
-            title: 'Super Six',
+            copies: 3,
+            title: 'Triple Treat',
             price: 599,
             popular: false
+        },
+    ], [])
+
+    const defaultLayouts = useMemo<LayoutData[]>(() => [
+        {
+            kind: Layout.A,
+            disabled: false
+        },
+        {
+            kind: Layout.B,
+            disabled: false
+        },
+        {
+            kind: Layout.C,
+            disabled: false
         },
     ], [])
 
     useEffect(() => {
         const fetch = async () => {
             try {
-                let data = await getOrInitPricing(defaults)
-                setPlans(data)
+                let planData = await getOrInitPricing(defaultPlans)
+                setPlans(planData)
+
+                let layoutData = await getOrInitLayouts(defaultLayouts)
+                setLayouts(layoutData)
             } catch (e) {
                 console.error(e)
-                if (plans.length < 1) setPlans(defaults)
+                if (plans.length < 1) setPlans(defaultPlans)
+                if (layouts.length < 1) setLayouts(defaultLayouts)
             }
         }
 
         fetch()
     }, [])
 
+
+
+    const value = {
+        options,
+        setOptions,
+        plans,
+        layouts,
+        setPlans,
+        setLayouts,
+        mode,
+        setMode,
+        images,
+        setImages,
+        digitalEnabled,
+        setDigitalEnabled
+    }
+
     return (
-        <DataContext.Provider value={{ options, setOptions, plans, setPlans, mode, setMode, images, setImages, digitalEnabled, setDigitalEnabled }}>
+        <DataContext.Provider value={value}>
             {children}
         </DataContext.Provider>
     )

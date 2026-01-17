@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
 import { Plan, useData } from '../../../Contexts/DataContext'
-import { savePricing } from '../../../Services/pricing'
+import { savePricing } from '../../../Services/commands'
 
 import EditIconSVG from '../../../assets/Images/edit.svg'
 
@@ -144,7 +144,7 @@ function PlanOption({
 
         {/* STRIPS */}
         <div className="plan-price-quantity">
-          / {data.strips} strips
+          / {data.copies} {data.copies == 1 ? "copy" : "copies"}
         </div>
       </div>
 

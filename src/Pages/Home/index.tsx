@@ -98,7 +98,7 @@ export default function Home() {
                 <div className='arrow-img'>
                     <img src={arrow} />
                 </div>
-                <button className='start-btn' onClick={() => navigate('/copies')}>Start</button>
+                <button className='start-btn' onClick={() => navigate('/layout')}>Start</button>
             </div>
         </div>
     </motion.div>

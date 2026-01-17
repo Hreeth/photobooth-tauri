@@ -30,7 +30,7 @@ export default function Greeting() {
   const [progressText, setProgressText] = useState("0 of 0")
   const [showLoader, setShowLoader] = useState(true)
 
-  const stripCount = options.copies || 2
+  const stripCount = options.copies || 1
 
   useEffect(() => {
     const timers: NodeJS.Timeout[] = []
@@ -43,7 +43,8 @@ export default function Greeting() {
           images: images,
           outputPath: img_path,
           colorMode: options.print == Print.COLOR ? "COLOR" : "B&W",
-          copies: options.copies
+          copies: options.copies,
+          layout: options.layout
         })
 
         console.log("Print successful")
@@ -58,15 +59,15 @@ export default function Greeting() {
     setShowLoader(true)
 
     const progressSteps: Record<number, { time: number, text: string }[]> = {
-      2: [{ time: 16000, text: "2 of 2" }],
-      4: [
-        { time: 16000, text: "2 of 4" },
-        { time: 30000, text: "4 of 4" },
+      1: [{ time: 16000, text: "1 of 1" }],
+      2: [
+        { time: 16000, text: "1 of 2" },
+        { time: 30000, text: "2 of 2" },
       ],
-      6: [
-        { time: 16000, text: "2 of 6" },
-        { time: 30000, text: "4 of 6" },
-        { time: 40000, text: "6 of 6" },
+      3: [
+        { time: 16000, text: "1 of 3" },
+        { time: 30000, text: "2 of 3" },
+        { time: 40000, text: "3 of 3" },
       ],
     }
 

@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Photobooth",
+  "productName": "Photobooth (Event)",
   "version": "1.4.0",
-  "identifier": "com.tauri.photobooth",
+  "identifier": "com.tauri.photobooth.event",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",

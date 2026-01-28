@@ -36,7 +36,6 @@ function Countdown() {
           let img_path = await path.join(pictures, `photo-${photoIndex}.jpg`)
           let img = await invoke<string>("capture", {
             outputPath: img_path,
-            colorMode: options.print == Print.COLOR ? "COLOR" : "B&W",
             layout: options.layout
           });
           setImages(prev => [...prev, img]);

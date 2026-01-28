@@ -76,7 +76,7 @@ pub async fn capture(
 }
 
 // #[tauri::command]
-// pub fn capture(output_path: &str) -> Result<String, String> {
+// pub fn capture(output_path: &str, layout: Layout) -> Result<String, String> {
 //     let sample_path = "sample.jpg"; // Replace with the actual path of your sample image
 
 //     match fs::copy(sample_path, output_path) {
@@ -90,7 +90,7 @@ pub async fn capture(
 
 #[tauri::command(async)]
 pub async fn print(
-    _app: AppHandle,
+    app: AppHandle,
     images: Vec<String>,
     output_path: &str,
     color_mode: &str,
@@ -106,9 +106,9 @@ pub async fn print(
     let border_px = ((BORDER / 2.54) * DPI).round() as u32;
 
     let canvas = match layout {
-        Layout::A => apply_layout_a(images, color_mode, bg_color, border_px)?,
-        Layout::B => apply_layout_b(images, color_mode, bg_color, border_px)?,
-        Layout::C => apply_layout_c(images, color_mode, bg_color, border_px)?,
+        Layout::A => apply_layout_a(&app, images, color_mode, bg_color, border_px)?,
+        Layout::B => apply_layout_b(&app, images, color_mode, bg_color, border_px)?,
+        Layout::C => apply_layout_c(&app, images, color_mode, bg_color, border_px)?,
     };
 
     if let Err(e) = canvas.save(output_path) {
@@ -181,6 +181,7 @@ pub async fn print(
 }
 
 fn apply_layout_a(
+    app: &AppHandle,
     images: Vec<String>,
     color_mode: &str,
     bg_color: Rgba<u8>,
@@ -257,9 +258,9 @@ fn apply_layout_a(
     };
 
     let heart_path = if color_mode == "B&W" {
-        "fonts/heart_white.png"
+        get_asset_path(&app, "heart_white.png")?
     } else {
-        "fonts/heart_black.png"
+        get_asset_path(&app, "heart_black.png")?
     };
 
     let mut heart = image::open(heart_path)
@@ -365,6 +366,7 @@ fn apply_layout_a(
 }
 
 fn apply_layout_b(
+    app: &AppHandle,
     images: Vec<String>,
     color_mode: &str,
     bg_color: Rgba<u8>,
@@ -447,9 +449,9 @@ fn apply_layout_b(
     };
 
     let heart_path = if color_mode == "B&W" {
-        "fonts/heart_white.png"
+        get_asset_path(&app, "heart_white.png")?
     } else {
-        "fonts/heart_black.png"
+        get_asset_path(&app, "heart_black.png")?
     };
 
     let mut heart = image::open(heart_path)
@@ -555,6 +557,7 @@ fn apply_layout_b(
 }
 
 fn apply_layout_c(
+    app: &AppHandle,
     images: Vec<String>,
     color_mode: &str,
     bg_color: Rgba<u8>,
@@ -645,9 +648,9 @@ fn apply_layout_c(
     };
 
     let heart_path = if color_mode == "B&W" {
-        "fonts/heart_white.png"
+        get_asset_path(&app, "heart_white.png")?
     } else {
-        "fonts/heart_black.png"
+        get_asset_path(&app, "heart_black.png")?
     };
 
     let mut heart = image::open(heart_path)
@@ -772,7 +775,7 @@ fn apply_layout_c(
     Ok(canvas)
 }
 
-fn _get_asset_path(app_handle: &AppHandle, filename: &str) -> Result<PathBuf, String> {
+fn get_asset_path(app_handle: &AppHandle, filename: &str) -> Result<PathBuf, String> {
     let resource_path = app_handle.path().resolve(
         format!("assets/{}", filename),
         tauri::path::BaseDirectory::Resource,

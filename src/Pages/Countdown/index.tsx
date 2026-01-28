@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
 import { pictureDir } from "@tauri-apps/api/path";
+import { path } from "@tauri-apps/api";
 
-import { Layout, Print, useData } from "../../Contexts/DataContext";
+import { Layout, useData } from "../../Contexts/DataContext";
 
 import './styles.css'
-import { path } from "@tauri-apps/api";
 
 function Countdown() {
   const navigate = useNavigate();

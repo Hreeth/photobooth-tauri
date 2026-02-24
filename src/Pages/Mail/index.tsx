@@ -1,22 +1,25 @@
 import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-import './styles.css'
 import { documentDir } from '@tauri-apps/api/path'
 import { invoke } from '@tauri-apps/api/core'
+
 import { useData } from '../../Contexts/DataContext'
-import KeyboardReact from 'react-simple-keyboard'
-import 'react-simple-keyboard/build/css/index.css';
+
+import Keyboard from '../../Components/Keyboard'
+
+import './styles.css'
 
 export default function Mail() {
   const navigate = useNavigate()
   const [email, onSetEmail] = useState("")
+  const [selectionStart, setSelectionStart] = useState<number>(0)
+  const [selectionEnd, setSelectionEnd] = useState<number>(0)
   const [documentPath, setDocumentPath] = useState("")
   const [keyboardVisible, setKeyboardVisible] = useState(false)
-  const [layoutName, setLayoutName] = useState("default")
 
   const keyboardRef = useRef(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
 
   const { images } = useData()
 
@@ -47,24 +50,6 @@ export default function Mail() {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
   }
 
-  function handleKeyPress(btn: string) {
-    switch (btn) {
-      case "{lock}": {
-        setLayoutName(prev => prev == "lock" ? "default" : "lock")
-        break
-      }
-      case "{shift}": {
-        setLayoutName(prev => prev == "shift" ? "default" : "shift")
-        break
-      }
-      case "{bksp}": {
-        onSetEmail(prev => prev.slice(0, -1))
-        break
-      }
-      default: break
-    }
-  }
-
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -85,6 +70,13 @@ export default function Mail() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [keyboardVisible])
 
+  useEffect(() => {
+    if (!inputRef.current) return
+    
+    inputRef.current.focus()
+    inputRef.current.setSelectionRange(selectionStart, selectionEnd)
+  }, [email, selectionStart, selectionEnd])
+
   return (
     <motion.div
       id='mail'
@@ -97,12 +89,37 @@ export default function Mail() {
           <div className="input-container">
             <div className="input-box">
               <input
-                type="email"
+                ref={inputRef}
+                type="text"
+                inputMode='email'
                 className="input"
-                onChange={(_) => onSetEmail(_.target.value.trim())}
                 placeholder='enteryouremail@gmail.com'
-                onFocus={() => setKeyboardVisible(true)}
                 value={email}
+                onFocus={() => setKeyboardVisible(true)}
+                onSelect={() => setKeyboardVisible(true)}
+                onChange={(e) => {
+                  const v = e.target.value
+                  onSetEmail(v)
+                  setSelectionStart(e.target.selectionStart ?? v.length)
+                  setSelectionEnd(e.target.selectionEnd ?? v.length)
+                }}
+                onClick={(e) => {
+                  const el = e.currentTarget
+                  setSelectionStart(el.selectionStart ?? 0)
+                  setSelectionEnd(el.selectionEnd ?? 0)
+                }}
+                onKeyUp={(e) => {
+                  const el = e.currentTarget
+                  setSelectionStart(el.selectionStart ?? 0)
+                  setSelectionEnd(el.selectionEnd ?? 0)
+                }}
+                onKeyDown={(e) => {
+                  const el = e.currentTarget
+                  requestAnimationFrame(() => {
+                    setSelectionStart(el.selectionStart ?? 0)
+                    setSelectionEnd(el.selectionEnd ?? 0)
+                  })
+                }}
               />
               <button
                 className="send-btn"
@@ -122,36 +139,14 @@ export default function Mail() {
         </div>
         {keyboardVisible && (
           <div id='keyboard' ref={keyboardRef}>
-            <KeyboardReact
-              onChange={(input) => onSetEmail(input)}
-              inputName='email'
-              layoutName={layoutName}
-              onKeyPress={(btn) => handleKeyPress(btn)}
-              layout={{
-                default: [
-                  "q w e r t y u i o p",
-                  "a s d f g h j k l",
-                  "{lock} z x c v b n m {bksp}",
-                  "{shift} .com .in .net . {space} @ ,",
-                ],
-                lock: [
-                  "Q W E R T Y U I O P",
-                  "A S D F G H J K L",
-                  "{lock} Z X C V B N M {bksp}",
-                  "{shift} .com .in .net . {space} @ ,"
-                ],
-                shift: [
-                  "1 2 3 4 5 6 7 8 9 0",
-                  "! @ # $ % ^ & * ( )",
-                  "` \" \' : ; ! ? {bksp}",
-                  "{shift} .com .in .net . {space} ,",
-                ],
-              }}
-              display={{
-                "{bksp}": "⌫",
-                "{lock}": "⇧",
-                "{shift}": layoutName == "shift" ? "ABC" : "?123",
-                "{space}": " "
+            <Keyboard
+              value={email}
+              onChange={(next) => onSetEmail(next)}
+              selectionStart={selectionStart}
+              selectionEnd={selectionEnd}
+              onSelectionChange={(start, end) => {
+                setSelectionStart(start)
+                setSelectionEnd(end)
               }}
             />
           </div>

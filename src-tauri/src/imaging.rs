@@ -12,7 +12,7 @@ const WIDTH: u32 = (4f32 * DPI).round() as u32;
 const HEIGHT: u32 = (6f32 * DPI).round() as u32;
 const BORDER: f32 = 0.15f32;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub enum Layout {
     A,
     B,
@@ -20,70 +20,70 @@ pub enum Layout {
 }
 
 
-#[tauri::command(async)]
-pub async fn capture(
-    output_path: &str,
-    color_mode: &str
-) -> Result<String, String> {
-    let mut cmd_base = Command::new("libcamera-still");
-    let cmd = cmd_base
-        .arg("-t")
-        .arg("3000")
-        .arg("--autofocus-mode")
-        .arg("continuous")
-        .arg("--autofocus-range")
-        .arg("normal")
-        .arg("--denoise")
-        .arg("cdn_off")
-        .arg("--shutter")
-        .arg("18000")
-        .arg("--gain")
-        .arg("10")
-        .arg("--ev")
-        .arg("0")
-        .arg("--roi")
-        .arg("0.075,0.13,0.79,0.85")
-        .arg("-p")
-        .arg("-10,-10,1920,1080")
-        .arg("-o")
-        .arg(output_path);
+// #[tauri::command(async)]
+// pub async fn capture(
+//     output_path: &str,
+//     color_mode: &str
+// ) -> Result<String, String> {
+//     let mut cmd_base = Command::new("libcamera-still");
+//     let cmd = cmd_base
+//         .arg("-t")
+//         .arg("3000")
+//         .arg("--autofocus-mode")
+//         .arg("continuous")
+//         .arg("--autofocus-range")
+//         .arg("normal")
+//         .arg("--denoise")
+//         .arg("cdn_off")
+//         .arg("--shutter")
+//         .arg("18000")
+//         .arg("--gain")
+//         .arg("10")
+//         .arg("--ev")
+//         .arg("0")
+//         .arg("--roi")
+//         .arg("0.075,0.13,0.79,0.85")
+//         .arg("-p")
+//         .arg("-10,-10,1920,1080")
+//         .arg("-o")
+//         .arg(output_path);
     
-    // if color_mode != "B&W" {
-    //     cmd
-    //         .arg("--awbgains")
-    //         .arg("1.8,3.2");
-    // }
+//     // if color_mode != "B&W" {
+//     //     cmd
+//     //         .arg("--awbgains")
+//     //         .arg("1.8,3.2");
+//     // }
         
-    let result = cmd.output();
+//     let result = cmd.output();
 
-    match result {
-        Ok(output) => {
-            let stdout_str = String::from_utf8_lossy(&output.stdout);
-            let stderr_str = String::from_utf8_lossy(&output.stderr);
+//     match result {
+//         Ok(output) => {
+//             let stdout_str = String::from_utf8_lossy(&output.stdout);
+//             let stderr_str = String::from_utf8_lossy(&output.stderr);
     
-            if !output.status.success() {
-                println!("stderr: {}", stderr_str);
-            }
+//             if !output.status.success() {
+//                 println!("stderr: {}", stderr_str);
+//             }
             
-            println!("stdout: {}", stdout_str);
-            Ok(output_path.to_string())
-        }
-        Err(e) => return Err(format!("Failed to execute capture command: {}", e)),
-    }
-}
-
-// #[tauri::command]
-// pub fn capture(output_path: &str) -> Result<String, String> {
-//     let sample_path = "sample.jpg"; // Replace with the actual path of your sample image
-
-//     match fs::copy(sample_path, output_path) {
-//         Ok(_) => {
-//             println!("Sample image copied to: {}", output_path);
+//             println!("stdout: {}", stdout_str);
 //             Ok(output_path.to_string())
 //         }
-//         Err(e) => Err(format!("Failed to copy sample image: {}", e)),
+//         Err(e) => return Err(format!("Failed to execute capture command: {}", e)),
 //     }
 // }
+
+#[tauri::command]
+pub fn capture(output_path: &str) -> Result<String, String> {
+    let sample_path = "sample.jpg"; // Replace with the actual path of your sample image
+
+    match fs::copy(sample_path, output_path) {
+        Ok(_) => {
+            println!("Sample image copied to: {}", output_path);
+            Ok(output_path.to_string())
+        }
+        Err(e) => Err(format!("Failed to copy sample image: {}", e)),
+    }
+}
 
 #[tauri::command(async)]
 pub async fn print(

@@ -8,23 +8,29 @@ use serde_json::{json, to_string_pretty, Value};
 use std::{error::Error, fs::{self, read, remove_file, File, OpenOptions}, io::{Read, Write}, path::PathBuf, sync::atomic::{AtomicBool, Ordering}};
 use once_cell::sync::Lazy;
 
+use crate::imaging::Layout;
+
 static IS_SENDING: Lazy<AtomicBool> = Lazy::new(|| AtomicBool::new(false));
 
 #[tauri::command]
-pub fn store_email(document_path: String, user_email: String, photo_paths: Vec<String>) -> Result<String, String> {
+pub fn store_email(document_path: String, user_email: String, photo_paths: Vec<String>, layout: Layout) -> Result<String, String> {
     tauri::async_runtime::spawn(async move {
-        if let Err(e) = store_email_req(document_path, user_email, photo_paths) {
-            eprintln!("Failed to store emails: {}", e);
+        if let Err(e) = store_email_req(document_path.clone(), user_email, photo_paths, layout) {
+            eprintln!("Failed to store emails: {e}");
+        }
+
+        if let Err(e) = send_email_req(document_path).await {
+            eprintln!("Failed to send emails: {e}");
         }
     });
 
     Ok("Email stores successfully".to_string())
 }
 
-fn store_email_req(document_path: String, user_email: String, photo_paths: Vec<String>) -> Result<(), String> {
+fn store_email_req(document_path: String, user_email: String, photo_paths: Vec<String>, layout: Layout) -> Result<(), String> {
     let json_path: PathBuf = PathBuf::from(document_path.clone()).join("emails.json");
 
-    let new_photo_paths = format_files((document_path).to_string(), user_email.clone(), photo_paths);
+    let new_photo_paths = format_files((document_path).to_string(), user_email.clone(), photo_paths, layout);
     if let Err(e) = new_photo_paths {
         return Err(format!("Failed to process new paths: {}", e))
     } 
@@ -180,7 +186,7 @@ async fn send_email_req(document_path: String) -> Result<String, String> {
     Ok("Emails sent successfully via ZeptoMail!".to_string())
 }
 
-fn format_files(document_path: String, user_email: String, photo_paths: Vec<String>) -> Result<Vec<String>, Box<dyn Error>> {
+fn format_files(document_path: String, user_email: String, photo_paths: Vec<String>, layout: Layout) -> Result<Vec<String>, Box<dyn Error>> {
     let email_prefix = user_email.split('@').next().unwrap_or("unknown");
     let storage_dir = PathBuf::from(&document_path).join("Memorabooth");
 
@@ -247,44 +253,46 @@ fn format_files(document_path: String, user_email: String, photo_paths: Vec<Stri
         polaroid_images.push(polaroid);
     }
 
-    // Create the final collage
-    let gap_px = 20;
-    let padded_collage_size = (collage_size.0 + (2 * gap_px), collage_size.1 + (2 * gap_px));
-    let collage_path = storage_dir.join(format!("{}_collage.png", email_prefix));
-    let mut collage = RgbaImage::from_pixel(padded_collage_size.0, padded_collage_size.1, Rgba([255, 255, 255, 255]));
-
-    let cell_width = (collage_size.0 - gap_px) / 2;
-    let cell_height = (collage_size.1 - 100 - (gap_px * 3)) / 4;
-
-    for (i, photo) in photo_paths.iter().enumerate() {
-        let y_offset = gap_px + (i as u32 * (cell_height + gap_px));
-
-        let img = image::open(photo).map_err(|e| format!("Failed to load image: {}", e))?;
-        let resized = image::imageops::resize(&img, cell_width, cell_height, Lanczos3);
-
-        let left_x_offset = gap_px;
-        let right_x_offset = cell_width + (2 * gap_px);
-
-        collage.copy_from(&resized, left_x_offset, y_offset)
-            .map_err(|e| format!("Failed to place photo in left column: {}", e))?;
-        collage.copy_from(&resized, right_x_offset, y_offset)
-            .map_err(|e| format!("Failed to place photo in right column: {}", e))?;
+    if layout != Layout::A {
+        // Create the final collage
+        let gap_px = 20;
+        let padded_collage_size = (collage_size.0 + (2 * gap_px), collage_size.1 + (2 * gap_px));
+        let collage_path = storage_dir.join(format!("{}_collage.png", email_prefix));
+        let mut collage = RgbaImage::from_pixel(padded_collage_size.0, padded_collage_size.1, Rgba([255, 255, 255, 255]));
+    
+        let cell_width = (collage_size.0 - gap_px) / 2;
+        let cell_height = (collage_size.1 - 100 - (gap_px * 3)) / 4;
+    
+        for (i, photo) in photo_paths.iter().enumerate() {
+            let y_offset = gap_px + (i as u32 * (cell_height + gap_px));
+    
+            let img = image::open(photo).map_err(|e| format!("Failed to load image: {}", e))?;
+            let resized = image::imageops::resize(&img, cell_width, cell_height, Lanczos3);
+    
+            let left_x_offset = gap_px;
+            let right_x_offset = cell_width + (2 * gap_px);
+    
+            collage.copy_from(&resized, left_x_offset, y_offset)
+                .map_err(|e| format!("Failed to place photo in left column: {}", e))?;
+            collage.copy_from(&resized, right_x_offset, y_offset)
+                .map_err(|e| format!("Failed to place photo in right column: {}", e))?;
+        }
+    
+        // Add "Memorabooth" text at the bottom, centered
+        draw_text_mut(
+            &mut collage,
+            Rgba([78, 52, 46, 255]), // Blue
+            ((padded_collage_size.0 / 2) - 250).try_into().unwrap(),
+            (padded_collage_size.1 - 80 - gap_px).try_into().unwrap(),
+            PxScale::from(60.0),
+            &font,
+            "M E M O R A B O O T H",
+        );
+    
+        // Save the collage
+        collage.save(&collage_path).map_err(|e| format!("Failed to save collage: {}", e))?;
+        renamed_paths.push(collage_path.to_string_lossy().to_string());
     }
-
-    // Add "Memorabooth" text at the bottom, centered
-    draw_text_mut(
-        &mut collage,
-        Rgba([78, 52, 46, 255]), // Blue
-        ((padded_collage_size.0 / 2) - 250).try_into().unwrap(),
-        (padded_collage_size.1 - 80 - gap_px).try_into().unwrap(),
-        PxScale::from(60.0),
-        &font,
-        "M E M O R A B O O T H",
-    );
-
-    // Save the collage
-    collage.save(&collage_path).map_err(|e| format!("Failed to save collage: {}", e))?;
-    renamed_paths.push(collage_path.to_string_lossy().to_string());
 
     Ok(renamed_paths)
 }

@@ -21,7 +21,7 @@ export default function Mail() {
   const keyboardRef = useRef(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
-  const { images } = useData()
+  const { images, options } = useData()
 
   useEffect(() => {
     async function fetchPath() {
@@ -33,16 +33,17 @@ export default function Mail() {
   }, [])
 
   async function handleEmail() {
-    navigate("/greeting")
-    
     try {
       await invoke<string>("store_email", {
         documentPath: documentPath,
         userEmail: email,
-        photoPaths: images
+        photoPaths: images,
+        layout: options.layout
       })
     } catch (err) {
       console.error("Error storing email:", err)
+    } finally {
+      navigate("/greeting")
     }
   }
 

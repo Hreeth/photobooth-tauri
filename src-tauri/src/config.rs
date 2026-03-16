@@ -6,6 +6,7 @@ use crate::imaging::Layout;
 
 const PRICING_VERSION: u32 = 1;
 const LAYOUTS_VERSION: u32 = 1;
+const PAGES_VERSION: u32 = 1;
 
 #[derive(Serialize, Deserialize)]
 struct Versioned<T> {
@@ -135,4 +136,59 @@ pub fn get_or_init_layouts(directory: String, defaults: Vec<LayoutData>) -> Resu
     fs::write(&path, json).map_err(|e| e.to_string())?;
 
     Ok(defaults)
+}
+
+#[tauri::command]
+pub fn save_pages(directory: String, pages: u64) -> Result<(), String> {
+    let mut path = PathBuf::from(directory);
+
+    path.push("Memorabooth");
+    fs::create_dir_all(&path)
+        .map_err(|e| e.to_string())?;
+
+    path.push("pages.json");
+
+    let wrapped = Versioned {
+        version: PAGES_VERSION,
+        data: pages
+    };
+
+    let json = serde_json::to_string_pretty(&wrapped)
+        .map_err(|e| e.to_string())?;
+
+    fs::write(path, json)
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_or_init_pages(directory: String, default: u64) -> Result<u64, String> {
+    let mut path = PathBuf::from(directory);
+    path.push("Memorabooth");
+    fs::create_dir_all(&path).map_err(|e| e.to_string())?;
+
+    path.push("pages.json");
+
+    if path.exists() {
+        let content = fs::read_to_string(&path).map_err(|e| e.to_string())?;
+
+        if let Ok(parsed) = serde_json::from_str::<Versioned<u64>>(&content) {
+            if parsed.version == PAGES_VERSION {
+                return Ok(parsed.data);
+            }
+        }
+
+        fs::remove_file(&path).map_err(|e| e.to_string())?;
+    }
+
+    let wrapped = Versioned {
+        version: PAGES_VERSION,
+        data: default
+    };
+
+    let json = serde_json::to_string_pretty(&wrapped).map_err(|e| e.to_string())?;
+    fs::write(&path, json).map_err(|e| e.to_string())?;
+
+    Ok(default)
 }

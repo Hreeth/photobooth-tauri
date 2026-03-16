@@ -24,3 +24,15 @@ export async function getOrInitLayouts(defaults: LayoutData[]) {
 
     return await invoke<LayoutData[]>("get_or_init_layouts", { directory: dir, defaults });
 }
+
+export async function savePages(pages: number) {
+    const dir = await documentDir()
+
+    await invoke("save_pages", { directory: dir, pages })
+}
+
+export async function getOrInitPages() {
+    const dir = await documentDir()
+
+    return await invoke<number>("get_or_init_pages", { directory: dir, default: 0 });
+}

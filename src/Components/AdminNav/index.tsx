@@ -26,6 +26,13 @@ export default function AdminNav() {
         >
           Layouts
         </NavLink>
+        <NavLink
+            to="/admin/pages"
+            className="admin-nav-link"
+            style={({ isActive }) => ({ pointerEvents: isActive ? 'none' : 'auto' })}
+        >
+          Pages
+        </NavLink>
     </nav>
   )
 }

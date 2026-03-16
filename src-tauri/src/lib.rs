@@ -19,7 +19,9 @@ pub fn run() {
       config::save_pricing,
       config::get_or_init_pricing,
       config::save_layouts,
-      config::get_or_init_layouts
+      config::get_or_init_layouts,
+      config::save_pages,
+      config::get_or_init_pages,
     ])
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();

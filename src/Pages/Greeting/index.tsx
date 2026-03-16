@@ -10,9 +10,10 @@ import reset from '../../Utils/reset'
 import './styles.css'
 import { path } from '@tauri-apps/api'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
+import { savePages } from '../../Services/commands'
 
 export default function Greeting() {
-  const { setOptions, options, images, setImages } = useData()
+  const { setOptions, options, images, setImages, pages, setPages } = useData()
   const navigate = useNavigate()
 
   const greetings = useMemo(() => [
@@ -46,6 +47,9 @@ export default function Greeting() {
           copies: options.copies,
           layout: options.layout
         })
+        
+        await savePages(pages + options.copies!)
+        setPages(pages + options.copies!)
 
         console.log("Print successful")
       } catch (err) {

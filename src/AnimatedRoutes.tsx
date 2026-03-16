@@ -12,6 +12,7 @@ const Admin = React.lazy(() => import('./Pages/Admin'))
 const AdminMode = React.lazy(() => import('./Pages/Admin/Mode'))
 const AdminPricing = React.lazy(() => import('./Pages/Admin/Pricing'))
 const AdminLayouts = React.lazy(() => import('./Pages/Admin/Layouts'))
+const AdminPages = React.lazy(() => import('./Pages/Admin/Pages'))
 const Countdown = React.lazy(() => import('./Pages/Countdown'))
 const Passcode = React.lazy(() => import('./Pages/Passcode'))
 const Layout = React.lazy(() => import('./Pages/Form/Layout'))
@@ -37,6 +38,7 @@ export default function AnimatedRoutes() {
                             <Route path='mode' element={<AdminMode />} />
                             <Route path='pricing' element={<AdminPricing />} />
                             <Route path='layouts' element={<AdminLayouts />} />
+                            <Route path='pages' element={<AdminPages />} />
                         </Route>
                         <Route path='/countdown' element={<Countdown />} />
                         <Route path='/layout' element={<Layout />} />

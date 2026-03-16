@@ -1,0 +1,38 @@
+#admin-pages {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    gap: 3rem;
+    padding: 4rem;
+}
+
+#admin-pages .heading {
+    color: var(--txt-clr);
+    font-size: 10vmin;
+}
+
+#admin-pages .heading div {
+    display: inline;
+    font-family: Seriguela;
+    color: var(--accent-1);
+}
+
+#admin-pages .pages-container {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+}
+
+.page-number-input {
+    width: 200px;
+    background: none;
+    border: 2px dashed var(--border-clr);
+    border-radius: 2ex;
+    padding: 1rem;
+    font-size: 3rem;
+    text-align: center;
+}

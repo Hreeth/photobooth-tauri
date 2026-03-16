@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react"
-import { getOrInitLayouts, getOrInitPricing } from "../Services/commands"
+import { getOrInitLayouts, getOrInitPages, getOrInitPricing } from "../Services/commands"
 
 export interface Options {
     layout: Layout | null,
@@ -43,6 +43,9 @@ interface DataContextProps {
     setMode: React.Dispatch<React.SetStateAction<Mode>>,
     images: Array<string>
     setImages: React.Dispatch<React.SetStateAction<Array<string>>>,
+
+    pages: number,
+    setPages: React.Dispatch<React.SetStateAction<number>>
 }
 
 const DataContext = createContext<DataContextProps | undefined>(undefined)
@@ -66,6 +69,7 @@ export default function DataProvider({ children }: { children: React.ReactNode }
     const [digitalEnabled, setDigitalEnabled] = useState<boolean>(false)
     const [plans, setPlans] = useState<Plan[]>([]);
     const [layouts, setLayouts] = useState<LayoutData[]>([]);
+    const [pages, setPages] = useState<number>(0);
 
     const defaultPlans = useMemo<Plan[]>(() => [
         {
@@ -111,6 +115,9 @@ export default function DataProvider({ children }: { children: React.ReactNode }
 
                 let layoutData = await getOrInitLayouts(defaultLayouts)
                 setLayouts(layoutData)
+
+                let pages = await getOrInitPages()
+                setPages(pages)
             } catch (e) {
                 console.error(e)
                 if (plans.length < 1) setPlans(defaultPlans)
@@ -120,8 +127,6 @@ export default function DataProvider({ children }: { children: React.ReactNode }
 
         fetch()
     }, [])
-
-
 
     const value = {
         options,
@@ -135,7 +140,9 @@ export default function DataProvider({ children }: { children: React.ReactNode }
         images,
         setImages,
         digitalEnabled,
-        setDigitalEnabled
+        setDigitalEnabled,
+        pages,
+        setPages
     }
 
     return (

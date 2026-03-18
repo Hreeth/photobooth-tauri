@@ -3,23 +3,48 @@ use base64::{prelude::BASE64_STANDARD, Engine};
 use chrono::Local;
 use image::{imageops::FilterType::Lanczos3, GenericImage, GenericImageView, Rgba, RgbaImage};
 use imageproc::drawing::draw_text_mut;
+use once_cell::sync::Lazy;
 use reqwest::Client;
 use serde_json::{json, to_string_pretty, Value};
-use std::{error::Error, fs::{self, read, remove_file, File, OpenOptions}, io::{Read, Write}, path::PathBuf, sync::atomic::{AtomicBool, Ordering}};
-use once_cell::sync::Lazy;
+use std::{
+    error::Error,
+    fs::{self, read, remove_file, File, OpenOptions},
+    io::{Read, Write},
+    path::PathBuf,
+    sync::atomic::{AtomicBool, Ordering},
+};
 
 use crate::imaging::Layout;
 
 static IS_SENDING: Lazy<AtomicBool> = Lazy::new(|| AtomicBool::new(false));
 
+const TEMPLATE_KEY: &str =
+    "2518b.45ebd6f14385fb13.k1.2d7bc653-223a-11f1-8c35-cabf48e1bf81.19cfd571733";
+
 #[tauri::command]
-pub fn store_email(document_path: String, user_email: String, photo_paths: Vec<String>, layout: Layout) -> Result<String, String> {
+pub fn store_email(
+    document_path: String,
+    user_email: String,
+    photo_paths: Vec<String>,
+    layout: Layout,
+) -> Result<String, String> {
     tauri::async_runtime::spawn(async move {
         if let Err(e) = store_email_req(document_path.clone(), user_email, photo_paths, layout) {
             eprintln!("Failed to store emails: {e}");
+            return;
         }
 
-        if let Err(e) = send_email_req(document_path).await {
+        if IS_SENDING
+            .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+            .is_err()
+        {
+            return;
+        }
+
+        let res = send_email_req(document_path).await;
+        IS_SENDING.store(false, Ordering::SeqCst);
+
+        if let Err(e) = res {
             eprintln!("Failed to send emails: {e}");
         }
     });
@@ -27,19 +52,34 @@ pub fn store_email(document_path: String, user_email: String, photo_paths: Vec<S
     Ok("Email stores successfully".to_string())
 }
 
-fn store_email_req(document_path: String, user_email: String, photo_paths: Vec<String>, layout: Layout) -> Result<(), String> {
-    let json_path: PathBuf = PathBuf::from(document_path.clone()).join("emails.json");
+fn store_email_req(
+    document_path: String,
+    user_email: String,
+    photo_paths: Vec<String>,
+    layout: Layout,
+) -> Result<(), String> {
+    let mut json_path = PathBuf::from(document_path.clone());
+    json_path.push("Memorabooth");
+    fs::create_dir_all(&json_path).map_err(|e| e.to_string())?;
 
-    let new_photo_paths = format_files((document_path).to_string(), user_email.clone(), photo_paths, layout);
+    json_path.push("emails.json");
+
+    let new_photo_paths = format_files(
+        (document_path).to_string(),
+        user_email.clone(),
+        photo_paths,
+        layout,
+    );
     if let Err(e) = new_photo_paths {
-        return Err(format!("Failed to process new paths: {}", e))
-    } 
+        return Err(format!("Failed to process new paths: {}", e));
+    }
 
     let mut emails: Vec<Value> = if json_path.exists() {
         let mut file = File::open(&json_path).map_err(|e| format!("Failed to open file: {}", e))?;
         let mut buffer: Vec<u8> = Vec::new();
 
-        file.read_to_end(&mut buffer).map_err(|e| format!("Failed to read file: {}", e))?;
+        file.read_to_end(&mut buffer)
+            .map_err(|e| format!("Failed to read file: {}", e))?;
         serde_json::from_slice(&buffer).unwrap_or_else(|_| vec![])
     } else {
         vec![]
@@ -62,14 +102,18 @@ fn store_email_req(document_path: String, user_email: String, photo_paths: Vec<S
         .open(&json_path)
         .map_err(|e| format!("Failed to open file for writing: {}", e))?;
 
-    file.write_all(to_string_pretty(&emails).unwrap().as_bytes()).map_err(|e| format!("Failed to write to file: {}", e))?;
+    file.write_all(to_string_pretty(&emails).unwrap().as_bytes())
+        .map_err(|e| format!("Failed to write to file: {}", e))?;
 
     Ok(())
 }
 
 #[tauri::command]
-pub fn send_email(document_path: String) ->  Result<String, String> {
-    if IS_SENDING.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst).is_err() {
+pub fn send_email(document_path: String) -> Result<String, String> {
+    if IS_SENDING
+        .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+        .is_err()
+    {
         return Err("Email sending already in progress.".to_string());
     }
 
@@ -89,15 +133,21 @@ pub fn send_email(document_path: String) ->  Result<String, String> {
 async fn send_email_req(document_path: String) -> Result<String, String> {
     let api_key = dotenv_codegen::dotenv!("ZEPTOMAIL_API_KEY");
 
-    let json_path: PathBuf = PathBuf::from(&document_path).join("emails.json");
-    let zepto_url = "https://api.zeptomail.in/v1.1/email";
+    let mut json_path = PathBuf::from(document_path.clone());
+    json_path.push("Memorabooth");
+    fs::create_dir_all(&json_path).map_err(|e| e.to_string())?;
+
+    json_path.push("emails.json");
+
+    let zepto_url = "https://api.zeptomail.in/v1.1/email/template";
 
     let client = Client::new();
 
     let mut emails: Vec<Value> = if json_path.exists() {
         let mut file = File::open(&json_path).map_err(|e| format!("Failed to open file: {}", e))?;
         let mut buffer = Vec::new();
-        file.read_to_end(&mut buffer).map_err(|e| format!("Failed to read file: {}", e))?;
+        file.read_to_end(&mut buffer)
+            .map_err(|e| format!("Failed to read file: {}", e))?;
         serde_json::from_slice(&buffer).unwrap_or_else(|_| vec![])
     } else {
         return Err("No pending emails.".to_string());
@@ -129,6 +179,7 @@ async fn send_email_req(document_path: String) -> Result<String, String> {
         }
 
         let email_data = json!({
+            "template_key": TEMPLATE_KEY,
             "from": {
                 "address": "memories@memorabooth.com",
                 "name": "Memorabooth"
@@ -138,8 +189,6 @@ async fn send_email_req(document_path: String) -> Result<String, String> {
                     "address": user_email
                 }
             }],
-            "subject": "Your memories at the Memora Photobooth!",
-            "htmlbody": "<p>Here are your photos from the photobooth!</p>",
             "attachments": attachments
         });
 
@@ -163,7 +212,10 @@ async fn send_email_req(document_path: String) -> Result<String, String> {
                 }
             }
             Ok(res) => {
-                return Err(format!("Failed to send email: {:?}", res.text().await.unwrap_or_default()));
+                return Err(format!(
+                    "Failed to send email: {:?}",
+                    res.text().await.unwrap_or_default()
+                ));
             }
             Err(e) => {
                 return Err(format!("Error: {}", e));
@@ -186,7 +238,12 @@ async fn send_email_req(document_path: String) -> Result<String, String> {
     Ok("Emails sent successfully via ZeptoMail!".to_string())
 }
 
-fn format_files(document_path: String, user_email: String, photo_paths: Vec<String>, layout: Layout) -> Result<Vec<String>, Box<dyn Error>> {
+fn format_files(
+    document_path: String,
+    user_email: String,
+    photo_paths: Vec<String>,
+    layout: Layout,
+) -> Result<Vec<String>, Box<dyn Error>> {
     let email_prefix = user_email.split('@').next().unwrap_or("unknown");
     let storage_dir = PathBuf::from(&document_path).join("Memorabooth");
 
@@ -221,9 +278,12 @@ fn format_files(document_path: String, user_email: String, photo_paths: Vec<Stri
         let polaroid_height = resized_height + (2 * border_width) + 120;
 
         // Create Polaroid-style canvas
-        let mut polaroid = RgbaImage::from_pixel(polaroid_size, polaroid_height, Rgba([255, 255, 255, 255]));
+        let mut polaroid =
+            RgbaImage::from_pixel(polaroid_size, polaroid_height, Rgba([255, 255, 255, 255]));
 
-        polaroid.copy_from(&resized, border_width, border_width).map_err(|e| format!("Failed to place photo: {}", e))?;
+        polaroid
+            .copy_from(&resized, border_width, border_width)
+            .map_err(|e| format!("Failed to place photo: {}", e))?;
 
         // Add date (Red)
         draw_text_mut(
@@ -240,7 +300,7 @@ fn format_files(document_path: String, user_email: String, photo_paths: Vec<Stri
         draw_text_mut(
             &mut polaroid,
             Rgba([78, 52, 46, 255]), // Blue
-            ((polaroid_size - 600)).try_into().unwrap(),
+            (polaroid_size - 600).try_into().unwrap(),
             (polaroid_height - border_width - 80).try_into().unwrap(),
             PxScale::from(70.0),
             &font,
@@ -248,7 +308,9 @@ fn format_files(document_path: String, user_email: String, photo_paths: Vec<Stri
         );
 
         // Save the polaroid image
-        polaroid.save(&new_path).map_err(|e| format!("Failed to save polaroid image: {}", e))?;
+        polaroid
+            .save(&new_path)
+            .map_err(|e| format!("Failed to save polaroid image: {}", e))?;
         renamed_paths.push(new_path.to_string_lossy().to_string());
         polaroid_images.push(polaroid);
     }
@@ -258,26 +320,32 @@ fn format_files(document_path: String, user_email: String, photo_paths: Vec<Stri
         let gap_px = 20;
         let padded_collage_size = (collage_size.0 + (2 * gap_px), collage_size.1 + (2 * gap_px));
         let collage_path = storage_dir.join(format!("{}_collage.png", email_prefix));
-        let mut collage = RgbaImage::from_pixel(padded_collage_size.0, padded_collage_size.1, Rgba([255, 255, 255, 255]));
-    
+        let mut collage = RgbaImage::from_pixel(
+            padded_collage_size.0,
+            padded_collage_size.1,
+            Rgba([255, 255, 255, 255]),
+        );
+
         let cell_width = (collage_size.0 - gap_px) / 2;
         let cell_height = (collage_size.1 - 100 - (gap_px * 3)) / 4;
-    
+
         for (i, photo) in photo_paths.iter().enumerate() {
             let y_offset = gap_px + (i as u32 * (cell_height + gap_px));
-    
+
             let img = image::open(photo).map_err(|e| format!("Failed to load image: {}", e))?;
             let resized = image::imageops::resize(&img, cell_width, cell_height, Lanczos3);
-    
+
             let left_x_offset = gap_px;
             let right_x_offset = cell_width + (2 * gap_px);
-    
-            collage.copy_from(&resized, left_x_offset, y_offset)
+
+            collage
+                .copy_from(&resized, left_x_offset, y_offset)
                 .map_err(|e| format!("Failed to place photo in left column: {}", e))?;
-            collage.copy_from(&resized, right_x_offset, y_offset)
+            collage
+                .copy_from(&resized, right_x_offset, y_offset)
                 .map_err(|e| format!("Failed to place photo in right column: {}", e))?;
         }
-    
+
         // Add "Memorabooth" text at the bottom, centered
         draw_text_mut(
             &mut collage,
@@ -288,9 +356,11 @@ fn format_files(document_path: String, user_email: String, photo_paths: Vec<Stri
             &font,
             "M E M O R A B O O T H",
         );
-    
+
         // Save the collage
-        collage.save(&collage_path).map_err(|e| format!("Failed to save collage: {}", e))?;
+        collage
+            .save(&collage_path)
+            .map_err(|e| format!("Failed to save collage: {}", e))?;
         renamed_paths.push(collage_path.to_string_lossy().to_string());
     }
 

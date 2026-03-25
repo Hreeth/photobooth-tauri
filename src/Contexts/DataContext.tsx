@@ -27,6 +27,8 @@ export interface Plan {
 
 export interface LayoutData {
   kind: Layout,
+  title: string,
+  disclaimer: string,
   disabled: boolean
 }
 
@@ -94,16 +96,22 @@ export default function DataProvider({ children }: { children: React.ReactNode }
 
     const defaultLayouts = useMemo<LayoutData[]>(() => [
         {
+            title: "Big frame.\nOwn it.",
             kind: Layout.A,
-            disabled: false
+            disabled: false,
+            disclaimer: "1-2 people"
         },
         {
+            title: "Four shots.\nMake them count.",
             kind: Layout.B,
-            disabled: false
+            disabled: false,
+            disclaimer: "1-2 per shot"
         },
         {
+            title: "Full frame.\nFull energy.",
             kind: Layout.C,
-            disabled: false
+            disabled: false,
+            disclaimer: "up to 5 people"
         },
     ], [])
 

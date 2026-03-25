@@ -21,7 +21,12 @@ export default function LayoutSelectable({
         <div className="selectable-content">
           <img src={`/Layout ${data.kind.toString()}.png`} alt={data.kind.toString()} />
         </div>
-        <div className="selectable-details">{`Layout ${data.kind}`}</div>
+        <div className="selectable-details">
+          {data.title.split(".")[0]}.
+          <br />
+          {data.title.split(".")[1]}.
+        </div>
+        <div className="selectable-disclaimer">{data.disclaimer}</div>
     </button>
   )
 }

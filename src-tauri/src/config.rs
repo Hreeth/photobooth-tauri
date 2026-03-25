@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::imaging::Layout;
 
 const PRICING_VERSION: u32 = 1;
-const LAYOUTS_VERSION: u32 = 1;
+const LAYOUTS_VERSION: u32 = 2;
 const PAGES_VERSION: u32 = 1;
 
 #[derive(Serialize, Deserialize)]
@@ -25,7 +25,9 @@ pub struct Plan {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct LayoutData {
     pub kind: Layout,
-    pub disabled: bool
+    pub disabled: bool,
+    pub title: String,
+    pub disclaimer: String
 }
 
 #[tauri::command]

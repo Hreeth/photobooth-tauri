@@ -495,17 +495,20 @@ fn apply_layout_c(
         }
     }
 
-    let label = "MEMORABOOTH".to_string();
-    let label_font_src = include_bytes!("../fonts/Futura.ttf");
+    let date = Local::now().format("%d.%m.%Y").to_string();
+    let label = "SRM RMP - HOSTEL DAY '26".to_string();
+    let label_font_src = include_bytes!("../fonts/Serati Italic.ttf");
+    let date_font_src = include_bytes!("../fonts/GlacialIndifference-Bold.otf");
     let label_font = FontArc::try_from_slice(label_font_src as &[u8])
         .expect("Failed to load font");
+    let date_font = FontArc::try_from_slice(date_font_src as &[u8])
+        .expect("Failed to load font");
 
-    let label_scale: PxScale = PxScale {
-        x: 60.0,
-        y: 60.0
-    };
+    let label_scale = PxScale { x: 44.0, y: 44.0 };
+    let date_scale = PxScale { x: 41.0, y: 41.0 };
 
-    let text_color = if color_mode == "B&W" {
+    let label_color = Rgba([95, 17, 17, 255]);
+    let date_color = if color_mode == "B&W" {
         Rgba([255, 255, 255, 255])
     } else {
         Rgba([0, 0, 0, 255])
@@ -515,17 +518,23 @@ fn apply_layout_c(
         let glyph_id = label_font.glyph_id(c);
         label_font.as_scaled(label_scale.y).h_advance(glyph_id)
     }).sum();
+    let date_width: f32 = date.chars().map(|c| {
+        let glyph_id = date_font.glyph_id(c);
+        date_font.as_scaled(date_scale.y).h_advance(glyph_id)
+    }).sum();
 
-    let label_x = ((cell_width as f32 - label_width) / 2.0) as i32;
+    let date_x = (((WIDTH / 2) as f32 - date_width) / 2.0) as i32;
+    let label_x = (((WIDTH / 2) as f32 - label_width) / 2.0) as i32;
 
     let branding_start_y = HEIGHT - branding_height;
     let label_y = (branding_start_y + 6) as i32;
+    let date_y = (branding_start_y + 60) as i32;
 
     
     // Draw title first
     draw_text_mut(
         &mut canvas,
-        text_color,
+        label_color,
         label_x,
         label_y,
         label_scale,
@@ -534,7 +543,7 @@ fn apply_layout_c(
     );
     draw_text_mut(
         &mut canvas,
-        text_color,
+        label_color,
         label_x + (cell_width + center_gap) as i32,
         label_y,
         label_scale,
@@ -542,6 +551,25 @@ fn apply_layout_c(
         &label
     );
 
+    // date
+    draw_text_mut(
+        &mut canvas,
+        date_color,
+        date_x,
+        date_y,
+        date_scale,
+        &date_font,
+        &date
+    );
+    draw_text_mut(
+        &mut canvas,
+        date_color,
+        date_x + (cell_width + center_gap) as i32,
+        date_y,
+        date_scale,
+        &date_font,
+        &date
+    );
     
     Ok(canvas)
 }

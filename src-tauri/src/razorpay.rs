@@ -1,7 +1,10 @@
 use chrono::{Duration, Utc};
 
+use once_cell::sync::Lazy;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+
+static RZP_CLIENT: Lazy<Client> = Lazy::new(|| Client::new());
 
 #[derive(Serialize)]
 pub struct RazorpayQrRequest {
@@ -31,7 +34,7 @@ pub async fn create_qr(amount: u64, close_by_secs: i64) -> Result<RazorpayQrResp
   let key_secret = dotenv_codegen::dotenv!("RAZORPAY_KEY_SECRET");
 
   let url = "https://api.razorpay.com/v1/payments/qr_codes";
-  let client = Client::new();
+  let client = &*RZP_CLIENT;
 
   let close_by = (Utc::now() + Duration::seconds(close_by_secs)).timestamp() as u64;
 
@@ -66,7 +69,7 @@ pub async fn check_payment_status(qr_code_id: String) -> Result<bool, String> {
   let key_secret = dotenv_codegen::dotenv!("RAZORPAY_KEY_SECRET");
 
   let url = format!("https://api.razorpay.com/v1/payments/qr_codes/{}", qr_code_id);
-  let client = Client::new();
+  let client = &*RZP_CLIENT;
 
   let res = client
     .get(url)

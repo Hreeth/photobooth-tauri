@@ -55,7 +55,6 @@ export default function usePayment() {
                 }
             } catch (err) {
                 console.error("Failed to check payment status:", err)
-                clearInterval(interval)
             }
         }, 2000);
 

@@ -22,6 +22,11 @@ export default function usePayment() {
         try {
             const res = await invoke<QrResponse>('create_qr', { amount: amt, closeBySecs: 180 })
             setQrCode(res)
+
+            let img = new Image()
+            img.src = res.image_url
+            await img.decode()
+
             setPaid(null)
             pollPaymentStatus(res)
             return res
@@ -34,7 +39,7 @@ export default function usePayment() {
         }
     }, [])
 
-    const pollPaymentStatus = useCallback((qr: QrResponse) => {
+    const pollPaymentStatus = (qr: QrResponse) => {
         if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current)
 
         const interval = setInterval(async () => {
@@ -52,6 +57,7 @@ export default function usePayment() {
                     console.log("Payment successful")
                     setPaid(true)
                     clearInterval(interval)
+                    pollingIntervalRef.current = null
                 }
             } catch (err) {
                 console.error("Failed to check payment status:", err)
@@ -59,7 +65,7 @@ export default function usePayment() {
         }, 2000);
 
         pollingIntervalRef.current = interval
-    }, [])
+    }
 
     return { qrCode, loading, error, fetchQrCode, paid, pollingIntervalRef }
 }

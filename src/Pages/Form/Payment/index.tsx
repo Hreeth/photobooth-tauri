@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
 import Header from '../../../Components/Header'
 
@@ -74,20 +75,38 @@ export default function Payment() {
             navigate(-1)
           }}
         />
+        {loading && (
+          <div
+            style={{
+              width: "100%",
+              height: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              placeItems: "center"
+            }}
+          >
+            <DotLottieReact
+              className='greeting-progress-loader'
+              src='/loader.lottie'
+              loop
+              autoplay
+            />
+          </div>
+        )}
         {
           !loading && (
-          <div className='payment-container'>
-            <div className="payment-heading">
-              <div className="payment-title">Scan the QR to make payment</div>
-              <div className="payment-subtitle">QR will expire in {time}s</div>
-            </div>
-            <div className="qr-container">
-              <div className="qr-title">Payment</div>
-              <div id="qr">
-                <img src={qrCode?.image_url} alt="" />
+            <div className='payment-container'>
+              <div className="payment-heading">
+                <div className="payment-title">Scan the QR to make payment</div>
+                <div className="payment-subtitle">QR will expire in {time}s</div>
+              </div>
+              <div className="qr-container">
+                <div className="qr-title">Payment</div>
+                <div id="qr">
+                  <img src={qrCode?.image_url} alt="" />
+                </div>
               </div>
             </div>
-          </div>
           )
         }
     </motion.div>

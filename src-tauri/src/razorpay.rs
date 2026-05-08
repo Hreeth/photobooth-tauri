@@ -25,7 +25,7 @@ pub struct RazorpayQrResponse {
 
 #[derive(Deserialize)]
 pub struct RazorpayPollingResponse {
-  pub close_reason: Option<String>
+  pub payments_amount_received: Option<u64>
 }
 
 #[tauri::command(async)]
@@ -64,7 +64,6 @@ pub async fn create_qr(amount: u64, close_by_secs: i64) -> Result<RazorpayQrResp
 
 #[tauri::command(async)]
 pub async fn check_payment_status(qr_code_id: String) -> Result<bool, String> {
-
   let key_id = dotenv_codegen::dotenv!("RAZORPAY_KEY_ID");
   let key_secret = dotenv_codegen::dotenv!("RAZORPAY_KEY_SECRET");
 
@@ -84,8 +83,11 @@ pub async fn check_payment_status(qr_code_id: String) -> Result<bool, String> {
 
   let res_data: RazorpayPollingResponse = res.json().await.map_err(|e| format!("Parse error: {}", e))?;
 
-  match res_data.close_reason.as_deref() {
-    Some("paid") => Ok(true),
-    _ => Ok(false)
+  if let Some(amount) = res_data.payments_amount_received {
+      if amount > 0 {
+        return Ok(true);
+      }
   }
+
+  Ok(false)
 }

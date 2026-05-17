@@ -183,67 +183,124 @@ fn apply_layout_a(
 ) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, String> {
     let branding_height = ((2f32 / 2.54) * DPI).round() as u32;
 
-    let cell_height = HEIGHT - branding_height - border_px;
+    // 2 vertical photos
+    let available_height =
+        HEIGHT - branding_height - (3 * border_px);
+
+    let cell_height = available_height / 2;
     let cell_width = WIDTH - (2 * border_px);
 
-    let mut canvas = RgbaImage::from_pixel(WIDTH, HEIGHT, bg_color);
+    let mut canvas =
+        RgbaImage::from_pixel(WIDTH, HEIGHT, bg_color);
 
-    let photo = match image::open(&images[0]) {
-        Ok(img) => {
-            let (orig_w, orig_h) = img.dimensions();
-            let cell_aspect = cell_width as f32 / cell_height as f32;
-            let img_aspect = orig_w as f32 / orig_h as f32;
+    for (i, img_path) in images.iter().enumerate().take(2) {
+        let y_offset =
+            border_px + (i as u32 * (cell_height + border_px));
 
-            let (crop_x, crop_y, crop_w, crop_h) = if img_aspect > cell_aspect {
-                let new_w = (orig_h as f32 * cell_aspect).round() as u32;
-                let x = (orig_w - new_w) / 2;
-                (x, 0, new_w, orig_h)
-            } else {
-                let new_h = (orig_w as f32 / cell_aspect).round() as u32;
-                let y = (orig_h - new_h) / 2;
-                (0, y, orig_w, new_h)
-            };
+        let photo = match image::open(img_path) {
+            Ok(img) => {
+                let (orig_w, orig_h) = img.dimensions();
 
-            let cropped = image::imageops::crop_imm(&img, crop_x, crop_y, crop_w, crop_h).to_image();
-            image::imageops::resize(
-                &cropped,
-                cell_width,
-                cell_height,
-                image::imageops::FilterType::Lanczos3,
-            )
+                let cell_aspect =
+                    cell_width as f32 / cell_height as f32;
+
+                let img_aspect =
+                    orig_w as f32 / orig_h as f32;
+
+                let (crop_x, crop_y, crop_w, crop_h) =
+                    if img_aspect > cell_aspect {
+                        let new_w =
+                            (orig_h as f32 * cell_aspect)
+                                .round() as u32;
+
+                        let x = (orig_w - new_w) / 2;
+
+                        (x, 0, new_w, orig_h)
+                    } else {
+                        let new_h =
+                            (orig_w as f32 / cell_aspect)
+                                .round() as u32;
+
+                        let y = (orig_h - new_h) / 2;
+
+                        (0, y, orig_w, new_h)
+                    };
+
+                let cropped = image::imageops::crop_imm(
+                    &img,
+                    crop_x,
+                    crop_y,
+                    crop_w,
+                    crop_h
+                )
+                .to_image();
+
+                image::imageops::resize(
+                    &cropped,
+                    cell_width,
+                    cell_height,
+                    image::imageops::FilterType::Lanczos3,
+                )
+            }
+            Err(e) => {
+                eprintln!(
+                    "Failed to open image {}: {}",
+                    img_path,
+                    e
+                );
+
+                return Err(format!(
+                    "Failed to open image {}: {}",
+                    img_path,
+                    e
+                ));
+            }
+        };
+
+        if let Err(e) =
+            canvas.copy_from(&photo, border_px, y_offset)
+        {
+            eprintln!("photo error: {}", e);
+
+            return Err(format!("photo error: {}", e));
         }
-        Err(e) => {
-            eprintln!("Failed to open image {}: {}", &images[0], e);
-            return Err(format!("Failed to open image {}: {}", &images[0], e));
-        }
-    };
-    
-    if let Err(e) = canvas.copy_from(&photo, border_px, border_px) {
-        eprintln!("photo error: {}", e);
-        return Err(format!("photo error: {}", e));
     }
 
     if color_mode == "B&W" {
         for pixel in canvas.pixels_mut() {
             let [r, g, b, a] = pixel.0;
-            let gray = ((r as u32 + g as u32 + b as u32) / 3) as u8;
+
+            let gray =
+                ((r as u32 + g as u32 + b as u32) / 3) as u8;
+
             *pixel = Rgba([gray, gray, gray, a]);
         }
     }
 
     let date = Local::now().format("%d.%m.%Y").to_string();
     let label = "MEMORABOOTH".to_string();
-    let label_font_src = include_bytes!("../fonts/Futura.ttf");
-    let data_font_src = include_bytes!("../fonts/JMH Typewriter.ttf");
-    let label_font = FontArc::try_from_slice(label_font_src as &[u8])
-        .expect("Failed to load font");
-    let date_font = FontArc::try_from_slice(data_font_src as &[u8])
-        .expect("Failed to load font");
+
+    let label_font_src =
+        include_bytes!("../fonts/Futura.ttf");
+
+    let data_font_src =
+        include_bytes!("../fonts/JMH Typewriter.ttf");
+
+    let label_font = FontArc::try_from_slice(
+        label_font_src as &[u8]
+    )
+    .expect("Failed to load font");
+
+    let date_font = FontArc::try_from_slice(
+        data_font_src as &[u8]
+    )
+    .expect("Failed to load font");
 
     let label_scale: PxScale = PxScale {
         x: 100.0,
         y: 100.0
     };
+
     let date_scale: PxScale = PxScale {
         x: 80.0,
         y: 80.0
@@ -257,22 +314,31 @@ fn apply_layout_a(
 
     let date_width: f32 = date.chars().map(|c| {
         let glyph_id = date_font.glyph_id(c);
-        date_font.as_scaled(date_scale.y).h_advance(glyph_id)
+
+        date_font
+            .as_scaled(date_scale.y)
+            .h_advance(glyph_id)
     }).sum();
+
     let label_width: f32 = label.chars().map(|c| {
         let glyph_id = label_font.glyph_id(c);
-        label_font.as_scaled(label_scale.y).h_advance(glyph_id)
+
+        label_font
+            .as_scaled(label_scale.y)
+            .h_advance(glyph_id)
     }).sum();
 
-    let date_x = ((WIDTH as f32 - date_width) / 2.0) as i32;
-    let label_x = ((WIDTH as f32 - label_width) / 2.0) as i32;
+    let date_x =
+        ((WIDTH as f32 - date_width) / 2.0) as i32;
+
+    let label_x =
+        ((WIDTH as f32 - label_width) / 2.0) as i32;
 
     let branding_start_y = HEIGHT - branding_height;
+
     let label_y = (branding_start_y + 20) as i32;
     let date_y = (branding_start_y + 110) as i32;
 
-    
-    // Draw title first (above)
     draw_text_mut(
         &mut canvas,
         text_color,
@@ -283,7 +349,6 @@ fn apply_layout_a(
         &label
     );
 
-    // Draw date below
     draw_text_mut(
         &mut canvas,
         text_color,
@@ -293,7 +358,7 @@ fn apply_layout_a(
         &date_font,
         &date
     );
-    
+
     Ok(canvas)
 }
 
@@ -303,13 +368,22 @@ fn apply_layout_b(
     bg_color: Rgba<u8>,
     border_px: u32
 ) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, String> {
-    let branding_height = ((2f32 / 2.54) * DPI).round() as u32;
+    // Internally work in landscape orientation (6x4)
+    let landscape_width = HEIGHT;
+    let landscape_height = WIDTH;
 
-    let available_height = HEIGHT - branding_height - (2 * border_px);
-    let cell_width = (WIDTH - (3 * border_px)) / 2;
+    let branding_height = ((1f32 / 2.54) * DPI).round() as u32;
+
+    let available_height = landscape_height - branding_height - (2 * border_px);
+
+    let cell_width = (landscape_width - (3 * border_px)) / 2;
     let cell_height = available_height / 2;
 
-    let mut canvas = RgbaImage::from_pixel(WIDTH, HEIGHT, bg_color);
+    let mut canvas = RgbaImage::from_pixel(
+        landscape_width,
+        landscape_height,
+        bg_color
+    );
 
     for (i, img_path) in images.iter().enumerate().take(4) {
         let y_offset = border_px + (i as u32 / 2) * (cell_height + border_px);
@@ -318,20 +392,32 @@ fn apply_layout_b(
         let photo = match image::open(img_path) {
             Ok(img) => {
                 let (orig_w, orig_h) = img.dimensions();
+
                 let cell_aspect = cell_width as f32 / cell_height as f32;
                 let img_aspect = orig_w as f32 / orig_h as f32;
 
-                let (crop_x, crop_y, crop_w, crop_h) = if img_aspect > cell_aspect {
-                    let new_w = (orig_h as f32 * cell_aspect).round() as u32;
-                    let x = (orig_w - new_w) / 2;
-                    (x, 0, new_w, orig_h)
-                } else {
-                    let new_h = (orig_w as f32 / cell_aspect).round() as u32;
-                    let y = (orig_h - new_h) / 2;
-                    (0, y, orig_w, new_h)
-                };
+                let (crop_x, crop_y, crop_w, crop_h) =
+                    if img_aspect > cell_aspect {
+                        let new_w =
+                            (orig_h as f32 * cell_aspect).round() as u32;
+                        let x = (orig_w - new_w) / 2;
+                        (x, 0, new_w, orig_h)
+                    } else {
+                        let new_h =
+                            (orig_w as f32 / cell_aspect).round() as u32;
+                        let y = (orig_h - new_h) / 2;
+                        (0, y, orig_w, new_h)
+                    };
 
-                let cropped = image::imageops::crop_imm(&img, crop_x, crop_y, crop_w, crop_h).to_image();
+                let cropped = image::imageops::crop_imm(
+                    &img,
+                    crop_x,
+                    crop_y,
+                    crop_w,
+                    crop_h,
+                )
+                .to_image();
+
                 image::imageops::resize(
                     &cropped,
                     cell_width,
@@ -341,7 +427,10 @@ fn apply_layout_b(
             }
             Err(e) => {
                 eprintln!("Failed to open image {}: {}", img_path, e);
-                return Err(format!("Failed to open image {}: {}", img_path, e));
+                return Err(format!(
+                    "Failed to open image {}: {}",
+                    img_path, e
+                ));
             }
         };
 
@@ -354,27 +443,26 @@ fn apply_layout_b(
     if color_mode == "B&W" {
         for pixel in canvas.pixels_mut() {
             let [r, g, b, a] = pixel.0;
-            let gray = ((r as u32 + g as u32 + b as u32) / 3) as u8;
+
+            let gray =
+                ((r as u32 + g as u32 + b as u32) / 3) as u8;
+
             *pixel = Rgba([gray, gray, gray, a]);
         }
     }
 
-    let date = Local::now().format("%d.%m.%Y").to_string();
     let label = "MEMORABOOTH".to_string();
+
     let label_font_src = include_bytes!("../fonts/Futura.ttf");
-    let data_font_src = include_bytes!("../fonts/JMH Typewriter.ttf");
-    let label_font = FontArc::try_from_slice(label_font_src as &[u8])
-        .expect("Failed to load font");
-    let date_font = FontArc::try_from_slice(data_font_src as &[u8])
-        .expect("Failed to load font");
+
+    let label_font = FontArc::try_from_slice(
+        label_font_src as &[u8]
+    )
+    .expect("Failed to load font");
 
     let label_scale: PxScale = PxScale {
         x: 100.0,
         y: 100.0
-    };
-    let date_scale: PxScale = PxScale {
-        x: 80.0,
-        y: 80.0
     };
 
     let text_color = if color_mode == "B&W" {
@@ -383,24 +471,22 @@ fn apply_layout_b(
         Rgba([0, 0, 0, 255])
     };
 
-    let date_width: f32 = date.chars().map(|c| {
-        let glyph_id = date_font.glyph_id(c);
-        date_font.as_scaled(date_scale.y).h_advance(glyph_id)
-    }).sum();
     let label_width: f32 = label.chars().map(|c| {
         let glyph_id = label_font.glyph_id(c);
-        label_font.as_scaled(label_scale.y).h_advance(glyph_id)
+
+        label_font
+            .as_scaled(label_scale.y)
+            .h_advance(glyph_id)
     }).sum();
 
-    let date_x = ((WIDTH as f32 - date_width) / 2.0) as i32;
-    let label_x = ((WIDTH as f32 - label_width) / 2.0) as i32;
+    let label_x =
+        ((landscape_width as f32 - label_width) / 2.0) as i32;
 
-    let branding_start_y = HEIGHT - branding_height;
+    let branding_start_y =
+        landscape_height - branding_height;
+
     let label_y = (branding_start_y + 20) as i32;
-    let date_y = (branding_start_y + 110) as i32;
 
-    
-    // Draw title first (above)
     draw_text_mut(
         &mut canvas,
         text_color,
@@ -411,19 +497,12 @@ fn apply_layout_b(
         &label
     );
 
-    // Draw date below
-    draw_text_mut(
-        &mut canvas,
-        text_color,
-        date_x,
-        date_y,
-        date_scale,
-        &date_font,
-        &date
-    );
-    
-    Ok(canvas)
+    // Rotate back into portrait 4x6
+    let rotated = image::imageops::rotate90(&canvas);
+
+    Ok(rotated)
 }
+
 
 fn apply_layout_c(
     images: Vec<String>,

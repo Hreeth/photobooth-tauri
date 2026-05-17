@@ -27,7 +27,7 @@ function Countdown() {
   useEffect(() => {
     if (isStarting) return
 
-    let photo_num = options.layout == Layout.A ? 1 : 4;
+    let photo_num = options.layout == Layout.A ? 2 : 4;
 
     if (count === 0 && photoIndex <= photo_num) {
       async function capturePhoto() {

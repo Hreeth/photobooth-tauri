@@ -39,9 +39,17 @@ export default function Pages() {
           <input
             type="number"
             value={localPages}
-            onChange={(e) => setLocalPages(Number(e.target.value))}
+            onChange={(e) => setLocalPages(Number(e.target.value) > 699 ? 699 : Number(e.target.value))}
             className="page-number-input"
+            max={699}
+            min={0}
           />
+          <button
+            className='reset-btn'
+            onClick={() => setLocalPages(0)}
+          >
+            Reset
+          </button>
         </div>
       </motion.div>
 

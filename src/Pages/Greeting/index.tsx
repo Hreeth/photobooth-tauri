@@ -48,8 +48,11 @@ export default function Greeting() {
           layout: options.layout
         })
         
-        await savePages(pages + options.copies!)
-        setPages(pages + options.copies!)
+        const updatedPages = pages + options.copies!
+        const finalPages = updatedPages > 699 ? 0 : updatedPages
+
+        await savePages(finalPages)
+        setPages(finalPages)
 
         console.log("Print successful")
       } catch (err) {

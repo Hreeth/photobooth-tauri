@@ -28,8 +28,7 @@
 }
 
 .layout-container .layouts-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
     justify-content: center;
     align-items: center;
     gap: 2rem;

@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import { pictureDir } from "@tauri-apps/api/path";
 
-import { Layout, Print, useData } from "../../Contexts/DataContext";
+import { Layout, useData } from "../../Contexts/DataContext";
 
 import './styles.css'
-import { path } from "@tauri-apps/api";
 
 function Countdown() {
   const navigate = useNavigate();
-  const [count, setCount] = useState(3);
+  const [count, setCount] = useState(5);
   const [photoIndex, setPhotoIndex] = useState(1)
   const [isStarting, setIsStarting] = useState(true)
   const { options, setImages } = useData();
@@ -34,10 +34,7 @@ function Countdown() {
         const pictures = await pictureDir();
         try {
           let img_path = await path.join(pictures, `photo-${photoIndex}.jpg`)
-          let img = await invoke<string>("capture", {
-            outputPath: img_path,
-            colorMode: options.print == Print.COLOR ? "COLOR" : "B&W"
-          });
+          let img = await invoke<string>("capture", { outputPath: img_path });
           setImages(prev => [...prev, img]);
         } catch (err) {
           console.error("Failed to capture image:", err);
@@ -48,7 +45,7 @@ function Countdown() {
         if (photoIndex < photo_num) {
           setTimeout(() => {
             setPhotoIndex(prev => prev + 1);
-            setCount(3);
+            setCount(5);
           }, 1000);
         } else {
           setTimeout(() => {

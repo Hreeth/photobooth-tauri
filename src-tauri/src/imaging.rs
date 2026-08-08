@@ -1,7 +1,6 @@
-use std::{fs, path::PathBuf, process::Command};
+use std::{path::PathBuf, process::Command};
 
 use ab_glyph::{Font, FontArc, PxScale, ScaleFont};
-use chrono::Local;
 use image::{GenericImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use imageproc::drawing::draw_text_mut;
 use serde::{Deserialize, Serialize};
@@ -16,74 +15,73 @@ const BORDER: f32 = 0.15f32;
 pub enum Layout {
     A,
     B,
-    C
+    C,
 }
-
 
 #[tauri::command(async)]
-pub async fn capture(
-    output_path: &str,
-    color_mode: &str
-) -> Result<String, String> {
-    let mut cmd_base = Command::new("libcamera-still");
-    let cmd = cmd_base
-        .arg("-t")
-        .arg("3000")
-        .arg("--autofocus-mode")
-        .arg("continuous")
-        .arg("--autofocus-range")
-        .arg("normal")
-        .arg("--denoise")
-        .arg("cdn_off")
-        .arg("--shutter")
-        .arg("18000")
-        .arg("--gain")
-        .arg("10")
-        .arg("--ev")
-        .arg("0")
-        .arg("--roi")
-        .arg("0.075,0.15,0.79,0.85")
-        .arg("-p")
-        .arg("-10,-10,1920,1080")
-        .arg("-o")
-        .arg(output_path);
-    
-    // if color_mode != "B&W" {
-    //     cmd
-    //         .arg("--awbgains")
-    //         .arg("1.8,3.2");
-    // }
-        
-    let result = cmd.output();
+pub async fn capture(output_path: &str) -> Result<String, String> {
+    #[cfg(target_os = "linux")]
+    {
+        let mut cmd_base = Command::new("libcamera-still");
+        let cmd = cmd_base
+            .arg("-t")
+            .arg("3000")
+            .arg("--autofocus-mode")
+            .arg("continuous")
+            .arg("--autofocus-range")
+            .arg("normal")
+            .arg("--denoise")
+            .arg("cdn_off")
+            .arg("--shutter")
+            .arg("18000")
+            .arg("--gain")
+            .arg("10")
+            .arg("--ev")
+            .arg("0")
+            .arg("--roi")
+            .arg("0.075,0.15,0.79,0.85")
+            .arg("-p")
+            .arg("-10,-10,1920,1080")
+            .arg("-o")
+            .arg(output_path);
 
-    match result {
-        Ok(output) => {
-            let stdout_str = String::from_utf8_lossy(&output.stdout);
-            let stderr_str = String::from_utf8_lossy(&output.stderr);
-    
-            if !output.status.success() {
-                println!("stderr: {}", stderr_str);
+        // if color_mode != "B&W" {
+        //     cmd
+        //         .arg("--awbgains")
+        //         .arg("1.8,3.2");
+        // }
+
+        let result = cmd.output();
+
+        return match result {
+            Ok(output) => {
+                let stdout_str = String::from_utf8_lossy(&output.stdout);
+                let stderr_str = String::from_utf8_lossy(&output.stderr);
+
+                if !output.status.success() {
+                    println!("stderr: {}", stderr_str);
+                }
+
+                println!("stdout: {}", stdout_str);
+                Ok(output_path.to_string())
             }
-            
-            println!("stdout: {}", stdout_str);
-            Ok(output_path.to_string())
-        }
-        Err(e) => return Err(format!("Failed to execute capture command: {}", e)),
+            Err(e) => return Err(format!("Failed to execute capture command: {}", e)),
+        };
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    {
+        let sample_path = "sample.jpg"; // Replace with the actual path of your sample image
+
+        return match std::fs::copy(sample_path, output_path) {
+            Ok(_) => {
+                println!("Sample image copied to: {}", output_path);
+                Ok(output_path.to_string())
+            }
+            Err(e) => Err(format!("Failed to copy sample image: {}", e)),
+        };
     }
 }
-
-// #[tauri::command]
-// pub fn capture(output_path: &str) -> Result<String, String> {
-//     let sample_path = "sample.jpg"; // Replace with the actual path of your sample image
-
-//     match fs::copy(sample_path, output_path) {
-//         Ok(_) => {
-//             println!("Sample image copied to: {}", output_path);
-//             Ok(output_path.to_string())
-//         }
-//         Err(e) => Err(format!("Failed to copy sample image: {}", e)),
-//     }
-// }
 
 #[tauri::command(async)]
 pub async fn print(
@@ -92,14 +90,10 @@ pub async fn print(
     output_path: &str,
     color_mode: &str,
     copies: usize,
-    layout: Layout
+    layout: Layout,
 ) -> Result<(), String> {
-    let bg_color = if color_mode == "B&W" {
-        Rgba([0, 0, 0, 255])
-    } else {
-        Rgba([255, 255, 255, 255])
-    };
-    
+    let bg_color = Rgba([0, 11, 141, 255]);
+
     let border_px = ((BORDER / 2.54) * DPI).round() as u32;
 
     let canvas = match layout {
@@ -139,31 +133,33 @@ pub async fn print(
     }
 
     let print_res = match layout {
-        Layout::A | Layout::B => {
-            Command::new("lp")
-                .arg("-o")
-                .arg("media=w288h432")
-                .arg("-o")
-                .arg("fit-to-page")
-                .arg("-n")
-                .arg(copies.to_string())
-                .arg(output_path)
-                .output()
-        },
-        Layout::C => {
-            Command::new("lp")
-                .arg("-n")
-                .arg(copies.to_string())
-                .arg(output_path)
-                .output()
-        }
+        Layout::A | Layout::B => Command::new("lp")
+            .arg("-o")
+            .arg("media=w288h432")
+            .arg("-o")
+            .arg("fit-to-page")
+            .arg("-n")
+            .arg(copies.to_string())
+            .arg(output_path)
+            .output(),
+        Layout::C => Command::new("lp")
+            .arg("-n")
+            .arg(copies.to_string())
+            .arg(output_path)
+            .output(),
     };
 
     match print_res {
         Ok(output) => {
             if !output.status.success() {
-                eprintln!("Failed to print: {}", String::from_utf8_lossy(&output.stderr));
-                return Err(format!("Failed to print: {}", String::from_utf8_lossy(&output.stderr)));
+                eprintln!(
+                    "Failed to print: {}",
+                    String::from_utf8_lossy(&output.stderr)
+                );
+                return Err(format!(
+                    "Failed to print: {}",
+                    String::from_utf8_lossy(&output.stderr)
+                ));
             }
         }
         Err(e) => {
@@ -179,165 +175,107 @@ fn apply_layout_a(
     images: Vec<String>,
     color_mode: &str,
     bg_color: Rgba<u8>,
-    border_px: u32
+    border_px: u32,
 ) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, String> {
     let branding_height = ((2f32 / 2.54) * DPI).round() as u32;
 
     // 2 vertical photos
-    let available_height =
-        HEIGHT - branding_height - (3 * border_px);
+    let available_height = HEIGHT - branding_height - (3 * border_px);
 
     let cell_height = available_height / 2;
     let cell_width = WIDTH - (2 * border_px);
 
-    let mut canvas =
-        RgbaImage::from_pixel(WIDTH, HEIGHT, bg_color);
+    let mut canvas = RgbaImage::from_pixel(WIDTH, HEIGHT, bg_color);
 
     for (i, img_path) in images.iter().enumerate().take(2) {
-        let y_offset =
-            border_px + (i as u32 * (cell_height + border_px));
+        let y_offset = border_px + (i as u32 * (cell_height + border_px));
 
         let photo = match image::open(img_path) {
             Ok(img) => {
                 let (orig_w, orig_h) = img.dimensions();
 
-                let cell_aspect =
-                    cell_width as f32 / cell_height as f32;
+                let cell_aspect = cell_width as f32 / cell_height as f32;
 
-                let img_aspect =
-                    orig_w as f32 / orig_h as f32;
+                let img_aspect = orig_w as f32 / orig_h as f32;
 
-                let (crop_x, crop_y, crop_w, crop_h) =
-                    if img_aspect > cell_aspect {
-                        let new_w =
-                            (orig_h as f32 * cell_aspect)
-                                .round() as u32;
+                let (crop_x, crop_y, crop_w, crop_h) = if img_aspect > cell_aspect {
+                    let new_w = (orig_h as f32 * cell_aspect).round() as u32;
 
-                        let x = (orig_w - new_w) / 2;
+                    let x = (orig_w - new_w) / 2;
 
-                        (x, 0, new_w, orig_h)
-                    } else {
-                        let new_h =
-                            (orig_w as f32 / cell_aspect)
-                                .round() as u32;
+                    (x, 0, new_w, orig_h)
+                } else {
+                    let new_h = (orig_w as f32 / cell_aspect).round() as u32;
 
-                        let y = (orig_h - new_h) / 2;
+                    let y = (orig_h - new_h) / 2;
 
-                        (0, y, orig_w, new_h)
-                    };
+                    (0, y, orig_w, new_h)
+                };
 
-                let cropped = image::imageops::crop_imm(
-                    &img,
-                    crop_x,
-                    crop_y,
-                    crop_w,
-                    crop_h
-                )
-                .to_image();
+                let cropped =
+                    image::imageops::crop_imm(&img, crop_x, crop_y, crop_w, crop_h).to_image();
 
-                image::imageops::resize(
+                let mut resized = image::imageops::resize(
                     &cropped,
                     cell_width,
                     cell_height,
                     image::imageops::FilterType::Lanczos3,
-                )
-            }
-            Err(e) => {
-                eprintln!(
-                    "Failed to open image {}: {}",
-                    img_path,
-                    e
                 );
 
-                return Err(format!(
-                    "Failed to open image {}: {}",
-                    img_path,
-                    e
-                ));
+                if color_mode == "B&W" {
+                    for pixel in resized.pixels_mut() {
+                        let [r, g, b, a] = pixel.0;
+
+                        let gray = ((r as u32 + g as u32 + b as u32) / 3) as u8;
+
+                        *pixel = Rgba([gray, gray, gray, a]);
+                    }
+                }
+
+                resized
+            }
+            Err(e) => {
+                eprintln!("Failed to open image {}: {}", img_path, e);
+
+                return Err(format!("Failed to open image {}: {}", img_path, e));
             }
         };
 
-        if let Err(e) =
-            canvas.copy_from(&photo, border_px, y_offset)
-        {
+        if let Err(e) = canvas.copy_from(&photo, border_px, y_offset) {
             eprintln!("photo error: {}", e);
 
             return Err(format!("photo error: {}", e));
         }
     }
 
-    if color_mode == "B&W" {
-        for pixel in canvas.pixels_mut() {
-            let [r, g, b, a] = pixel.0;
+    let label = "memora.".to_string();
 
-            let gray =
-                ((r as u32 + g as u32 + b as u32) / 3) as u8;
+    let label_font_src = include_bytes!("../fonts/Burgundia.otf");
 
-            *pixel = Rgba([gray, gray, gray, a]);
-        }
-    }
+    let label_font = FontArc::try_from_slice(label_font_src as &[u8]).expect("Failed to load font");
 
-    let date = Local::now().format("%d.%m.%Y").to_string();
-    let label = "MEMORABOOTH".to_string();
+    let label_scale = font_scale_for_height(&label_font, branding_height as f32 * 0.8);
 
-    let label_font_src =
-        include_bytes!("../fonts/Futura.ttf");
+    let text_color = Rgba([255, 255, 255, 255]);
 
-    let data_font_src =
-        include_bytes!("../fonts/JMH Typewriter.ttf");
+    let label_width: f32 = label
+        .chars()
+        .map(|c| {
+            let glyph_id = label_font.glyph_id(c);
 
-    let label_font = FontArc::try_from_slice(
-        label_font_src as &[u8]
-    )
-    .expect("Failed to load font");
+            label_font.as_scaled(label_scale.y).h_advance(glyph_id)
+        })
+        .sum();
 
-    let date_font = FontArc::try_from_slice(
-        data_font_src as &[u8]
-    )
-    .expect("Failed to load font");
+    let label_x = ((WIDTH as f32 - label_width) / 2.0) as i32;
 
-    let label_scale: PxScale = PxScale {
-        x: 100.0,
-        y: 100.0
-    };
-
-    let date_scale: PxScale = PxScale {
-        x: 80.0,
-        y: 80.0
-    };
-
-    let text_color = if color_mode == "B&W" {
-        Rgba([255, 255, 255, 255])
-    } else {
-        Rgba([0, 0, 0, 255])
-    };
-
-    let date_width: f32 = date.chars().map(|c| {
-        let glyph_id = date_font.glyph_id(c);
-
-        date_font
-            .as_scaled(date_scale.y)
-            .h_advance(glyph_id)
-    }).sum();
-
-    let label_width: f32 = label.chars().map(|c| {
-        let glyph_id = label_font.glyph_id(c);
-
-        label_font
-            .as_scaled(label_scale.y)
-            .h_advance(glyph_id)
-    }).sum();
-
-    let date_x =
-        ((WIDTH as f32 - date_width) / 2.0) as i32;
-
-    let label_x =
-        ((WIDTH as f32 - label_width) / 2.0) as i32;
+    let scaled_font = label_font.as_scaled(label_scale.y);
+    let text_visual_height = scaled_font.ascent() - scaled_font.descent();
 
     let branding_start_y = HEIGHT - branding_height;
+    let vertical_padding = (branding_height as f32 - text_visual_height) / 2.0;
 
-    let label_y = (branding_start_y + 20) as i32;
-    let date_y = (branding_start_y + 110) as i32;
+    let label_y = (branding_start_y as f32 + vertical_padding) as i32;
 
     draw_text_mut(
         &mut canvas,
@@ -346,17 +284,7 @@ fn apply_layout_a(
         label_y,
         label_scale,
         &label_font,
-        &label
-    );
-
-    draw_text_mut(
-        &mut canvas,
-        text_color,
-        date_x,
-        date_y,
-        date_scale,
-        &date_font,
-        &date
+        &label,
     );
 
     Ok(canvas)
@@ -366,7 +294,7 @@ fn apply_layout_b(
     images: Vec<String>,
     color_mode: &str,
     bg_color: Rgba<u8>,
-    border_px: u32
+    border_px: u32,
 ) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, String> {
     // Internally work in landscape orientation (6x4)
     let landscape_width = HEIGHT;
@@ -379,11 +307,7 @@ fn apply_layout_b(
     let cell_width = (landscape_width - (3 * border_px)) / 2;
     let cell_height = available_height / 2;
 
-    let mut canvas = RgbaImage::from_pixel(
-        landscape_width,
-        landscape_height,
-        bg_color
-    );
+    let mut canvas = RgbaImage::from_pixel(landscape_width, landscape_height, bg_color);
 
     for (i, img_path) in images.iter().enumerate().take(4) {
         let y_offset = border_px + (i as u32 / 2) * (cell_height + border_px);
@@ -396,41 +320,41 @@ fn apply_layout_b(
                 let cell_aspect = cell_width as f32 / cell_height as f32;
                 let img_aspect = orig_w as f32 / orig_h as f32;
 
-                let (crop_x, crop_y, crop_w, crop_h) =
-                    if img_aspect > cell_aspect {
-                        let new_w =
-                            (orig_h as f32 * cell_aspect).round() as u32;
-                        let x = (orig_w - new_w) / 2;
-                        (x, 0, new_w, orig_h)
-                    } else {
-                        let new_h =
-                            (orig_w as f32 / cell_aspect).round() as u32;
-                        let y = (orig_h - new_h) / 2;
-                        (0, y, orig_w, new_h)
-                    };
+                let (crop_x, crop_y, crop_w, crop_h) = if img_aspect > cell_aspect {
+                    let new_w = (orig_h as f32 * cell_aspect).round() as u32;
+                    let x = (orig_w - new_w) / 2;
+                    (x, 0, new_w, orig_h)
+                } else {
+                    let new_h = (orig_w as f32 / cell_aspect).round() as u32;
+                    let y = (orig_h - new_h) / 2;
+                    (0, y, orig_w, new_h)
+                };
 
-                let cropped = image::imageops::crop_imm(
-                    &img,
-                    crop_x,
-                    crop_y,
-                    crop_w,
-                    crop_h,
-                )
-                .to_image();
+                let cropped =
+                    image::imageops::crop_imm(&img, crop_x, crop_y, crop_w, crop_h).to_image();
 
-                image::imageops::resize(
+                let mut resized = image::imageops::resize(
                     &cropped,
                     cell_width,
                     cell_height,
                     image::imageops::FilterType::Lanczos3,
-                )
+                );
+
+                if color_mode == "B&W" {
+                    for pixel in resized.pixels_mut() {
+                        let [r, g, b, a] = pixel.0;
+
+                        let gray = ((r as u32 + g as u32 + b as u32) / 3) as u8;
+
+                        *pixel = Rgba([gray, gray, gray, a]);
+                    }
+                }
+
+                resized
             }
             Err(e) => {
                 eprintln!("Failed to open image {}: {}", img_path, e);
-                return Err(format!(
-                    "Failed to open image {}: {}",
-                    img_path, e
-                ));
+                return Err(format!("Failed to open image {}: {}", img_path, e));
             }
         };
 
@@ -440,52 +364,34 @@ fn apply_layout_b(
         }
     }
 
-    if color_mode == "B&W" {
-        for pixel in canvas.pixels_mut() {
-            let [r, g, b, a] = pixel.0;
+    let label = "memora.".to_string();
 
-            let gray =
-                ((r as u32 + g as u32 + b as u32) / 3) as u8;
+    let label_font_src = include_bytes!("../fonts/Burgundia.otf");
 
-            *pixel = Rgba([gray, gray, gray, a]);
-        }
-    }
+    let label_font = FontArc::try_from_slice(label_font_src as &[u8]).expect("Failed to load font");
 
-    let label = "MEMORABOOTH".to_string();
+    let label_scale = font_scale_for_height(&label_font, branding_height as f32 * 0.8);
 
-    let label_font_src = include_bytes!("../fonts/Futura.ttf");
+    let text_color = Rgba([255, 255, 255, 255]);
 
-    let label_font = FontArc::try_from_slice(
-        label_font_src as &[u8]
-    )
-    .expect("Failed to load font");
+    let label_width: f32 = label
+        .chars()
+        .map(|c| {
+            let glyph_id = label_font.glyph_id(c);
 
-    let label_scale: PxScale = PxScale {
-        x: 100.0,
-        y: 100.0
-    };
+            label_font.as_scaled(label_scale.y).h_advance(glyph_id)
+        })
+        .sum();
 
-    let text_color = if color_mode == "B&W" {
-        Rgba([255, 255, 255, 255])
-    } else {
-        Rgba([0, 0, 0, 255])
-    };
+    let label_x = ((landscape_width as f32 - label_width) / 2.0) as i32;
 
-    let label_width: f32 = label.chars().map(|c| {
-        let glyph_id = label_font.glyph_id(c);
+    let scaled_font = label_font.as_scaled(label_scale.y);
+    let text_visual_height = scaled_font.ascent() - scaled_font.descent();
 
-        label_font
-            .as_scaled(label_scale.y)
-            .h_advance(glyph_id)
-    }).sum();
+    let branding_start_y = landscape_height - branding_height;
+    let vertical_padding = (branding_height as f32 - text_visual_height) / 2.0;
 
-    let label_x =
-        ((landscape_width as f32 - label_width) / 2.0) as i32;
-
-    let branding_start_y =
-        landscape_height - branding_height;
-
-    let label_y = (branding_start_y + 20) as i32;
+    let label_y = (branding_start_y as f32 + vertical_padding) as i32;
 
     draw_text_mut(
         &mut canvas,
@@ -494,7 +400,7 @@ fn apply_layout_b(
         label_y,
         label_scale,
         &label_font,
-        &label
+        &label,
     );
 
     // Rotate back into portrait 4x6
@@ -503,12 +409,11 @@ fn apply_layout_b(
     Ok(rotated)
 }
 
-
 fn apply_layout_c(
     images: Vec<String>,
     color_mode: &str,
     bg_color: Rgba<u8>,
-    border_px: u32
+    border_px: u32,
 ) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, String> {
     let center_gap = border_px * 2;
     let branding_height = ((1.0f32 / 2.54) * DPI).round() as u32;
@@ -538,13 +443,27 @@ fn apply_layout_c(
                     (0, y, orig_w, new_h)
                 };
 
-                let cropped = image::imageops::crop_imm(&img, crop_x, crop_y, crop_w, crop_h).to_image();
-                image::imageops::resize(
+                let cropped =
+                    image::imageops::crop_imm(&img, crop_x, crop_y, crop_w, crop_h).to_image();
+
+                let mut resized = image::imageops::resize(
                     &cropped,
                     cell_width,
                     cell_height,
                     image::imageops::FilterType::Lanczos3,
-                )
+                );
+
+                if color_mode == "B&W" {
+                    for pixel in resized.pixels_mut() {
+                        let [r, g, b, a] = pixel.0;
+
+                        let gray = ((r as u32 + g as u32 + b as u32) / 3) as u8;
+
+                        *pixel = Rgba([gray, gray, gray, a]);
+                    }
+                }
+
+                resized
             }
             Err(e) => {
                 eprintln!("Failed to open image {}: {}", img_path, e);
@@ -566,42 +485,32 @@ fn apply_layout_c(
         }
     }
 
-    if color_mode == "B&W" {
-        for pixel in canvas.pixels_mut() {
-            let [r, g, b, a] = pixel.0;
-            let gray = ((r as u32 + g as u32 + b as u32) / 3) as u8;
-            *pixel = Rgba([gray, gray, gray, a]);
-        }
-    }
+    let label = "memora.".to_string();
+    let label_font_src = include_bytes!("../fonts/Burgundia.otf");
+    let label_font = FontArc::try_from_slice(label_font_src as &[u8]).expect("Failed to load font");
 
-    let label = "MEMORABOOTH".to_string();
-    let label_font_src = include_bytes!("../fonts/Futura.ttf");
-    let label_font = FontArc::try_from_slice(label_font_src as &[u8])
-        .expect("Failed to load font");
+    let label_scale = font_scale_for_height(&label_font, branding_height as f32 * 0.8);
 
-    let label_scale: PxScale = PxScale {
-        x: 60.0,
-        y: 60.0
-    };
+    let text_color = Rgba([255, 255, 255, 255]);
 
-    let text_color = if color_mode == "B&W" {
-        Rgba([255, 255, 255, 255])
-    } else {
-        Rgba([0, 0, 0, 255])
-    };
-
-    let label_width: f32 = label.chars().map(|c| {
-        let glyph_id = label_font.glyph_id(c);
-        label_font.as_scaled(label_scale.y).h_advance(glyph_id)
-    }).sum();
+    let label_width: f32 = label
+        .chars()
+        .map(|c| {
+            let glyph_id = label_font.glyph_id(c);
+            label_font.as_scaled(label_scale.y).h_advance(glyph_id)
+        })
+        .sum();
 
     let label_x = ((cell_width as f32 - label_width) / 2.0) as i32;
 
-    let branding_start_y = HEIGHT - branding_height;
-    let label_y = (branding_start_y + 6) as i32;
+    let scaled_font = label_font.as_scaled(label_scale.y);
+    let text_visual_height = scaled_font.ascent() - scaled_font.descent();
 
-    
-    // Draw title first
+    let branding_start_y = HEIGHT - branding_height;
+    let vertical_padding = (branding_height as f32 - text_visual_height) / 2.0;
+
+    let label_y = (branding_start_y as f32 + vertical_padding) as i32;
+
     draw_text_mut(
         &mut canvas,
         text_color,
@@ -609,7 +518,7 @@ fn apply_layout_c(
         label_y,
         label_scale,
         &label_font,
-        &label
+        &label,
     );
     draw_text_mut(
         &mut canvas,
@@ -618,19 +527,30 @@ fn apply_layout_c(
         label_y,
         label_scale,
         &label_font,
-        &label
+        &label,
     );
 
-    
     Ok(canvas)
 }
 
+fn font_scale_for_height(font: &FontArc, target_height: f32) -> PxScale {
+    let scaled = font.as_scaled(PxScale { x: 1.0, y: 1.0 });
+    let unit_height = scaled.ascent() - scaled.descent();
+    let scale_factor = target_height / unit_height;
 
+    PxScale {
+        x: scale_factor,
+        y: scale_factor,
+    }
+}
 
 fn _get_asset_path(app_handle: &AppHandle, filename: &str) -> Result<PathBuf, String> {
-    let resource_path = app_handle.path().resolve(format!("assets/{}", filename), tauri::path::BaseDirectory::Resource);
+    let resource_path = app_handle.path().resolve(
+        format!("assets/{}", filename),
+        tauri::path::BaseDirectory::Resource,
+    );
     if let Err(e) = resource_path {
-        return Err(format!("Failed to find resource: {}", e))
+        return Err(format!("Failed to find resource: {}", e));
     }
 
     Ok(resource_path.unwrap())

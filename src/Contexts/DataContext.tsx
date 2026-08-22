@@ -1,48 +1,25 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react"
-import { getOrInitLayouts, getOrInitPages, getOrInitPricing } from "../Services/commands"
+import { getOrInitConfig, getOrInitLayouts, getOrInitPages } from "../Services/commands"
+import { Addon, Layout, LayoutData, Mode, Options, Plan } from "../types"
 
-export interface Options {
-    layout: Layout | null,
-    copies: number | null,
-    digital: boolean,
-    print: Print | null
-}
-
-export enum Mode {
-    AUTOMATIC,
-    MANUAL
-}
-export enum Print {
-    "B&W",
-    COLOR
-}
-export enum Layout { A = "A", B = "B", C = "C" }
-
-export interface Plan {
-  title: string
-  price: number
-  copies: 1 | 2 | 3
-  popular: boolean
-}
-
-export interface LayoutData {
-  kind: Layout,
-  title: string,
-  disclaimer: string,
-  disabled: boolean
+export interface Config {
+    plans: Plan[],
+    digital: Addon
 }
 
 interface DataContextProps {
     options: Options,
     setOptions: React.Dispatch<React.SetStateAction<Options>>,
-    setPlans: React.Dispatch<React.SetStateAction<Plan[]>>
-    plans: Array<Plan>,
+
+    setConfig: React.Dispatch<React.SetStateAction<Config>>
+    config: Config,
+
     setLayouts: React.Dispatch<React.SetStateAction<LayoutData[]>>
     layouts: Array<LayoutData>,
-    digitalEnabled: boolean,
-    setDigitalEnabled: React.Dispatch<React.SetStateAction<boolean>>,
+
     mode: Mode,
     setMode: React.Dispatch<React.SetStateAction<Mode>>,
+
     images: Array<string>
     setImages: React.Dispatch<React.SetStateAction<Array<string>>>,
 
@@ -68,31 +45,40 @@ export default function DataProvider({ children }: { children: React.ReactNode }
     })
     const [mode, setMode] = useState<Mode>(Mode.AUTOMATIC)
     const [images, setImages] = useState<Array<string>>([]);
-    const [digitalEnabled, setDigitalEnabled] = useState<boolean>(false)
-    const [plans, setPlans] = useState<Plan[]>([]);
+    const [config, setConfig] = useState<Config>({
+        plans: [],
+        digital: { enabled: false, price: 0, title: "Digital Copy" }
+    });
     const [layouts, setLayouts] = useState<LayoutData[]>([]);
     const [pages, setPages] = useState<number>(0);
 
-    const defaultPlans = useMemo<Plan[]>(() => [
-        {
-            copies: 1,
-            title: 'Solo Special',
-            price: 199,
-            popular: false
-        },
-        {
-            copies: 2,
-            title: 'Duo Delight',
-            price: 399,
-            popular: true
-        },
-        {
-            copies: 3,
-            title: 'Triple Treat',
-            price: 599,
-            popular: false
-        },
-    ], [])
+    const defaultConfig = useMemo<Config>(() => ({
+        plans: [
+            {
+                copies: 1,
+                title: 'Solo Special',
+                price: 199,
+                popular: false
+            },
+            {
+                copies: 2,
+                title: 'Duo Delight',
+                price: 399,
+                popular: true
+            },
+            {
+                copies: 3,
+                title: 'Triple Treat',
+                price: 599,
+                popular: false
+            },
+        ],
+        digital: {
+            enabled: false,
+            price: 99,
+            title: "Digital Copy"
+        }
+    }), [])
 
     const defaultLayouts = useMemo<LayoutData[]>(() => [
         {
@@ -118,8 +104,8 @@ export default function DataProvider({ children }: { children: React.ReactNode }
     useEffect(() => {
         const fetch = async () => {
             try {
-                let planData = await getOrInitPricing(defaultPlans)
-                setPlans(planData)
+                let configData = await getOrInitConfig(defaultConfig)
+                setConfig(configData)
 
                 let layoutData = await getOrInitLayouts(defaultLayouts)
                 setLayouts(layoutData)
@@ -128,7 +114,7 @@ export default function DataProvider({ children }: { children: React.ReactNode }
                 setPages(pages)
             } catch (e) {
                 console.error(e)
-                if (plans.length < 1) setPlans(defaultPlans)
+                setConfig(defaultConfig)
                 if (layouts.length < 1) setLayouts(defaultLayouts)
             }
         }
@@ -139,16 +125,14 @@ export default function DataProvider({ children }: { children: React.ReactNode }
     const value = {
         options,
         setOptions,
-        plans,
+        config,
+        setConfig,
         layouts,
-        setPlans,
         setLayouts,
         mode,
         setMode,
         images,
         setImages,
-        digitalEnabled,
-        setDigitalEnabled,
         pages,
         setPages
     }

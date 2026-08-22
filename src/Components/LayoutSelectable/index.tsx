@@ -1,4 +1,5 @@
-import { LayoutData, useData } from '../../Contexts/DataContext'
+import { useData } from '../../Contexts/DataContext'
+import { LayoutData } from '../../types'
 
 import './styles.css'
 

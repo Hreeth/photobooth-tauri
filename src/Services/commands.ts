@@ -1,16 +1,17 @@
 import { documentDir } from "@tauri-apps/api/path";
-import { LayoutData, Plan } from "../Contexts/DataContext";
+import { Config } from "../Contexts/DataContext";
 import { invoke } from "@tauri-apps/api/core";
+import { LayoutData } from "../types";
 
-export async function savePricing(plans: Plan[]) {
+export async function saveConfig(config: Config) {
     const dir = await documentDir()
 
-    await invoke("save_pricing", { directory: dir, plans })
+    await invoke("save_config", { directory: dir, config })
 }
-export async function getOrInitPricing(defaults: Plan[]) {
+export async function getOrInitConfig(defaults: Config) {
     const dir = await documentDir()
 
-    return await invoke<Plan[]>("get_or_init_pricing", { directory: dir, defaults });
+    return await invoke<Config>("get_or_init_config", { directory: dir, defaults });
 }
 
 export async function saveLayouts(layouts: LayoutData[]) {

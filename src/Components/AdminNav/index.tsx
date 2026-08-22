@@ -13,11 +13,11 @@ export default function AdminNav() {
           Mode
         </NavLink>
         <NavLink
-            to="/admin/pricing"
+            to="/admin/config"
             className="admin-nav-link"
             style={({ isActive }) => ({ pointerEvents: isActive ? 'none' : 'auto' })}
         >
-          Pricing
+          Config
         </NavLink>
         <NavLink
             to="/admin/layouts"

@@ -4,14 +4,14 @@ use serde::{Deserialize, Serialize};
 
 use crate::imaging::Layout;
 
-const PRICING_VERSION: u32 = 1;
+const CONFIG_VERSSION: u32 = 1;
 const LAYOUTS_VERSION: u32 = 2;
 const PAGES_VERSION: u32 = 1;
 
 #[derive(Serialize, Deserialize)]
 struct Versioned<T> {
     version: u32,
-    data: T
+    data: T,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -19,7 +19,20 @@ pub struct Plan {
     pub title: String,
     pub price: u32,
     pub copies: u8,
-    pub popular: bool
+    pub popular: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Addon {
+    pub title: String,
+    pub price: u32,
+    pub enabled: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Config {
+    plans: Vec<Plan>,
+    digital: Addon,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -27,47 +40,44 @@ pub struct LayoutData {
     pub kind: Layout,
     pub disabled: bool,
     pub title: String,
-    pub disclaimer: String
+    pub disclaimer: String,
 }
 
 #[tauri::command]
-pub fn save_pricing(directory: String, plans: Vec<Plan>) -> Result<(), String> {
+pub fn save_config(directory: String, config: Config) -> Result<(), String> {
     let mut path = PathBuf::from(directory);
 
     path.push("Memorabooth");
-    fs::create_dir_all(&path)
-        .map_err(|e| e.to_string())?;
+    fs::create_dir_all(&path).map_err(|e| e.to_string())?;
 
-    path.push("plans.json");
+    path.push("config.json");
 
     let wrapped = Versioned {
-        version: PRICING_VERSION,
-        data: plans
+        version: CONFIG_VERSSION,
+        data: config,
     };
 
-    let json = serde_json::to_string_pretty(&wrapped)
-        .map_err(|e| e.to_string())?;
+    let json = serde_json::to_string_pretty(&wrapped).map_err(|e| e.to_string())?;
 
-    fs::write(path, json)
-        .map_err(|e| e.to_string())?;
+    fs::write(path, json).map_err(|e| e.to_string())?;
 
     Ok(())
 }
 
 #[tauri::command]
-pub fn get_or_init_pricing(directory: String, defaults: Vec<Plan>) -> Result<Vec<Plan>, String> {
+pub fn get_or_init_config(directory: String, defaults: Config) -> Result<Config, String> {
     let mut path = PathBuf::from(directory);
     path.push("Memorabooth");
     fs::create_dir_all(&path).map_err(|e| e.to_string())?;
 
-    path.push("plans.json");
+    path.push("config.json");
 
     if path.exists() {
         let content = fs::read_to_string(&path).map_err(|e| e.to_string())?;
 
-        if let Ok(parsed) = serde_json::from_str::<Versioned<Vec<Plan>>>(&content) {
-            if parsed.version == PRICING_VERSION {
-                return Ok(parsed.data)
+        if let Ok(parsed) = serde_json::from_str::<Versioned<Config>>(&content) {
+            if parsed.version == CONFIG_VERSSION {
+                return Ok(parsed.data);
             }
         }
 
@@ -75,7 +85,7 @@ pub fn get_or_init_pricing(directory: String, defaults: Vec<Plan>) -> Result<Vec
     }
 
     let wrapped = Versioned {
-        version: PRICING_VERSION,
+        version: CONFIG_VERSSION,
         data: defaults.clone(),
     };
 
@@ -90,27 +100,27 @@ pub fn save_layouts(directory: String, layouts: Vec<LayoutData>) -> Result<(), S
     let mut path = PathBuf::from(directory);
 
     path.push("Memorabooth");
-    fs::create_dir_all(&path)
-        .map_err(|e| e.to_string())?;
+    fs::create_dir_all(&path).map_err(|e| e.to_string())?;
 
     path.push("layouts.json");
 
     let wrapped = Versioned {
         version: LAYOUTS_VERSION,
-        data: layouts
+        data: layouts,
     };
 
-    let json = serde_json::to_string_pretty(&wrapped)
-        .map_err(|e| e.to_string())?;
+    let json = serde_json::to_string_pretty(&wrapped).map_err(|e| e.to_string())?;
 
-    fs::write(path, json)
-        .map_err(|e| e.to_string())?;
+    fs::write(path, json).map_err(|e| e.to_string())?;
 
     Ok(())
 }
 
 #[tauri::command]
-pub fn get_or_init_layouts(directory: String, defaults: Vec<LayoutData>) -> Result<Vec<LayoutData>, String> {
+pub fn get_or_init_layouts(
+    directory: String,
+    defaults: Vec<LayoutData>,
+) -> Result<Vec<LayoutData>, String> {
     let mut path = PathBuf::from(directory);
     path.push("Memorabooth");
     fs::create_dir_all(&path).map_err(|e| e.to_string())?;
@@ -125,7 +135,7 @@ pub fn get_or_init_layouts(directory: String, defaults: Vec<LayoutData>) -> Resu
                 return Ok(parsed.data);
             }
         }
-        
+
         fs::remove_file(&path).map_err(|e| e.to_string())?;
     }
 
@@ -145,21 +155,18 @@ pub fn save_pages(directory: String, pages: u64) -> Result<(), String> {
     let mut path = PathBuf::from(directory);
 
     path.push("Memorabooth");
-    fs::create_dir_all(&path)
-        .map_err(|e| e.to_string())?;
+    fs::create_dir_all(&path).map_err(|e| e.to_string())?;
 
     path.push("pages.json");
 
     let wrapped = Versioned {
         version: PAGES_VERSION,
-        data: pages
+        data: pages,
     };
 
-    let json = serde_json::to_string_pretty(&wrapped)
-        .map_err(|e| e.to_string())?;
+    let json = serde_json::to_string_pretty(&wrapped).map_err(|e| e.to_string())?;
 
-    fs::write(path, json)
-        .map_err(|e| e.to_string())?;
+    fs::write(path, json).map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -186,7 +193,7 @@ pub fn get_or_init_pages(directory: String, default: u64) -> Result<u64, String>
 
     let wrapped = Versioned {
         version: PAGES_VERSION,
-        data: default
+        data: default,
     };
 
     let json = serde_json::to_string_pretty(&wrapped).map_err(|e| e.to_string())?;

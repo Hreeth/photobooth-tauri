@@ -7,9 +7,10 @@ import Footer from '../../../Components/Footer'
 import { useData } from '../../../Contexts/DataContext'
 
 import './styles.css'
+import { Mode } from '../../../types'
 
 export default function Copies() {
-  const { plans, options, setOptions, digitalEnabled } = useData()
+  const { config, options, setOptions, mode } = useData()
 
   const navigate = useNavigate()
 
@@ -23,14 +24,14 @@ export default function Copies() {
         <div className='copies-container'>
           <h1 className="heading">Pick your <div>Perfect</div> Strip Package!</h1>
           <div className="plans-container">
-            {plans.map((plan, idx) => <CopiesSelectable key={idx} data={plan} selected={options.copies == plan.copies} />)}
-            {digitalEnabled && <div className="digital-container" data-selected={options.digital} onClick={() => setOptions(prev => ({ ...prev, digital: !prev.digital }))}>
+            {config.plans.map((plan, idx) => <CopiesSelectable key={idx} data={plan} selected={options.copies == plan.copies} />)}
+            {config.digital.enabled && <div className="digital-container" data-selected={options.digital} onClick={() => setOptions(prev => ({ ...prev, digital: !prev.digital }))}>
               <div className="digital-grp-2">
-                <div className="digital-title">Digital Copy</div>
+                <div className="digital-title">{config.digital.title}</div>
                 <div className="digital-label">Add-On</div>
               </div>
               <div className="digital-grp-1">
-                <div className="digital-price">₹99</div>
+                <div className="digital-price">{mode == Mode.MANUAL ? "FREE" : `₹${config.digital.price}`}</div>
                 <div className="add-btn">{options.digital ? "Added" : "Add"}</div>
               </div>
             </div>}

@@ -5,9 +5,10 @@ import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import { pictureDir } from "@tauri-apps/api/path";
 
-import { Layout, useData } from "../../Contexts/DataContext";
+import { useData } from "../../Contexts/DataContext";
 
 import './styles.css'
+import { Layout } from "../../types";
 
 function Countdown() {
   const navigate = useNavigate();

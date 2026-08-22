@@ -4,8 +4,8 @@ import { motion } from 'framer-motion'
 import PrintSelectable from '../../../Components/PrintSelectable'
 
 import Footer from '../../../Components/Footer'
-import { Mode, Print as PrintOptions } from '../../../Contexts/DataContext'
 import { useData } from '../../../Contexts/DataContext'
+import { Mode, Print as PrintOptions } from '../../../types'
 
 import './styles.css'
 

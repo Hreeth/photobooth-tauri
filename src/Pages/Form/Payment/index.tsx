@@ -20,10 +20,10 @@ export default function Payment() {
 
   const dev = false;
 
-  const { setOptions, setImages, options, plans } = useData()
+  const { setOptions, setImages, options, config, mode } = useData()
   
   useEffect(() => {
-    fetchQrCode(calculate(options, plans))
+    fetchQrCode(calculate(options, mode, config))
   }, [fetchQrCode])
   
   useEffect(() => {

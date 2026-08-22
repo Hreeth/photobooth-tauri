@@ -1,4 +1,4 @@
-#admin-pricing {
+#admin-config {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -8,18 +8,18 @@
     padding: 4rem;
 }
 
-#admin-pricing .heading {
+#admin-config .heading {
     color: var(--txt-clr);
     font-size: 10vmin;
 }
 
-#admin-pricing .heading div {
+#admin-config .heading div {
     display: inline;
     font-family: Seriguela;
     color: var(--accent-1);
 }
 
-#admin-pricing .plans-container {
+#admin-config .plans-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     justify-content: center;
@@ -39,33 +39,28 @@
     position: relative;
 }
 
-/* Hover elevation */
 .plan-option:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 20px #00000033;
 }
 
-/* Selected (Popular) */
 .plan-option[data-selected="true"] {
     border-color: var(--accent-1);
     box-shadow: 0 0 0 2px #FFD58533;
 }
 
-/* Header row */
 .plan-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
-/* Title */
 .plan-title {
     color: var(--accent-1);
     font-weight: 700;
     font-size: 2.5vmin;
 }
 
-/* Price row */
 .plan-price {
     display: flex;
     justify-content: center;
@@ -74,7 +69,6 @@
     color: var(--txt-clr);
 }
 
-/* Price value */
 .plan-price-value {
     display: flex;
     align-items: center;
@@ -84,13 +78,11 @@
     line-height: 1;
 }
 
-/* Strip label */
 .plan-price-quantity {
     font-size: 2.5vmin;
     font-weight: 700;
 }
 
-/* Button */
 .plan-option .select-btn {
     width: 100%;
     padding: .6rem 0;
@@ -108,12 +100,10 @@
     filter: brightness(0.92);
 }
 
-/* Selected button */
 .plan-option[data-selected="true"] .select-btn {
     background-color: var(--accent-1);
 }
 
-/* Popular floating badge */
 .plan-option[data-selected="true"]::after {
     content: "POPULAR";
     position: absolute;
@@ -136,12 +126,12 @@
     user-select: none;
     transition: 200ms ease;
 }
+
 .edit-icon:hover {
     opacity: 1;
     transform: scale(1.1);
 }
 
-/* TITLE INPUT */
 .title-input {
     background: transparent;
     border: none;
@@ -153,7 +143,6 @@
     width: 100%;
 }
 
-/* PRICE INPUT */
 .price-input {
     background: transparent;
     border: none;
@@ -166,6 +155,7 @@
     text-align: center;
     width: 150px;
 }
+
 .price-input::-webkit-outer-spin-button,
 .price-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -173,13 +163,123 @@
     margin: 0;
 }
 
-/* GLOW ON EDIT */
 .plan-option:has(input:focus),
 .plan-option:has(select:focus) {
     box-shadow: 0 0 0 2px #FFD58544;
 }
 
-/* BUTTON FEEDBACK */
 .plan-option[data-selected="true"] .select-btn:hover {
     filter: brightness(1.08);
+}
+
+.additional-container {
+    width: 100%;
+    max-width: 600px;
+
+    background: var(--bg-clr-2);
+    padding: 1.5rem;
+
+    border-radius: 4vmin;
+    border: 2px solid var(--border-clr);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 2rem;
+
+    transition: 300ms ease;
+}
+
+.additional-container:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 20px #00000033;
+}
+
+.additional-container[data-selected="true"] {
+    border-color: var(--accent-1);
+    box-shadow: 0 0 0 2px #FFD58533;
+}
+
+.additional-grp-2 {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+}
+
+.additional-grp-1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.field-header {
+    display: flex;
+    align-items: center;
+}
+
+.additional-title {
+    color: var(--accent-1);
+    font-weight: 700;
+    font-size: 2.5vmin;
+}
+
+
+.additional-container .plan-price-value {
+    color: var(--txt-clr);
+}
+
+
+.add-btn {
+    min-width: 120px;
+
+    padding: .6rem 1.2rem;
+
+    border-radius: 50px;
+    border: none;
+
+    background-color: var(--txt-clr);
+    color: black;
+
+    font-size: 2vmin;
+    font-weight: 600;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    transition: 200ms ease;
+}
+
+.add-btn:hover {
+    filter: brightness(0.92);
+}
+
+.additional-container[data-selected="true"] .add-btn {
+    background-color: var(--accent-1);
+}
+
+.additional-container[data-selected="true"] .add-btn:hover {
+    filter: brightness(1.08);
+}
+
+
+.additional-container:focus-within {
+    box-shadow: 0 0 0 2px #FFD58544;
+}
+
+
+.additional-container .title-input {
+    max-width: 300px;
+}
+
+.additional-container .plan-price-value {
+    font-size: 4vmin;
+}
+
+.additional-container .price-input {
+    width: 150px;
+    font-size: 4vmin;
 }

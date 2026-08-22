@@ -4,13 +4,14 @@ import { useNavigate } from 'react-router-dom'
 import { invoke } from '@tauri-apps/api/core'
 import { pictureDir } from '@tauri-apps/api/path'
 
-import { Print, useData } from '../../Contexts/DataContext'
+import { useData } from '../../Contexts/DataContext'
 import reset from '../../Utils/reset'
 
 import './styles.css'
 import { path } from '@tauri-apps/api'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import { savePages } from '../../Services/commands'
+import { Print } from '../../types'
 
 export default function Greeting() {
   const { setOptions, options, images, setImages, pages, setPages } = useData()

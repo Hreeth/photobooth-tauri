@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
-import { LayoutData, useData } from '../../../Contexts/DataContext'
+import { useData } from '../../../Contexts/DataContext'
 import { saveLayouts } from '../../../Services/commands'
+import { LayoutData } from '../../../types'
 
 import './styles.css'
 

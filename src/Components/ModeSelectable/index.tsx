@@ -1,4 +1,5 @@
-import { Mode, useData } from '../../Contexts/DataContext'
+import { useData } from '../../Contexts/DataContext'
+import { Mode } from '../../types'
 
 import './styles.css'
 

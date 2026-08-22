@@ -92,7 +92,11 @@ pub async fn print(
     copies: usize,
     layout: Layout,
 ) -> Result<(), String> {
-    let bg_color = Rgba([0, 11, 141, 255]);
+    let bg_color = if color_mode == "B&W" {
+        Rgba([255, 255, 255, 255])
+    } else {
+        Rgba([0, 0, 0, 255])
+    };
 
     let border_px = ((BORDER / 2.54) * DPI).round() as u32;
 
@@ -254,9 +258,13 @@ fn apply_layout_a(
 
     let label_font = FontArc::try_from_slice(label_font_src as &[u8]).expect("Failed to load font");
 
-    let label_scale = font_scale_for_height(&label_font, branding_height as f32 * 0.8);
+    let label_scale = font_scale_for_height(&label_font, branding_height as f32 * 0.6);
 
-    let text_color = Rgba([255, 255, 255, 255]);
+    let txt_color = if color_mode == "B&W" {
+        Rgba([0, 0, 0, 255])
+    } else {
+        Rgba([255, 255, 255, 255])
+    };
 
     let label_width: f32 = label
         .chars()
@@ -279,7 +287,7 @@ fn apply_layout_a(
 
     draw_text_mut(
         &mut canvas,
-        text_color,
+        txt_color,
         label_x,
         label_y,
         label_scale,
@@ -372,7 +380,11 @@ fn apply_layout_b(
 
     let label_scale = font_scale_for_height(&label_font, branding_height as f32 * 0.8);
 
-    let text_color = Rgba([255, 255, 255, 255]);
+    let txt_color = if color_mode == "B&W" {
+        Rgba([0, 0, 0, 255])
+    } else {
+        Rgba([255, 255, 255, 255])
+    };
 
     let label_width: f32 = label
         .chars()
@@ -395,7 +407,7 @@ fn apply_layout_b(
 
     draw_text_mut(
         &mut canvas,
-        text_color,
+        txt_color,
         label_x,
         label_y,
         label_scale,
@@ -489,9 +501,13 @@ fn apply_layout_c(
     let label_font_src = include_bytes!("../fonts/Burgundia.otf");
     let label_font = FontArc::try_from_slice(label_font_src as &[u8]).expect("Failed to load font");
 
-    let label_scale = font_scale_for_height(&label_font, branding_height as f32 * 0.8);
+    let label_scale = font_scale_for_height(&label_font, branding_height as f32 * 0.6);
 
-    let text_color = Rgba([255, 255, 255, 255]);
+    let txt_color = if color_mode == "B&W" {
+        Rgba([0, 0, 0, 255])
+    } else {
+        Rgba([255, 255, 255, 255])
+    };
 
     let label_width: f32 = label
         .chars()
@@ -513,7 +529,7 @@ fn apply_layout_c(
 
     draw_text_mut(
         &mut canvas,
-        text_color,
+        txt_color,
         label_x,
         label_y,
         label_scale,
@@ -522,7 +538,7 @@ fn apply_layout_c(
     );
     draw_text_mut(
         &mut canvas,
-        text_color,
+        txt_color,
         label_x + (cell_width + center_gap) as i32,
         label_y,
         label_scale,

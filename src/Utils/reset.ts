@@ -1,6 +1,6 @@
 import React from "react";
-import { Options } from "../Contexts/DataContext";
 import { NavigateFunction } from "react-router-dom";
+import { Options } from "../types";
 
 export default function reset(
     setOptions: React.Dispatch<React.SetStateAction<Options>>,

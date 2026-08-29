@@ -47,6 +47,13 @@ jobs:
 
       - name: install frontend dependencies
         run: npm install # change this to npm or pnpm depending on which one you use.
+        
+      - name: Create .env file (for dotenv_codegen)
+        working-directory: ./src-tauri
+        run: |
+          echo "RAZORPAY_KEY_ID=${{ secrets.RAZORPAY_KEY_ID }}" >> .env
+          echo "RAZORPAY_KEY_SECRET=${{ secrets.RAZORPAY_KEY_SECRET }}" >> .env
+          echo "ZEPTOMAIL_API_KEY=${{ secrets.ZEPTOMAIL_API_KEY }}" >> .env
 
       - name: Build and publish event release
         uses: tauri-apps/tauri-action@v0

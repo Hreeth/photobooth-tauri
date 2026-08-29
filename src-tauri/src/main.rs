@@ -4,7 +4,5 @@
 extern crate dotenv_codegen;
 
 fn main() {
-  dotenv::dotenv().ok();
-
-  app_lib::run();
+    app_lib::run();
 }

@@ -1,11 +1,11 @@
-use std::{fs, path::PathBuf};
+use std::fs;
 
 use serde::{Deserialize, Serialize};
 
-use crate::imaging::Layout;
+use crate::{Result, state::LayoutKind, utils::assets_dir};
 
-const CONFIG_VERSSION: u32 = 1;
-const LAYOUTS_VERSION: u32 = 2;
+const CONFIG_VERSION: u32 = 1;
+const LAYOUTS_VERSION: u32 = 3;
 const PAGES_VERSION: u32 = 1;
 
 #[derive(Serialize, Deserialize)]
@@ -37,25 +37,20 @@ pub struct Config {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct LayoutData {
-    pub kind: Layout,
+    pub kind: LayoutKind,
     pub disabled: bool,
     pub title: String,
     pub disclaimer: String,
 }
 
 #[tauri::command]
-pub fn save_config(directory: String, config: Config) -> Result<(), String> {
-    let mut path = PathBuf::from(directory);
-
-    path.push("Memorabooth");
+pub fn save_config(config: Config) -> Result<()> {
+    let mut path = assets_dir();
     fs::create_dir_all(&path).map_err(|e| e.to_string())?;
 
     path.push("config.json");
 
-    let wrapped = Versioned {
-        version: CONFIG_VERSSION,
-        data: config,
-    };
+    let wrapped = Versioned { version: CONFIG_VERSION, data: config };
 
     let json = serde_json::to_string_pretty(&wrapped).map_err(|e| e.to_string())?;
 
@@ -65,9 +60,8 @@ pub fn save_config(directory: String, config: Config) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn get_or_init_config(directory: String, defaults: Config) -> Result<Config, String> {
-    let mut path = PathBuf::from(directory);
-    path.push("Memorabooth");
+pub fn get_or_init_config(defaults: Config) -> Result<Config> {
+    let mut path = assets_dir();
     fs::create_dir_all(&path).map_err(|e| e.to_string())?;
 
     path.push("config.json");
@@ -76,7 +70,7 @@ pub fn get_or_init_config(directory: String, defaults: Config) -> Result<Config,
         let content = fs::read_to_string(&path).map_err(|e| e.to_string())?;
 
         if let Ok(parsed) = serde_json::from_str::<Versioned<Config>>(&content) {
-            if parsed.version == CONFIG_VERSSION {
+            if parsed.version == CONFIG_VERSION {
                 return Ok(parsed.data);
             }
         }
@@ -84,10 +78,7 @@ pub fn get_or_init_config(directory: String, defaults: Config) -> Result<Config,
         fs::remove_file(&path).map_err(|e| e.to_string())?;
     }
 
-    let wrapped = Versioned {
-        version: CONFIG_VERSSION,
-        data: defaults.clone(),
-    };
+    let wrapped = Versioned { version: CONFIG_VERSION, data: defaults.clone() };
 
     let json = serde_json::to_string_pretty(&wrapped).map_err(|e| e.to_string())?;
     fs::write(&path, json).map_err(|e| e.to_string())?;
@@ -96,18 +87,13 @@ pub fn get_or_init_config(directory: String, defaults: Config) -> Result<Config,
 }
 
 #[tauri::command]
-pub fn save_layouts(directory: String, layouts: Vec<LayoutData>) -> Result<(), String> {
-    let mut path = PathBuf::from(directory);
-
-    path.push("Memorabooth");
+pub fn save_layouts(layouts: Vec<LayoutData>) -> Result<()> {
+    let mut path = assets_dir();
     fs::create_dir_all(&path).map_err(|e| e.to_string())?;
 
     path.push("layouts.json");
 
-    let wrapped = Versioned {
-        version: LAYOUTS_VERSION,
-        data: layouts,
-    };
+    let wrapped = Versioned { version: LAYOUTS_VERSION, data: layouts };
 
     let json = serde_json::to_string_pretty(&wrapped).map_err(|e| e.to_string())?;
 
@@ -117,12 +103,8 @@ pub fn save_layouts(directory: String, layouts: Vec<LayoutData>) -> Result<(), S
 }
 
 #[tauri::command]
-pub fn get_or_init_layouts(
-    directory: String,
-    defaults: Vec<LayoutData>,
-) -> Result<Vec<LayoutData>, String> {
-    let mut path = PathBuf::from(directory);
-    path.push("Memorabooth");
+pub fn get_or_init_layouts(defaults: Vec<LayoutData>) -> Result<Vec<LayoutData>> {
+    let mut path = assets_dir();
     fs::create_dir_all(&path).map_err(|e| e.to_string())?;
 
     path.push("layouts.json");
@@ -139,10 +121,7 @@ pub fn get_or_init_layouts(
         fs::remove_file(&path).map_err(|e| e.to_string())?;
     }
 
-    let wrapped = Versioned {
-        version: LAYOUTS_VERSION,
-        data: defaults.clone(),
-    };
+    let wrapped = Versioned { version: LAYOUTS_VERSION, data: defaults.clone() };
 
     let json = serde_json::to_string_pretty(&wrapped).map_err(|e| e.to_string())?;
     fs::write(&path, json).map_err(|e| e.to_string())?;
@@ -151,18 +130,13 @@ pub fn get_or_init_layouts(
 }
 
 #[tauri::command]
-pub fn save_pages(directory: String, pages: u64) -> Result<(), String> {
-    let mut path = PathBuf::from(directory);
-
-    path.push("Memorabooth");
+pub fn save_pages(pages: u64) -> Result<()> {
+    let mut path = assets_dir();
     fs::create_dir_all(&path).map_err(|e| e.to_string())?;
 
     path.push("pages.json");
 
-    let wrapped = Versioned {
-        version: PAGES_VERSION,
-        data: pages,
-    };
+    let wrapped = Versioned { version: PAGES_VERSION, data: pages };
 
     let json = serde_json::to_string_pretty(&wrapped).map_err(|e| e.to_string())?;
 
@@ -172,9 +146,8 @@ pub fn save_pages(directory: String, pages: u64) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn get_or_init_pages(directory: String, default: u64) -> Result<u64, String> {
-    let mut path = PathBuf::from(directory);
-    path.push("Memorabooth");
+pub fn get_or_init_pages(default: u64) -> Result<u64> {
+    let mut path = assets_dir();
     fs::create_dir_all(&path).map_err(|e| e.to_string())?;
 
     path.push("pages.json");
@@ -191,10 +164,7 @@ pub fn get_or_init_pages(directory: String, default: u64) -> Result<u64, String>
         fs::remove_file(&path).map_err(|e| e.to_string())?;
     }
 
-    let wrapped = Versioned {
-        version: PAGES_VERSION,
-        data: default,
-    };
+    let wrapped = Versioned { version: PAGES_VERSION, data: default };
 
     let json = serde_json::to_string_pretty(&wrapped).map_err(|e| e.to_string())?;
     fs::write(&path, json).map_err(|e| e.to_string())?;

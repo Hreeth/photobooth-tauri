@@ -41,9 +41,10 @@ fn process_session_inner(state: Arc<AppState>) -> Result<()> {
 
     for path in photos {
         let image = image::open(&path)
-            .map_err(|e| format!("failed to open photo {}: {e}", path.display()))?;
+            .map_err(|e| format!("failed to open photo {}: {e}", path.display()))?
+            .into_rgba8();
 
-        images.push(image);
+        images.push(DynamicImage::ImageRgba8(image));
     }
 
     for image in &mut images {

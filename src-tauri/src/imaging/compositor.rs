@@ -1,10 +1,10 @@
 use image::{DynamicImage, ImageBuffer, Rgba, RgbaImage, imageops::overlay};
+use tauri::Manager;
 
 use crate::{
     Result,
     imaging::{
         Layout, LayoutMode,
-        branding::{draw_branding, draw_branding_strip},
         layout::{Slot, generate_slots},
     },
     state::LayoutKind,
@@ -15,6 +15,7 @@ pub const WIDTH: u32 = (4f32 * DPI).round() as u32;
 pub const HEIGHT: u32 = (6f32 * DPI).round() as u32;
 
 pub fn compose(
+    app_handle: &tauri::AppHandle,
     layout_kind: &LayoutKind,
     images: Vec<DynamicImage>,
     background: Rgba<u8>,
@@ -23,18 +24,24 @@ pub fn compose(
 
     match layout.mode {
         LayoutMode::Full => match layout_kind {
-            LayoutKind::Full1x2 => compose_portrait(&layout, images, background),
+            LayoutKind::Full1x2 => {
+                compose_portrait(app_handle, layout_kind, &layout, images, background)
+            }
 
-            LayoutKind::Full2x2 => compose_landscape(&layout, images, background),
+            LayoutKind::Full2x2 => {
+                compose_landscape(app_handle, layout_kind, &layout, images, background)
+            }
 
             _ => unreachable!("non-full layout with LayoutMode::Full"),
         },
 
-        LayoutMode::Strip => compose_strip(&layout, images, background),
+        LayoutMode::Strip => compose_strip(app_handle, layout_kind, &layout, images, background),
     }
 }
 
 fn compose_portrait(
+    app_handle: &tauri::AppHandle,
+    layout_kind: &LayoutKind,
     layout: &Layout,
     images: Vec<DynamicImage>,
     background: Rgba<u8>,
@@ -48,12 +55,15 @@ fn compose_portrait(
     }
 
     place_all(&mut canvas, &images, &slots, 0)?;
-    draw_branding(&mut canvas, layout);
+
+    let _ = apply_overlay(app_handle, &mut canvas, layout_kind);
 
     Ok(DynamicImage::ImageRgba8(canvas))
 }
 
 fn compose_landscape(
+    app_handle: &tauri::AppHandle,
+    layout_kind: &LayoutKind,
     layout: &Layout,
     images: Vec<DynamicImage>,
     background: Rgba<u8>,
@@ -71,7 +81,8 @@ fn compose_landscape(
     }
 
     place_all(&mut canvas, &images, &slots, 0)?;
-    draw_branding(&mut canvas, layout);
+
+    let _ = apply_overlay(app_handle, &mut canvas, layout_kind);
 
     let rotated = image::imageops::rotate90(&canvas);
 
@@ -79,6 +90,8 @@ fn compose_landscape(
 }
 
 fn compose_strip(
+    app_handle: &tauri::AppHandle,
+    layout_kind: &LayoutKind,
     layout: &Layout,
     images: Vec<DynamicImage>,
     background: Rgba<u8>,
@@ -94,9 +107,10 @@ fn compose_strip(
     }
 
     place_all(&mut canvas, &images, &slots, 0)?;
+
     place_all(&mut canvas, &images, &slots, strip_width)?;
 
-    draw_branding_strip(&mut canvas, layout);
+    let _ = apply_overlay(app_handle, &mut canvas, layout_kind);
 
     Ok(DynamicImage::ImageRgba8(canvas))
 }
@@ -119,4 +133,69 @@ fn place_all(
     }
 
     Ok(())
+}
+
+fn apply_overlay(
+    app_handle: &tauri::AppHandle,
+    canvas: &mut RgbaImage,
+    layout_kind: &LayoutKind,
+) -> Result<()> {
+    let filename = format!("{:?}.png", layout_kind);
+
+    let overlay_path = app_handle
+        .path()
+        .resolve(format!("assets/{filename}"), tauri::path::BaseDirectory::Resource)
+        .map_err(|e| format!("failed to find overlay: {e}"))?;
+
+    let event_overlay =
+        image::open(&overlay_path).map_err(|e| format!("failed to open overlay: {e}"))?.to_rgba8();
+
+    let canvas_width = canvas.width();
+    let canvas_height = canvas.height();
+
+    let overlay_ratio = event_overlay.width() as f32 / event_overlay.height() as f32;
+
+    let canvas_ratio = canvas_width as f32 / canvas_height as f32;
+
+    if approximately_equal(overlay_ratio, canvas_ratio) {
+        let resized = image::imageops::resize(
+            &event_overlay,
+            canvas_width,
+            canvas_height,
+            image::imageops::FilterType::Lanczos3,
+        );
+
+        overlay(canvas, &resized, 0, 0);
+
+        return Ok(());
+    }
+
+    let half_width = canvas_width / 2;
+
+    let half_ratio = half_width as f32 / canvas_height as f32;
+
+    if approximately_equal(overlay_ratio, half_ratio) {
+        let resized = image::imageops::resize(
+            &event_overlay,
+            half_width,
+            canvas_height,
+            image::imageops::FilterType::Lanczos3,
+        );
+
+        overlay(canvas, &resized, 0, 0);
+
+        overlay(canvas, &resized, half_width as i64, 0);
+
+        return Ok(());
+    }
+
+    Err(format!(
+        "unexpected overlay aspect ratio {:.4} for canvas {}x{}",
+        overlay_ratio, canvas_width, canvas_height
+    )
+    .into())
+}
+
+fn approximately_equal(a: f32, b: f32) -> bool {
+    (a - b).abs() < 0.01
 }

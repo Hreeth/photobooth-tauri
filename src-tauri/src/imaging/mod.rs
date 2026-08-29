@@ -1,4 +1,3 @@
-mod branding;
 mod compositor;
 mod filter;
 mod layout;

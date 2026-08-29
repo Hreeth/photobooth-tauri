@@ -46,6 +46,7 @@
     ],
     "resources": [
       "fonts",
+      "assets",
       ".env"
     ]
   }

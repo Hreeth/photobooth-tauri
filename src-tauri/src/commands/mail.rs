@@ -19,7 +19,10 @@ use std::{
 use uuid::Uuid;
 
 use crate::{
-    Result, imaging::LayoutMode, state::AppState, utils::{assets_dir, output_dir, remove_bleed},
+    Result,
+    imaging::LayoutMode,
+    state::AppState,
+    utils::{assets_dir, output_dir, remove_bleed},
 };
 
 static IS_SENDING: Lazy<AtomicBool> = Lazy::new(|| AtomicBool::new(false));

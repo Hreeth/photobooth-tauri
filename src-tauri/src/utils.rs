@@ -45,23 +45,13 @@ pub fn remove_bleed(
         return Err("final image is too small to remove bleed".into());
     }
 
-    let cropped = img.crop_imm(
-        bleed,
-        bleed,
-        width - bleed * 2,
-        height - bleed * 2,
-    );
+    let cropped = img.crop_imm(bleed, bleed, width - bleed * 2, height - bleed * 2);
 
     let cropped = match layout_mode {
         LayoutMode::Strip => {
             let half_width = cropped.width() / 2;
 
-            cropped.crop_imm(
-                0,
-                0,
-                half_width,
-                cropped.height(),
-            )
+            cropped.crop_imm(0, 0, half_width, cropped.height())
         }
 
         _ => cropped,

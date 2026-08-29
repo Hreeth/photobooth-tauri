@@ -3,13 +3,14 @@ use std::{process::Command, sync::Arc};
 use crate::{Result, imaging::LayoutMode, state::AppState};
 
 #[tauri::command]
-pub fn print(state: tauri::State<Arc<AppState>>, mode: LayoutMode) -> Result<()> {
+pub fn print(state: tauri::State<Arc<AppState>>) -> Result<()> {
     let mut session = state.session.lock().unwrap();
 
     assert!(session.options.is_some(), "fatal: options must exist at this point");
 
     let options = session.options.as_ref().unwrap();
     let r#final = session.r#final.as_ref().ok_or("fatal: final image must exist at this point")?;
+    let mode = options.layout.mode();
 
     let res = match mode {
         LayoutMode::Full => Command::new("lp")

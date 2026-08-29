@@ -12,7 +12,7 @@ const MAX_RETAKES: u8 = 2;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Options {
-    pub prints: u8,
+    pub copies: u8,
     pub digital: bool,
     pub layout: LayoutKind,
     pub filter: FilterKind,

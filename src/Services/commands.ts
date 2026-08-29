@@ -1,39 +1,69 @@
-import { documentDir } from "@tauri-apps/api/path";
 import { Config } from "../Contexts/DataContext";
 import { invoke } from "@tauri-apps/api/core";
 import { LayoutData } from "../types";
 
-export async function saveConfig(config: Config) {
-    const dir = await documentDir()
+import type { Options } from "../types"
 
-    await invoke("save_config", { directory: dir, config })
+// lifecycle
+export async function startSession(options: Options): Promise<number> {
+    return await invoke<number>("start_session", { options })
+}
+
+export async function resetSession() {
+    await invoke("reset_session")
+}
+
+// camera
+export async function startCamera() {
+    await invoke("start_camera")
+}
+
+export async function stopCamera() {
+    await invoke("stop_camera")
+}
+
+export async function capture(): Promise<string> {
+    return await invoke<string>("capture")
+}
+
+export async function retake() {
+    await invoke("retake")
+}
+
+export async function acceptPhoto(): Promise<boolean> {
+    return await invoke<boolean>("accept_photo")
+}
+
+// imaging
+export async function processSession() {
+    await invoke("process_session")
+}
+
+// print
+export async function print() {
+    await invoke("print")
+}
+
+// config
+export async function saveConfig(config: Config) {
+    await invoke("save_config", { config })
 }
 export async function getOrInitConfig(defaults: Config) {
-    const dir = await documentDir()
-
-    return await invoke<Config>("get_or_init_config", { directory: dir, defaults });
+    return await invoke<Config>("get_or_init_config", { defaults });
 }
 
 export async function saveLayouts(layouts: LayoutData[]) {
-    const dir = await documentDir()
-
-    await invoke("save_layouts", { directory: dir, layouts })
+    await invoke("save_layouts", { layouts })
 }
 
 export async function getOrInitLayouts(defaults: LayoutData[]) {
-    const dir = await documentDir()
-
-    return await invoke<LayoutData[]>("get_or_init_layouts", { directory: dir, defaults });
+    return await invoke<LayoutData[]>("get_or_init_layouts", { defaults });
 }
 
 export async function savePages(pages: number) {
-    const dir = await documentDir()
-
-    await invoke("save_pages", { directory: dir, pages })
+    await invoke("save_pages", { pages })
 }
 
 export async function getOrInitPages() {
-    const dir = await documentDir()
-
-    return await invoke<number>("get_or_init_pages", { directory: dir, default: 0 });
+    return await invoke<number>("get_or_init_pages", { default: 0 });
 }

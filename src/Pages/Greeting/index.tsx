@@ -1,20 +1,16 @@
-import { motion } from 'framer-motion'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { invoke } from '@tauri-apps/api/core'
-import { pictureDir } from '@tauri-apps/api/path'
+import { motion } from 'framer-motion'
+import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
 import { useData } from '../../Contexts/DataContext'
+import { print, savePages } from '../../Services/commands'
 import reset from '../../Utils/reset'
 
 import './styles.css'
-import { path } from '@tauri-apps/api'
-import { DotLottieReact } from '@lottiefiles/dotlottie-react'
-import { savePages } from '../../Services/commands'
-import { Print } from '../../types'
 
 export default function Greeting() {
-  const { setOptions, options, images, setImages, pages, setPages } = useData()
+  const { setOptions, options, pages, setPages } = useData()
   const navigate = useNavigate()
 
   const greetings = useMemo(() => [
@@ -39,15 +35,7 @@ export default function Greeting() {
 
     const printPhotos = async () => {
       try {
-        let pictures = await pictureDir()
-        let img_path = await path.join(pictures, "print-strip.png")
-        await invoke("print", {
-          images: images,
-          outputPath: img_path,
-          colorMode: options.print == Print.COLOR ? "COLOR" : "B&W",
-          copies: options.copies,
-          layout: options.layout
-        })
+        void print()
         
         const updatedPages = pages + options.copies!
         const finalPages = updatedPages > 699 ? 0 : updatedPages
@@ -89,7 +77,7 @@ export default function Greeting() {
 
         if (last) {
           setTimeout(() => {
-            reset(setOptions, setImages, navigate)
+            reset(setOptions, navigate)
           }, 2000);
         }
       }, step.time))

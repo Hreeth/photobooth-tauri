@@ -1,18 +1,19 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-import PrintSelectable from '../../../Components/PrintSelectable'
+import FilterSelectable from '../../../Components/FilterSelectable'
 
 import Footer from '../../../Components/Footer'
 import { useData } from '../../../Contexts/DataContext'
-import { Mode, Print as PrintOptions } from '../../../types'
+import { Mode, Filter as FilterOptions } from '../../../types'
 
 import './styles.css'
+import { startSession } from '../../../Services/commands'
 
-export default function Print() {
+export default function Filter() {
   const arr = [
-    PrintOptions['B&W'],
-    PrintOptions.COLOR
+    FilterOptions.BW,
+    FilterOptions.Color
   ]
   const { options, mode } = useData()
 
@@ -20,22 +21,25 @@ export default function Print() {
 
   return (
     <motion.div
-      id='print'
+      id='filter'
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-        <div className='print-container'>
+        <div className='filter-container'>
           <h1 className="heading">Choose what you <div>like?</div></h1>
           <div className="selectables-container">
-            {arr.map((item, idx) => <PrintSelectable key={idx} data={item} selected={options.print == item} />)}
+            {arr.map((item, idx) => <FilterSelectable key={idx} data={item} selected={options.filter == item} />)}
           </div>
         </div>
         <Footer
           backCallback={() => navigate(-1)}
-          continueCallback={() => mode == Mode.AUTOMATIC ? navigate('/payment') : navigate('/countdown')}
+          continueCallback={() => {
+            void startSession(options)
+            mode == Mode.AUTOMATIC ? navigate('/payment') : navigate('/camera')
+          }}
           continueText={mode == Mode.AUTOMATIC ? "Continue to Payment" : "Start Countdown"}
-          disabled={options.print == null}
+          disabled={options.filter == null}
         />
     </motion.div>
   )

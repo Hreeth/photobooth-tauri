@@ -20,9 +20,6 @@ interface DataContextProps {
     mode: Mode,
     setMode: React.Dispatch<React.SetStateAction<Mode>>,
 
-    images: Array<string>
-    setImages: React.Dispatch<React.SetStateAction<Array<string>>>,
-
     pages: number,
     setPages: React.Dispatch<React.SetStateAction<number>>
 }
@@ -41,10 +38,9 @@ export default function DataProvider({ children }: { children: React.ReactNode }
         layout: null,
         copies: null,
         digital: false,
-        print: null
+        filter: null
     })
     const [mode, setMode] = useState<Mode>(Mode.AUTOMATIC)
-    const [images, setImages] = useState<Array<string>>([]);
     const [config, setConfig] = useState<Config>({
         plans: [],
         digital: { enabled: false, price: 0, title: "Digital Copy" }
@@ -83,19 +79,25 @@ export default function DataProvider({ children }: { children: React.ReactNode }
     const defaultLayouts = useMemo<LayoutData[]>(() => [
         {
             title: "Big frame.\nOwn it.",
-            kind: Layout.A,
+            kind: Layout.Full1x2,
             disabled: false,
             disclaimer: "1-2 people"
         },
         {
             title: "Four shots.\nMake them count.",
-            kind: Layout.B,
+            kind: Layout.Full2x2,
             disabled: false,
             disclaimer: "1-2 per shot"
         },
         {
+            title: "Full frame.\Triple Fun.",
+            kind: Layout.Strip1x3,
+            disabled: false,
+            disclaimer: "up to 5 people"
+        },
+        {
             title: "Full frame.\nFull energy.",
-            kind: Layout.C,
+            kind: Layout.Strip1x4,
             disabled: false,
             disclaimer: "up to 5 people"
         },
@@ -131,8 +133,6 @@ export default function DataProvider({ children }: { children: React.ReactNode }
         setLayouts,
         mode,
         setMode,
-        images,
-        setImages,
         pages,
         setPages
     }

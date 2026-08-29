@@ -15,23 +15,19 @@ pub fn draw_branding(canvas: &mut RgbaImage, layout: &Layout) {
         return;
     }
 
-    let usable_width = canvas
-        .width()
-        .saturating_sub(left + right);
+    let usable_width = canvas.width().saturating_sub(left + right);
 
     if usable_width == 0 {
         return;
     }
 
     let font_src = include_bytes!("../../fonts/Burgundia.otf");
-    let font =
-        FontArc::try_from_slice(font_src).expect("failed to load branding font");
+    let font = FontArc::try_from_slice(font_src).expect("failed to load branding font");
 
     let label = "memora.";
 
     // First size the branding according to the available branding height.
-    let mut scale =
-        font_scale_for_height(&font, branding_height as f32 * 0.8);
+    let mut scale = font_scale_for_height(&font, branding_height as f32 * 0.8);
 
     // Determine how wide that text actually is at this scale.
     let label_width = text_width(&font, scale, label);
@@ -51,31 +47,19 @@ pub fn draw_branding(canvas: &mut RgbaImage, layout: &Layout) {
     let final_width = text_width(&font, scale, label);
 
     // Center inside the usable area.
-    let x = left as f32
-        + (usable_width as f32 - final_width) / 2.0;
+    let x = left as f32 + (usable_width as f32 - final_width) / 2.0;
 
     let visual_height = scaled.ascent() - scaled.descent();
 
-    let branding_start_y =
-        canvas.height() - branding_height;
+    let branding_start_y = canvas.height() - branding_height;
 
-    let vertical_padding =
-        (branding_height as f32 - visual_height) / 2.0;
+    let vertical_padding = (branding_height as f32 - visual_height) / 2.0;
 
-    let y =
-        branding_start_y as f32 + vertical_padding;
+    let y = branding_start_y as f32 + vertical_padding;
 
     let text_color = branding_color(canvas);
 
-    draw_text_mut(
-        canvas,
-        text_color,
-        x.round() as i32,
-        y.round() as i32,
-        scale,
-        &font,
-        label,
-    );
+    draw_text_mut(canvas, text_color, x.round() as i32, y.round() as i32, scale, &font, label);
 }
 
 pub fn draw_branding_strip(canvas: &mut RgbaImage, layout: &Layout) {
@@ -88,29 +72,25 @@ pub fn draw_branding_strip(canvas: &mut RgbaImage, layout: &Layout) {
         return;
     }
 
-    let usable_width = strip_width
-        .saturating_sub(left + right);
+    let usable_width = strip_width.saturating_sub(left + right);
 
     if usable_width == 0 {
         return;
     }
 
     let font_src = include_bytes!("../../fonts/Burgundia.otf");
-    let font =
-        FontArc::try_from_slice(font_src).expect("failed to load branding font");
+    let font = FontArc::try_from_slice(font_src).expect("failed to load branding font");
 
     let label = "memora.";
 
     // Size from the branding height first.
-    let mut scale =
-        font_scale_for_height(&font, bottom as f32 * 0.8);
+    let mut scale = font_scale_for_height(&font, bottom as f32 * 0.8);
 
     let label_width = text_width(&font, scale, label);
 
     // Each branding instance can occupy at most 75%
     // of the usable width of one strip.
-    let max_width =
-        usable_width as f32 * BRANDING_WIDTH_RATIO;
+    let max_width = usable_width as f32 * BRANDING_WIDTH_RATIO;
 
     if label_width > max_width {
         let factor = max_width / label_width;
@@ -123,53 +103,28 @@ pub fn draw_branding_strip(canvas: &mut RgbaImage, layout: &Layout) {
 
     let final_width = text_width(&font, scale, label);
 
-    let visual_height =
-        scaled.ascent() - scaled.descent();
+    let visual_height = scaled.ascent() - scaled.descent();
 
-    let branding_start_y =
-        canvas.height() - bottom;
+    let branding_start_y = canvas.height() - bottom;
 
-    let vertical_padding =
-        (bottom as f32 - visual_height) / 2.0;
+    let vertical_padding = (bottom as f32 - visual_height) / 2.0;
 
-    let y =
-        branding_start_y as f32 + vertical_padding;
+    let y = branding_start_y as f32 + vertical_padding;
 
     let text_color = branding_color(canvas);
 
     // First strip.
-    let x1 = left as f32
-        + (usable_width as f32 - final_width) / 2.0;
+    let x1 = left as f32 + (usable_width as f32 - final_width) / 2.0;
 
     // Second strip.
     let x2 = strip_width as f32 + x1;
 
-    draw_text_mut(
-        canvas,
-        text_color,
-        x1.round() as i32,
-        y.round() as i32,
-        scale,
-        &font,
-        label,
-    );
+    draw_text_mut(canvas, text_color, x1.round() as i32, y.round() as i32, scale, &font, label);
 
-    draw_text_mut(
-        canvas,
-        text_color,
-        x2.round() as i32,
-        y.round() as i32,
-        scale,
-        &font,
-        label,
-    );
+    draw_text_mut(canvas, text_color, x2.round() as i32, y.round() as i32, scale, &font, label);
 }
 
-fn text_width(
-    font: &FontArc,
-    scale: PxScale,
-    text: &str,
-) -> f32 {
+fn text_width(font: &FontArc, scale: PxScale, text: &str) -> f32 {
     let scaled = font.as_scaled(scale);
 
     text.chars()
@@ -191,36 +146,17 @@ fn branding_color(canvas: &RgbaImage) -> Rgba<u8> {
         count += 3;
     }
 
-    let average = if count == 0 {
-        255
-    } else {
-        total / count
-    };
+    let average = if count == 0 { 255 } else { total / count };
 
-    if average > 128 {
-        Rgba([0, 0, 0, 255])
-    } else {
-        Rgba([255, 255, 255, 255])
-    }
+    if average > 128 { Rgba([0, 0, 0, 255]) } else { Rgba([255, 255, 255, 255]) }
 }
 
-fn font_scale_for_height(
-    font: &FontArc,
-    target_height: f32,
-) -> PxScale {
-    let scaled = font.as_scaled(PxScale {
-        x: 1.0,
-        y: 1.0,
-    });
+fn font_scale_for_height(font: &FontArc, target_height: f32) -> PxScale {
+    let scaled = font.as_scaled(PxScale { x: 1.0, y: 1.0 });
 
-    let unit_height =
-        scaled.ascent() - scaled.descent();
+    let unit_height = scaled.ascent() - scaled.descent();
 
-    let scale_factor =
-        target_height / unit_height;
+    let scale_factor = target_height / unit_height;
 
-    PxScale {
-        x: scale_factor,
-        y: scale_factor,
-    }
+    PxScale { x: scale_factor, y: scale_factor }
 }

@@ -13,11 +13,11 @@ const AdminMode = React.lazy(() => import('./Pages/Admin/Mode'))
 const AdminConfig = React.lazy(() => import('./Pages/Admin/Config'))
 const AdminLayouts = React.lazy(() => import('./Pages/Admin/Layouts'))
 const AdminPages = React.lazy(() => import('./Pages/Admin/Pages'))
-const Countdown = React.lazy(() => import('./Pages/Countdown'))
+const Camera = React.lazy(() => import('./Pages/Camera'))
 const Passcode = React.lazy(() => import('./Pages/Passcode'))
 const Layout = React.lazy(() => import('./Pages/Form/Layout'))
 const Copies = React.lazy(() => import('./Pages/Form/Copies'))
-const Print = React.lazy(() => import('./Pages/Form/Print'))
+const Print = React.lazy(() => import('./Pages/Form/Filter'))
 const Payment = React.lazy(() => import('./Pages/Form/Payment'))
 
 export default function AnimatedRoutes() {
@@ -40,7 +40,7 @@ export default function AnimatedRoutes() {
                             <Route path='layouts' element={<AdminLayouts />} />
                             <Route path='pages' element={<AdminPages />} />
                         </Route>
-                        <Route path='/countdown' element={<Countdown />} />
+                        <Route path='/Camera' element={<Camera />} />
                         <Route path='/layout' element={<Layout />} />
                         <Route path='/copies' element={<Copies />} />
                         <Route path='/print' element={<Print />} />
@@ -56,13 +56,13 @@ function RedirectAfterTimeout() {
     const navigate = useNavigate()
     const location = useLocation()
 
-    const { setOptions, setImages } = useData()
+    const { setOptions } = useData()
 
     useEffect(() => {
         if (location.pathname == "/") return;
 
         const timeout = setTimeout(() => {
-            reset(setOptions, setImages, navigate)
+            reset(setOptions, navigate)
         }, 4 * 60 * 1000);
 
         return () => clearTimeout(timeout)

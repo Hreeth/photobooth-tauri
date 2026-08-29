@@ -1,16 +1,16 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 
-import Footer from '../../../Components/Footer'
-
 import { useData } from '../../../Contexts/DataContext'
 import reset from '../../../Utils/reset'
 
-import './styles.css'
+import Footer from '../../../Components/Footer'
 import LayoutSelectable from '../../../Components/LayoutSelectable'
 
+import './styles.css'
+
 export default function Layout() {
-  const { layouts, options, setOptions, setImages } = useData()
+  const { layouts, options, setOptions } = useData()
 
   const navigate = useNavigate()
 
@@ -21,17 +21,17 @@ export default function Layout() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-        <div className='layout-container'>
-          <h1 className="heading">Pick the <div>Ideal</div> Layout!</h1>
-          <div className="layouts-container">
-            {layouts.map((layout, idx) => <LayoutSelectable key={idx} data={layout} selected={options.layout == layout.kind} />)}
-          </div>
+      <div className='layout-container'>
+        <h1 className="heading">Pick the <div>Ideal</div> Layout!</h1>
+        <div className="layouts-container">
+          {layouts.map((layout, idx) => <LayoutSelectable key={idx} data={layout} selected={options.layout == layout.kind} />)}
         </div>
-        <Footer
-          backCallback={() => reset(setOptions, setImages, navigate)}
-          continueCallback={() => navigate('/copies')}
-          disabled={!options.layout}
-        />
+      </div>
+      <Footer
+        backCallback={() => reset(setOptions, navigate)}
+        continueCallback={() => navigate('/copies')}
+        disabled={!options.layout}
+      />
     </motion.div>
   )
 }

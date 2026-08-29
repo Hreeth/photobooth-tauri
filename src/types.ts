@@ -1,14 +1,19 @@
 export enum Mode {
-  AUTOMATIC,
-  MANUAL
+  AUTOMATIC = "Automatic",
+  MANUAL = "Manual"
 }
 
-export enum Print {
-  "B&W",
-  COLOR
+export enum Filter {
+  BW = "B&W",
+  Color = "Color"
 }
 
-export enum Layout { A = "A", B = "B", C = "C" }
+export enum Layout {
+  Full1x2 = "Full1x2",
+  Full2x2 = "Full2x2",
+  Strip1x3 = "Strip1x3",
+  Strip1x4 = "Strip1x4",
+}
 
 export interface Plan {
   title: string
@@ -31,8 +36,8 @@ export interface LayoutData {
 }
 
 export interface Options {
-  layout: Layout | null,
   copies: number | null,
   digital: boolean,
-  print: Print | null
+  layout: Layout | null,
+  filter: Filter | null,
 }

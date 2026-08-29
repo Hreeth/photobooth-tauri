@@ -20,22 +20,22 @@ export default function Payment() {
 
   const dev = false;
 
-  const { setOptions, setImages, options, config, mode } = useData()
-  
+  const { setOptions, options, config, mode } = useData()
+
   useEffect(() => {
     fetchQrCode(calculate(options, mode, config))
   }, [fetchQrCode])
   
   useEffect(() => {
-    if (dev) navigate('/countdown')
+    if (dev) navigate('/camera')
 
     switch (paid) {
       case false: {
-        reset(setOptions, setImages, navigate)
+        reset(setOptions, navigate)
         break
       }
       case true: {
-        navigate('/countdown')
+        navigate('/camera')
         break
       }
       default: {

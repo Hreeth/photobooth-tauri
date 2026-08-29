@@ -20,7 +20,7 @@ export default function LayoutSelectable({
       onClick={() => setOptions(prev => ({ ...prev, layout: data.kind }))}
     >
         <div className="selectable-content">
-          <img src={`/Layout ${data.kind.toString()}.png`} alt={data.kind.toString()} />
+          <img src={`/${data.kind.toString()}.png`} alt={data.kind.toString()} />
         </div>
         <div className="selectable-details">
           {data.title.split(".")[0]}.

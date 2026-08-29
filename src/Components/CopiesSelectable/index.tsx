@@ -22,9 +22,9 @@ export default function CopiesSelectable({
         <div className="selectable-price-value">
           {mode == Mode.AUTOMATIC ?
             `₹${data.price}` :
-            `${data.copies * (options.layout == Layout.C ? 2 : 1)} ${options.layout == Layout.C ? "strips" : (data.copies === 1 ? "copy" : "copies")}`}
+            `${data.copies * ([Layout.Strip1x3, Layout.Strip1x4].some(_ => _ == options.layout) ? 2 : 1)} ${[Layout.Strip1x3, Layout.Strip1x4].some(_ => _ == options.layout) ? "strips" : (data.copies === 1 ? "copy" : "copies")}`}
         </div>
-        {mode == Mode.AUTOMATIC && <div className="selectable-price-quantity">/ {data.copies * (options.layout == Layout.C ? 2 : 1)} {options.layout == Layout.C ? "strips" : (data.copies === 1 ? "copy" : "copies")}</div>}
+        {mode == Mode.AUTOMATIC && <div className="selectable-price-quantity">/ {data.copies * ([Layout.Strip1x3, Layout.Strip1x4].some(_ => _ == options.layout) ? 2 : 1)} {[Layout.Strip1x3, Layout.Strip1x4].some(_ => _ == options.layout) ? "strips" : (data.copies === 1 ? "copy" : "copies")}</div>}
       </div>
       <button className="select-btn">{selected ? "Selected" : "Select"}</button>
     </div>

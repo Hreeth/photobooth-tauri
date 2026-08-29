@@ -42,16 +42,6 @@ export default function Copies() {
           continueCallback={() => navigate('/print')}
           disabled={!options.copies}
         />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '4.5rem',
-            opacity: 0.8,
-            fontSize: '1.2rem'
-          }}
-        >
-          NOTE: For Layout C, each copy includes 2 strips.
-        </div>
     </motion.div>
   )
 }

@@ -82,7 +82,7 @@ function LayoutOption({
     >
         <div className="layout-details">{`Layout ${data.kind}`}</div>
         <div className="layout-content">
-          <img src={`/Layout ${data.kind.toString()}.png`} alt={data.kind.toString()} />
+          <img src={`/${data.kind.toString()}.png`} alt={data.kind.toString()} />
         </div>
         <button className='layout-btn'>{data.disabled ? "Disabled" : "Enabled"}</button>
     </button>

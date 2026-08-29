@@ -16,11 +16,10 @@ use std::{
         atomic::{AtomicBool, Ordering},
     },
 };
+use uuid::Uuid;
 
 use crate::{
-    Result,
-    state::AppState,
-    utils::{assets_dir, output_dir},
+    Result, imaging::LayoutMode, state::AppState, utils::{assets_dir, output_dir, remove_bleed},
 };
 
 static IS_SENDING: Lazy<AtomicBool> = Lazy::new(|| AtomicBool::new(false));
@@ -38,16 +37,19 @@ pub fn store_email(state: tauri::State<Arc<AppState>>, user_email: String) -> Re
 
     tauri::async_runtime::spawn(async move {
         let result = (|| -> Result<()> {
-            let (photo_paths, final_path) = {
+            let (photo_paths, final_path, session_id, layout_mode) = {
                 let session = state.session.lock().unwrap();
 
                 let final_path =
                     session.r#final.clone().ok_or("fatal: final image not available")?;
 
-                (session.photos.clone(), final_path)
+                let options =
+                    session.options.as_ref().ok_or("fatal: session options not available")?;
+
+                (session.photos.clone(), final_path, session.session_id, options.layout.mode())
             };
 
-            store_email_req(user_email, photo_paths, final_path)
+            store_email_req(user_email, photo_paths, final_path, session_id, layout_mode)
         })();
 
         if let Err(e) = result {
@@ -75,9 +77,12 @@ fn store_email_req(
     user_email: String,
     photo_paths: Vec<PathBuf>,
     final_path: PathBuf,
+    session_id: Uuid,
+    layout_mode: LayoutMode,
 ) -> Result<()> {
-    let new_photo_paths = format_files(user_email.clone(), photo_paths, final_path)
-        .map_err(|e| format!("Failed to process new paths: {e}"))?;
+    let new_photo_paths =
+        format_files(user_email.clone(), photo_paths, final_path, session_id, layout_mode)
+            .map_err(|e| format!("Failed to process new paths: {e}"))?;
 
     let json_path = emails_path();
 
@@ -180,14 +185,15 @@ async fn send_email_req() -> Result<String> {
             if let Ok(data) = read(path) {
                 let base64_encoded = BASE64_STANDARD.encode(data);
 
-                let filename = PathBuf::from(path)
-                    .file_name()
-                    .and_then(|f| f.to_str())
-                    .unwrap_or("unknown.png")
-                    .to_string();
+                let path_buf = PathBuf::from(path);
+
+                let full_name =
+                    path_buf.file_name().and_then(|f| f.to_str()).unwrap_or("unknown.png");
+
+                let filename_slice = full_name.get(37..).unwrap_or(full_name);
 
                 attachments.push(json!({
-                    "name": filename,
+                    "name": filename_slice,
                     "content": base64_encoded,
                     "mime_type": "image/png"
                 }));
@@ -264,6 +270,8 @@ fn format_files(
     user_email: String,
     photo_paths: Vec<PathBuf>,
     final_path: PathBuf,
+    session_id: Uuid,
+    layout_mode: LayoutMode,
 ) -> Result<Vec<String>, Box<dyn Error>> {
     let email_prefix = user_email.split('@').next().unwrap_or("unknown");
 
@@ -285,7 +293,7 @@ fn format_files(
     let mut polaroid_images: Vec<RgbaImage> = Vec::new();
 
     for (index, photo_path) in photo_paths.iter().enumerate() {
-        let new_filename = format!("{}_polaroid_{}.png", email_prefix, index + 1);
+        let new_filename = format!("{}_{}_polaroid_{}.png", session_id, email_prefix, index + 1);
 
         let new_path = storage_dir.join(&new_filename);
 
@@ -335,11 +343,15 @@ fn format_files(
         polaroid_images.push(polaroid);
     }
 
-    let final_filename = format!("{}_final.png", email_prefix);
+    let final_filename = format!("{}_{}_final.png", session_id, email_prefix);
 
     let final_output_path = storage_dir.join(final_filename);
 
-    fs::copy(&final_path, &final_output_path)?;
+    let final_image = image::open(&final_path)?;
+
+    let final_image = remove_bleed(final_image, layout_mode)?;
+
+    final_image.save(&final_output_path)?;
 
     formatted_paths.push(final_output_path.to_string_lossy().to_string());
 

@@ -10,19 +10,15 @@ use crate::{
 };
 
 #[tauri::command]
-pub fn process_session(state: tauri::State<Arc<AppState>>) -> Result<()> {
+pub async fn process_session(state: tauri::State<'_, Arc<AppState>>) -> Result<()> {
     let state = state.inner().clone();
 
-    tauri::async_runtime::spawn(async move {
-        if let Err(e) = process_session_inner(state).await {
-            eprintln!("process_session failed: {e}");
-        }
-    });
-
-    Ok(())
+    tauri::async_runtime::spawn_blocking(move || process_session_inner(state))
+        .await
+        .map_err(|e| format!("process_session task failed: {e}"))?
 }
 
-async fn process_session_inner(state: Arc<AppState>) -> Result<()> {
+fn process_session_inner(state: Arc<AppState>) -> Result<()> {
     let (photos, layout, filter_kind);
 
     {
@@ -80,7 +76,7 @@ async fn process_session_inner(state: Arc<AppState>) -> Result<()> {
     Ok(())
 }
 
-fn apply_filter(image: &mut DynamicImage, filter_kind: crate::state::FilterKind) {
+fn apply_filter(image: &mut DynamicImage, filter_kind: FilterKind) {
     if let Some(image) = image.as_mut_rgba8() {
         apply(image, filter_kind);
     }

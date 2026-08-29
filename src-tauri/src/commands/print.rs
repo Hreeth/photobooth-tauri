@@ -19,7 +19,7 @@ pub fn print(state: tauri::State<Arc<AppState>>, mode: LayoutMode) -> Result<()>
                 "-o",
                 "fit-to-page",
                 "-n",
-                &options.prints.to_string(),
+                &options.copies.to_string(),
                 &r#final.to_string_lossy().to_string(),
             ])
             .output(),
@@ -27,7 +27,7 @@ pub fn print(state: tauri::State<Arc<AppState>>, mode: LayoutMode) -> Result<()>
         #[rustfmt::skip]
         LayoutMode::Strip => Command::new("lp")
             .args([
-                "-n", &options.prints.to_string(), 
+                "-n", &options.copies.to_string(), 
                 &r#final.to_string_lossy().to_string()
             ])
             .output(),

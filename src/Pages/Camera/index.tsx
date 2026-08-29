@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-
 import { useNavigate } from "react-router-dom";
-
 import { motion, AnimatePresence } from "framer-motion";
-
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
 import { useData } from "../../Contexts/DataContext";
-
 import {
   acceptPhoto,
   capture,
@@ -60,15 +56,6 @@ export default function Camera() {
     }
   }, []);
 
-  /*
-   * Continuous camera preview.
-   *
-   * The listener is registered before the camera starts so
-   * we cannot miss the first camera frames.
-   *
-   * Backend:
-   *   camera-frame -> base64 JPEG
-   */
   useEffect(() => {
     let unlisten: UnlistenFn | undefined;
 
@@ -97,15 +84,6 @@ export default function Camera() {
     };
   }, []);
 
-  /*
-   * Captured photo preview.
-   *
-   * Backend:
-   *   take-preview -> base64 JPEG
-   *
-   * The frontend does not keep the captured file.
-   * It only keeps the base64 preview needed for display.
-   */
   useEffect(() => {
     let unlisten: UnlistenFn | undefined;
 
@@ -135,9 +113,6 @@ export default function Camera() {
     };
   }, [cleanupFlash]);
 
-  /*
-   * Begin a new countdown.
-   */
   const beginCountdown = useCallback(() => {
     cleanupCountdown();
     cleanupFlash();
@@ -148,19 +123,10 @@ export default function Camera() {
     setState("countdown");
   }, [cleanupCountdown, cleanupFlash]);
 
-  /*
-   * Start button.
-   *
-   * The camera is already running.
-   * This only begins the capture countdown.
-   */
   const handleStart = () => {
     beginCountdown();
   };
 
-  /*
-   * Countdown and capture.
-   */
   useEffect(() => {
     if (state !== "countdown") {
       return;
@@ -175,16 +141,6 @@ export default function Camera() {
         capturing.current = true;
 
         try {
-          /*
-           * capture() waits for the backend capture operation
-           * to finish.
-           *
-           * The backend emits take-preview containing the
-           * base64 preview.
-           *
-           * The take-preview event changes the state to
-           * reviewing once the preview is available.
-           */
           await capture();
         } catch (err) {
           console.error("Failed to capture image:", err);
@@ -205,11 +161,6 @@ export default function Camera() {
     return cleanupCountdown;
   }, [count, state, cleanupCountdown]);
 
-  /*
-   * Retake the current photo.
-   *
-   * Backend enforces the maximum number of retakes.
-   */
   const handleRetake = async () => {
     try {
       await retake();
@@ -222,9 +173,6 @@ export default function Camera() {
     }
   };
 
-  /*
-   * Accept the current photo.
-   */
   const handleNext = async () => {
     try {
       const complete = await acceptPhoto();
@@ -232,20 +180,6 @@ export default function Camera() {
       if (complete) {
         setState("processing");
 
-        /*
-         * processSession waits for the backend processing to finish.
-         *
-         * The heavy image processing runs on a blocking worker
-         * thread, so the window remains responsive while we wait.
-         *
-         * This resolves only after:
-         *   - all photos are opened
-         *   - filters are applied
-         *   - composition is created
-         *   - bleed is applied
-         *   - final.jpg is saved
-         *   - session.final is updated
-         */
         await processSession();
 
         await stopCamera();
@@ -265,9 +199,6 @@ export default function Camera() {
     }
   };
 
-  /*
-   * Cleanup timers when leaving the page.
-   */
   useEffect(() => {
     return () => {
       cleanupCountdown();

@@ -44,6 +44,15 @@ export async function print() {
     await invoke("print")
 }
 
+// email
+export async function storeEmail(userEmail: string) {
+    await invoke("store_email", { userEmail })
+}
+
+export async function sendEmails() {
+    await invoke("send_email")
+}
+
 // config
 export async function saveConfig(config: Config) {
     await invoke("save_config", { config })

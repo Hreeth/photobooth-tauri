@@ -1,14 +1,15 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-import FilterSelectable from '../../../Components/FilterSelectable'
 
-import Footer from '../../../Components/Footer'
 import { useData } from '../../../Contexts/DataContext'
+import { startSession } from '../../../Services/commands'
 import { Mode, Filter as FilterOptions } from '../../../types'
 
+import Footer from '../../../Components/Footer'
+import FilterSelectable from '../../../Components/FilterSelectable'
+
 import './styles.css'
-import { startSession } from '../../../Services/commands'
 
 export default function Filter() {
   const arr = [

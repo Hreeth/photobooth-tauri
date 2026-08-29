@@ -1,13 +1,13 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 
+import { useData } from '../../../Contexts/DataContext'
+import { Mode } from '../../../types'
+
 import CopiesSelectable from '../../../Components/CopiesSelectable'
 import Footer from '../../../Components/Footer'
 
-import { useData } from '../../../Contexts/DataContext'
-
 import './styles.css'
-import { Mode } from '../../../types'
 
 export default function Copies() {
   const { config, options, setOptions, mode } = useData()

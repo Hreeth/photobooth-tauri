@@ -26,13 +26,10 @@ pub fn draw_branding(canvas: &mut RgbaImage, layout: &Layout) {
 
     let label = "memora.";
 
-    // First size the branding according to the available branding height.
     let mut scale = font_scale_for_height(&font, branding_height as f32 * 0.8);
 
-    // Determine how wide that text actually is at this scale.
     let label_width = text_width(&font, scale, label);
 
-    // Branding may occupy at most 75% of the usable width.
     let max_width = usable_width as f32 * BRANDING_WIDTH_RATIO;
 
     if label_width > max_width {
@@ -46,7 +43,6 @@ pub fn draw_branding(canvas: &mut RgbaImage, layout: &Layout) {
 
     let final_width = text_width(&font, scale, label);
 
-    // Center inside the usable area.
     let x = left as f32 + (usable_width as f32 - final_width) / 2.0;
 
     let visual_height = scaled.ascent() - scaled.descent();
@@ -63,7 +59,6 @@ pub fn draw_branding(canvas: &mut RgbaImage, layout: &Layout) {
 }
 
 pub fn draw_branding_strip(canvas: &mut RgbaImage, layout: &Layout) {
-    // The strip is duplicated, so branding must also be duplicated.
     let strip_width = canvas.width() / 2;
 
     let [_, right, bottom, left] = layout.bounds.borders;
@@ -83,13 +78,10 @@ pub fn draw_branding_strip(canvas: &mut RgbaImage, layout: &Layout) {
 
     let label = "memora.";
 
-    // Size from the branding height first.
     let mut scale = font_scale_for_height(&font, bottom as f32 * 0.8);
 
     let label_width = text_width(&font, scale, label);
 
-    // Each branding instance can occupy at most 75%
-    // of the usable width of one strip.
     let max_width = usable_width as f32 * BRANDING_WIDTH_RATIO;
 
     if label_width > max_width {
@@ -113,10 +105,8 @@ pub fn draw_branding_strip(canvas: &mut RgbaImage, layout: &Layout) {
 
     let text_color = branding_color(canvas);
 
-    // First strip.
     let x1 = left as f32 + (usable_width as f32 - final_width) / 2.0;
 
-    // Second strip.
     let x2 = strip_width as f32 + x1;
 
     draw_text_mut(canvas, text_color, x1.round() as i32, y.round() as i32, scale, &font, label);

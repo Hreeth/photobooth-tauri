@@ -3,13 +3,12 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
-import Header from '../../../Components/Header'
-
-import usePayment from '../../../Hooks/usePayment'
-
 import { useData } from '../../../Contexts/DataContext'
+import usePayment from '../../../Hooks/usePayment'
 import calculate from '../../../Utils/calculate'
 import reset from '../../../Utils/reset'
+
+import Header from '../../../Components/Header'
 
 import './styles.css'
 

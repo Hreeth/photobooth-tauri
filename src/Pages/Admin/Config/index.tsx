@@ -1,14 +1,13 @@
-import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 
 import { Config as ConfigType, useData } from '../../../Contexts/DataContext'
-
 import { saveConfig } from '../../../Services/commands'
+import { Addon, Plan } from '../../../types'
 
 import EditIconSVG from '../../../assets/Images/edit.svg'
 
 import './styles.css'
-import { Addon, Plan } from '../../../types'
 
 export default function Config() {
   const { config, setConfig } = useData()

@@ -49,7 +49,6 @@ impl Camera for RpiCamera {
                 "--timeout", "0",
                 "--hflip",
                 "--denoise", "cdn_off",
-                "--shutter", "18000",
                 "--gain", "10",
                 "--ev", "0",
                 "--hdr", "auto",

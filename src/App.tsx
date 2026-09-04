@@ -9,6 +9,7 @@ function App() {
     window.addEventListener('gesturestart', (e) => e.preventDefault(), { signal: controller.signal });
     window.addEventListener('gesturechange', (e) => e.preventDefault(), { signal: controller.signal });
     window.addEventListener('gestureend', (e) => e.preventDefault(), { signal: controller.signal });
+    window.addEventListener('contextmenu', (e) => e.preventDefault(), { signal: controller.signal })
 
     return () => controller.abort()
   }, [])

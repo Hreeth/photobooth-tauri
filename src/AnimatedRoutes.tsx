@@ -61,12 +61,27 @@ function RedirectAfterTimeout() {
     useEffect(() => {
         if (location.pathname == "/") return;
 
-        const timeout = setTimeout(() => {
-            reset(setOptions, navigate)
-        }, 4 * 60 * 1000);
+        let timeout: NodeJS.Timeout
 
-        return () => clearTimeout(timeout)
-    }, [navigate])
+        const resetTimeout = () => {
+            clearTimeout(timeout)
+
+            timeout = setTimeout(() => {
+                reset(setOptions, navigate)
+            }, 4 * 60 * 1000);
+        }
+
+        const events = ["pointerdown", "keydown"]
+        events.forEach((ev) => document.addEventListener(ev, resetTimeout))
+
+        resetTimeout()
+
+        return () => {
+            clearTimeout(timeout)
+
+            events.forEach((ev) => document.removeEventListener(ev, resetTimeout))
+        }
+    }, [location.pathname, navigate, setOptions])
     
     return null;
 }

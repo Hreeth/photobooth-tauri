@@ -26,6 +26,7 @@ export default function Layout() {
         <div className="layouts-container">
           {layouts.map((layout, idx) => <LayoutSelectable key={idx} data={layout} selected={options.layout == layout.kind} />)}
         </div>
+        <div className="scroll-more">Scroll for More ⟶</div>
       </div>
       <Footer
         backCallback={() => reset(setOptions, navigate)}

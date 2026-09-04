@@ -15,6 +15,8 @@ pub enum LayoutKind {
     Strip1x3,
     #[serde(rename = "Strip1x4")]
     Strip1x4,
+    #[serde(rename = "Strip1x5")]
+    Strip1x5,
 }
 
 impl LayoutKind {
@@ -24,6 +26,7 @@ impl LayoutKind {
             LayoutKind::Full2x2 => LayoutGrid::new(2, 2),
             LayoutKind::Strip1x3 => LayoutGrid::new(1, 3),
             LayoutKind::Strip1x4 => LayoutGrid::new(1, 4),
+            LayoutKind::Strip1x5 => LayoutGrid::new(1, 5),
         }
     }
 
@@ -33,15 +36,17 @@ impl LayoutKind {
             LayoutKind::Full2x2 => LayoutMode::Full,
             LayoutKind::Strip1x3 => LayoutMode::Strip,
             LayoutKind::Strip1x4 => LayoutMode::Strip,
+            LayoutKind::Strip1x5 => LayoutMode::Strip,
         }
     }
 
     pub fn bounds(&self) -> LayoutBounds {
         match self {
-            LayoutKind::Full1x2 => LayoutBounds { borders: [98, 44, 286, 44], gap: 44 },
-            LayoutKind::Full2x2 => LayoutBounds { borders: [18, 18, 118, 18], gap: 18 },
-            LayoutKind::Strip1x3 => LayoutBounds { borders: [181, 50, 377, 50], gap: 18 },
-            LayoutKind::Strip1x4 => LayoutBounds { borders: [44, 18, 112, 18], gap: 12 },
+            LayoutKind::Full1x2 => LayoutBounds { borders: [98, 44, 286, 44], gap: 44, branding: true },
+            LayoutKind::Full2x2 => LayoutBounds { borders: [18, 18, 118, 18], gap: 18, branding: true },
+            LayoutKind::Strip1x3 => LayoutBounds { borders: [181, 50, 377, 50], gap: 18, branding: true },
+            LayoutKind::Strip1x4 => LayoutBounds { borders: [44, 18, 112, 18], gap: 12, branding: true },
+            LayoutKind::Strip1x5 => LayoutBounds { borders: [6, 6, 6, 6], gap: 2, branding: false },
         }
     }
 

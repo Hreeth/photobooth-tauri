@@ -48,7 +48,10 @@ fn compose_portrait(
     }
 
     place_all(&mut canvas, &images, &slots, 0)?;
-    draw_branding(&mut canvas, layout);
+
+    if layout.bounds.branding {
+        draw_branding(&mut canvas, layout);
+    }
 
     Ok(DynamicImage::ImageRgba8(canvas))
 }
@@ -71,7 +74,10 @@ fn compose_landscape(
     }
 
     place_all(&mut canvas, &images, &slots, 0)?;
-    draw_branding(&mut canvas, layout);
+
+    if layout.bounds.branding {
+        draw_branding(&mut canvas, layout);
+    }
 
     let rotated = image::imageops::rotate90(&canvas);
 
@@ -96,7 +102,9 @@ fn compose_strip(
     place_all(&mut canvas, &images, &slots, 0)?;
     place_all(&mut canvas, &images, &slots, strip_width)?;
 
-    draw_branding_strip(&mut canvas, layout);
+    if layout.bounds.branding {
+        draw_branding_strip(&mut canvas, layout);
+    }
 
     Ok(DynamicImage::ImageRgba8(canvas))
 }

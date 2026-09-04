@@ -3,6 +3,7 @@
     padding: 1rem;
     border-radius: 4vmin;
     border: 2px solid var(--border-clr);
+    outline: none;
     display: flex;
     flex-direction: column;
     justify-content: center;

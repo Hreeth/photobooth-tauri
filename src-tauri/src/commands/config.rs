@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::{Result, state::LayoutKind, utils::assets_dir};
 
 const CONFIG_VERSION: u32 = 1;
-const LAYOUTS_VERSION: u32 = 3;
+const LAYOUTS_VERSION: u32 = 4;
 const PAGES_VERSION: u32 = 1;
 
 #[derive(Serialize, Deserialize)]
@@ -40,7 +40,6 @@ pub struct LayoutData {
     pub kind: LayoutKind,
     pub disabled: bool,
     pub title: String,
-    pub disclaimer: String,
 }
 
 #[tauri::command]

@@ -27,7 +27,6 @@ export default function LayoutSelectable({
           <br />
           {data.title.split(".")[1]}.
         </div>
-        <div className="selectable-disclaimer">{data.disclaimer}</div>
     </button>
   )
 }

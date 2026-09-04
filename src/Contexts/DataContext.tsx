@@ -82,25 +82,26 @@ export default function DataProvider({ children }: { children: React.ReactNode }
             title: "Big frame.\nOwn it.",
             kind: Layout.Full1x2,
             disabled: false,
-            disclaimer: "1-2 people"
         },
         {
             title: "Four shots.\nMake them count.",
             kind: Layout.Full2x2,
             disabled: false,
-            disclaimer: "1-2 per shot"
         },
         {
             title: "Full frame.\Triple Fun.",
             kind: Layout.Strip1x3,
             disabled: false,
-            disclaimer: "up to 5 people"
         },
         {
             title: "Full frame.\nFull energy.",
             kind: Layout.Strip1x4,
             disabled: false,
-            disclaimer: "up to 5 people"
+        },
+        {
+            title: "Mini Charms.\nDesigned for Keychains.",
+            kind: Layout.Strip1x5,
+            disabled: false,
         },
     ], [])
 

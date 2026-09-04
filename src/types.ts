@@ -13,6 +13,7 @@ export enum Layout {
   Full2x2 = "Full2x2",
   Strip1x3 = "Strip1x3",
   Strip1x4 = "Strip1x4",
+  Strip1x5 = "Strip1x5",
 }
 
 export interface Plan {
@@ -31,7 +32,6 @@ export interface Addon {
 export interface LayoutData {
   kind: Layout,
   title: string,
-  disclaimer: string,
   disabled: boolean
 }
 

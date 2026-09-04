@@ -28,6 +28,7 @@ impl LayoutGrid {
 pub struct LayoutBounds {
     pub borders: [u32; 4],
     pub gap: u32,
+    pub branding: bool
 }
 
 #[derive(Debug, Clone, Deserialize)]

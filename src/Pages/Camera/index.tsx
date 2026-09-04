@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { useNavigate } from "react-router-dom";
+
 import { motion, AnimatePresence } from "framer-motion";
+
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
 import { useData } from "../../Contexts/DataContext";
+
 import {
   acceptPhoto,
   capture,
@@ -41,6 +45,7 @@ export default function Camera() {
   >(null);
 
   const capturing = useRef(false);
+  const countdownId = useRef(0);
 
   const cleanupCountdown = useCallback(() => {
     if (countdownTimeout.current !== null) {
@@ -117,57 +122,64 @@ export default function Camera() {
     cleanupCountdown();
     cleanupFlash();
 
+    countdownId.current += 1;
+
+    const id = countdownId.current;
+
     setFlash(false);
     setPreview(null);
     setCount(5);
     setState("countdown");
+
+    const tick = (current: number) => {
+      if (id !== countdownId.current) {
+        return;
+      }
+
+      if (current === 0) {
+        const doCapture = async () => {
+          if (capturing.current || id !== countdownId.current) {
+            return;
+          }
+
+          capturing.current = true;
+
+          try {
+            await capture();
+          } catch (err) {
+            console.error("Failed to capture image:", err);
+
+            if (id === countdownId.current) {
+              setState("waiting");
+            }
+          } finally {
+            capturing.current = false;
+          }
+        };
+
+        doCapture();
+        return;
+      }
+
+      setCount(current);
+
+      countdownTimeout.current = setTimeout(() => {
+        tick(current - 1);
+      }, 1000);
+    };
+
+    tick(5);
   }, [cleanupCountdown, cleanupFlash]);
 
   const handleStart = () => {
     beginCountdown();
   };
 
-  useEffect(() => {
-    if (state !== "countdown") {
-      return;
-    }
-
-    if (count === 0) {
-      const doCapture = async () => {
-        if (capturing.current) {
-          return;
-        }
-
-        capturing.current = true;
-
-        try {
-          await capture();
-        } catch (err) {
-          console.error("Failed to capture image:", err);
-          setState("waiting");
-        } finally {
-          capturing.current = false;
-        }
-      };
-
-      doCapture();
-      return;
-    }
-
-    countdownTimeout.current = setTimeout(() => {
-      setCount((current) => current - 1);
-    }, 1000);
-
-    return cleanupCountdown;
-  }, [count, state, cleanupCountdown]);
-
   const handleRetake = async () => {
     try {
       await retake();
-
       setRetakes((current) => current + 1);
-
-      await beginCountdown();
+      beginCountdown();
     } catch (err) {
       console.error("Failed to retake photo:", err);
     }
@@ -192,8 +204,7 @@ export default function Camera() {
       }
 
       setRetakes(0);
-
-      await beginCountdown();
+      beginCountdown();
     } catch (err) {
       console.error("Failed to accept photo:", err);
     }
@@ -201,6 +212,7 @@ export default function Camera() {
 
   useEffect(() => {
     return () => {
+      countdownId.current += 1;
       cleanupCountdown();
       cleanupFlash();
     };
@@ -313,22 +325,29 @@ export default function Camera() {
               y: 0,
             }}
           >
-            <button
-              type="button"
-              onClick={handleRetake}
-              disabled={retakes >= 2}
-              className="retake-button"
-            >
-              Retake
-            </button>
+            <div className="attempts-remaining">
+              <b>Attempts Remaining:</b> {2 - retakes}
+            </div>
 
-            <button
-              type="button"
-              onClick={handleNext}
-              className="next-button"
-            >
-              Next
-            </button>
+            <div>
+              <button
+                type="button"
+                onClick={handleRetake}
+                disabled={retakes >= 2}
+                className="retake-button"
+              >
+                Retake
+              </button>
+
+              <button
+                type="button"
+                onClick={handleNext}
+                className="next-button"
+              >
+                Next
+              </button>
+            </div>
+
           </motion.div>
         )}
 

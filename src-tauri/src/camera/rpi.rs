@@ -37,21 +37,24 @@ impl Camera for RpiCamera {
             return Ok(());
         }
 
+        #[rustfmt::skip]
         let mut child = Command::new("rpicam-vid")
             .args([
-                "--width",
-                "2028",
-                "--height",
-                "1520",
-                "--framerate",
-                "30",
-                "--codec",
-                "mjpeg",
+                "--width", "2028",
+                "--height", "1520",
+                "--framerate", "30",
+                "--codec", "mjpeg",
                 "--inline",
                 "--nopreview",
-                "--timeout",
-                "0",
+                "--timeout", "0",
                 "--hflip",
+                "--denoise", "cdn_off",
+                "--shutter", "18000",
+                "--gain", "10",
+                "--ev", "0",
+                "--hdr", "auto",
+                "--quality", "95",
+                "--roi", "0.075,0.15,0.79,0.85",
                 "--output",
                 "-",
             ])

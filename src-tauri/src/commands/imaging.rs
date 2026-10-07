@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use image::DynamicImage;
+use tauri::AppHandle;
 
 use crate::{
     Result,
@@ -10,15 +11,18 @@ use crate::{
 };
 
 #[tauri::command]
-pub async fn process_session(state: tauri::State<'_, Arc<AppState>>) -> Result<()> {
+pub async fn process_session(
+    app_handle: AppHandle,
+    state: tauri::State<'_, Arc<AppState>>,
+) -> Result<()> {
     let state = state.inner().clone();
 
-    tauri::async_runtime::spawn_blocking(move || process_session_inner(state))
+    tauri::async_runtime::spawn_blocking(move || process_session_inner(&app_handle, state))
         .await
         .map_err(|e| format!("process_session task failed: {e}"))?
 }
 
-fn process_session_inner(state: Arc<AppState>) -> Result<()> {
+fn process_session_inner(app_handle: &AppHandle, state: Arc<AppState>) -> Result<()> {
     let (photos, layout, filter_kind);
 
     {
@@ -57,7 +61,7 @@ fn process_session_inner(state: Arc<AppState>) -> Result<()> {
         image::Rgba([255, 255, 255, 255])
     };
 
-    let composed = compose(&layout, images, background)?;
+    let composed = compose(app_handle, &layout, images, background)?;
 
     let output_path = capture_dir().join("final.jpg");
 

@@ -1,4 +1,5 @@
 use image::{DynamicImage, ImageBuffer, Rgba, RgbaImage, imageops::overlay};
+use tauri::AppHandle;
 
 use crate::{
     Result,
@@ -15,6 +16,7 @@ pub const WIDTH: u32 = (4f32 * DPI).round() as u32;
 pub const HEIGHT: u32 = (6f32 * DPI).round() as u32;
 
 pub fn compose(
+    app_handle: &AppHandle,
     layout_kind: &LayoutKind,
     images: Vec<DynamicImage>,
     background: Rgba<u8>,
@@ -23,18 +25,19 @@ pub fn compose(
 
     match layout.mode {
         LayoutMode::Full => match layout_kind {
-            LayoutKind::Full1x2 => compose_portrait(&layout, images, background),
+            LayoutKind::Full1x2 => compose_portrait(app_handle, &layout, images, background),
 
-            LayoutKind::Full2x2 => compose_landscape(&layout, images, background),
+            LayoutKind::Full2x2 => compose_landscape(app_handle, &layout, images, background),
 
             _ => unreachable!("non-full layout with LayoutMode::Full"),
         },
 
-        LayoutMode::Strip => compose_strip(&layout, images, background),
+        LayoutMode::Strip => compose_strip(app_handle, &layout, images, background),
     }
 }
 
 fn compose_portrait(
+    app_handle: &AppHandle,
     layout: &Layout,
     images: Vec<DynamicImage>,
     background: Rgba<u8>,
@@ -50,13 +53,14 @@ fn compose_portrait(
     place_all(&mut canvas, &images, &slots, 0)?;
 
     if layout.bounds.branding {
-        draw_branding(&mut canvas, layout);
+        draw_branding(app_handle, &mut canvas, layout, background == Rgba([0, 0, 0, 255]));
     }
 
     Ok(DynamicImage::ImageRgba8(canvas))
 }
 
 fn compose_landscape(
+    app_handle: &AppHandle,
     layout: &Layout,
     images: Vec<DynamicImage>,
     background: Rgba<u8>,
@@ -76,7 +80,7 @@ fn compose_landscape(
     place_all(&mut canvas, &images, &slots, 0)?;
 
     if layout.bounds.branding {
-        draw_branding(&mut canvas, layout);
+        draw_branding(app_handle, &mut canvas, layout, background == Rgba([0, 0, 0, 255]));
     }
 
     let rotated = image::imageops::rotate90(&canvas);
@@ -85,6 +89,7 @@ fn compose_landscape(
 }
 
 fn compose_strip(
+    app_handle: &AppHandle,
     layout: &Layout,
     images: Vec<DynamicImage>,
     background: Rgba<u8>,
@@ -103,7 +108,7 @@ fn compose_strip(
     place_all(&mut canvas, &images, &slots, strip_width)?;
 
     if layout.bounds.branding {
-        draw_branding_strip(&mut canvas, layout);
+        draw_branding_strip(app_handle, &mut canvas, layout, background == Rgba([0, 0, 0, 255]));
     }
 
     Ok(DynamicImage::ImageRgba8(canvas))

@@ -42,10 +42,18 @@ impl LayoutKind {
 
     pub fn bounds(&self) -> LayoutBounds {
         match self {
-            LayoutKind::Full1x2 => LayoutBounds { borders: [98, 44, 286, 44], gap: 44, branding: true },
-            LayoutKind::Full2x2 => LayoutBounds { borders: [18, 18, 118, 18], gap: 18, branding: true },
-            LayoutKind::Strip1x3 => LayoutBounds { borders: [181, 50, 377, 50], gap: 18, branding: true },
-            LayoutKind::Strip1x4 => LayoutBounds { borders: [44, 18, 112, 18], gap: 12, branding: true },
+            LayoutKind::Full1x2 => {
+                LayoutBounds { borders: [98, 44, 286, 44], gap: 44, branding: true }
+            }
+            LayoutKind::Full2x2 => {
+                LayoutBounds { borders: [18, 18, 118, 18], gap: 18, branding: true }
+            }
+            LayoutKind::Strip1x3 => {
+                LayoutBounds { borders: [181, 50, 377, 50], gap: 18, branding: true }
+            }
+            LayoutKind::Strip1x4 => {
+                LayoutBounds { borders: [44, 18, 112, 18], gap: 12, branding: true }
+            }
             LayoutKind::Strip1x5 => LayoutBounds { borders: [6, 6, 6, 6], gap: 2, branding: false },
         }
     }

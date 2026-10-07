@@ -37,10 +37,6 @@
     pointer-events: none;
 }
 
-.layout-selectable:disabled {
-    display: none;
-}
-
 .layout-selectable[data-selected="true"] {
     border-color: var(--accent-1);
     transform: scale(1.05);

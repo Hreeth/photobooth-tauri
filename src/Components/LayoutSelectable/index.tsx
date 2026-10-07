@@ -16,7 +16,6 @@ export default function LayoutSelectable({
     <button
       className="layout-selectable"
       data-selected={selected && !data.disabled}
-      disabled={data.disabled}
       onClick={() => setOptions(prev => ({ ...prev, layout: data.kind }))}
     >
         <div className="selectable-content">

@@ -160,27 +160,39 @@ async fn send_email_req() -> Result<String> {
     }
 
     let zepto_url = "https://api.zeptomail.in/v1.1/email/template";
-
     let client = Client::new();
 
-    let mut file = File::open(&json_path).map_err(|e| format!("Failed to open file: {e}"))?;
+    let mut file =
+        File::open(&json_path).map_err(|e| format!("Failed to open file: {e}"))?;
 
     let mut buffer = Vec::new();
 
-    file.read_to_end(&mut buffer).map_err(|e| format!("Failed to read file: {e}"))?;
+    file.read_to_end(&mut buffer)
+        .map_err(|e| format!("Failed to read file: {e}"))?;
 
-    let mut emails: Vec<Value> = serde_json::from_slice(&buffer).unwrap_or_else(|_| vec![]);
+    let mut emails: Vec<Value> =
+        serde_json::from_slice(&buffer).unwrap_or_else(|_| vec![]);
 
     if emails.is_empty() {
         return Err("No pending emails.".to_string());
     }
 
-    let mut successful_emails = vec![];
+    let mut successful_emails = Vec::new();
+    let mut failed_count = 0usize;
 
     for email in &emails {
         let user_email = email["email"].as_str().unwrap_or_default();
 
-        let photo_paths_arr = email["photos"].as_array().cloned().unwrap_or_default();
+        if user_email.is_empty() {
+            failed_count += 1;
+            eprintln!("Skipping email with missing address.");
+            continue;
+        }
+
+        let photo_paths_arr = email["photos"]
+            .as_array()
+            .cloned()
+            .unwrap_or_default();
 
         let mut attachments = vec![];
 
@@ -190,8 +202,10 @@ async fn send_email_req() -> Result<String> {
 
                 let path_buf = PathBuf::from(path);
 
-                let full_name =
-                    path_buf.file_name().and_then(|f| f.to_str()).unwrap_or("unknown.png");
+                let full_name = path_buf
+                    .file_name()
+                    .and_then(|f| f.to_str())
+                    .unwrap_or("unknown.png");
 
                 let filename_slice = full_name.get(37..).unwrap_or(full_name);
 
@@ -219,7 +233,10 @@ async fn send_email_req() -> Result<String> {
 
         let res = client
             .post(zepto_url)
-            .header("Authorization", format!("Zoho-enczapikey {}", api_key))
+            .header(
+                "Authorization",
+                format!("Zoho-enczapikey {}", api_key),
+            )
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
             .json(&email_data)
@@ -238,14 +255,27 @@ async fn send_email_req() -> Result<String> {
             }
 
             Ok(res) => {
-                return Err(format!(
-                    "Failed to send email: {}",
+                failed_count += 1;
+
+                eprintln!(
+                    "Failed to send email to {}: {}",
+                    user_email,
                     res.text().await.unwrap_or_default()
-                ));
+                );
+
+                continue;
             }
 
             Err(e) => {
-                return Err(format!("Error: {}", e));
+                failed_count += 1;
+
+                eprintln!(
+                    "Error sending email to {}: {}",
+                    user_email,
+                    e
+                );
+
+                continue;
             }
         }
     }
@@ -266,8 +296,13 @@ async fn send_email_req() -> Result<String> {
     )
     .map_err(|e| format!("Failed to update file: {e}"))?;
 
-    Ok("Emails sent successfully via ZeptoMail!".to_string())
+    Ok(format!(
+        "Sent {} email(s), {} failed.",
+        successful_emails.len(),
+        failed_count
+    ))
 }
+
 
 fn format_files(
     user_email: String,
